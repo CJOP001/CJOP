@@ -19,6 +19,16 @@ function HomeScreen() {
   return (
     <Tab.Navigator
     screenOptions={({ route }) => ({
+      headerShown: false,
+      tabBarShowLabel: false,
+      tabBarStyle: {
+        position:'absolute',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+      },
+      tabBarLabelStyle: {
+        fontSize: 12, // Font size of tab labels
+      },
       tabBarIcon: ({ color, size }) => {
         let iconName;
         let tabName;
