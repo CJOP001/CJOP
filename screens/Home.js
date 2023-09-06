@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { Appbar, Card, Avatar, Button } from 'react-native-paper';
 import { categories } from '../components/categories';
 import {dummyArticles} from '../components/articles';
 
@@ -10,6 +10,36 @@ const Home = () => {
    // Dummy data for articles
   const [articles] = useState(dummyArticles);
 
+  const renderItem = ({ item }) => {
+    return (
+      <Card style={styles.articleCard}>
+        <Card.Title
+          title={item.title}
+          subtitle={`Status: ${item.status} | ${item.timestamp}`}
+          left={(props) => (
+            <Avatar.Image
+              source={require('../assets/avatar.png') } 
+              size={40}
+            />
+          )}
+        />
+        {item.imagePath ? (
+          <Card.Cover source={require('../assets/image.png')} style={styles.articleImage} />
+        ) : null}
+        <Card.Content>
+          <Text style={styles.articleText}>{item.content}</Text>
+        </Card.Content>
+        <Card.Actions>
+          <Button icon="thumb-up" onPress={() => handleLike(item.id)}>
+            Like {item.likes}
+          </Button>
+          <Button icon="comment" onPress={() => handleComment(item.id)}>
+            Comment {item.comments}
+          </Button>
+        </Card.Actions>
+      </Card>
+    );
+  };
 
   // Filter articles based on the selected category
   const filteredArticles = selectedCategory
@@ -39,17 +69,14 @@ const Home = () => {
       </ScrollView>
       </Appbar.Header>
       {/* List of articles */}
-      <FlatList
-        data={filteredArticles}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.articleItem}>
-            <Text>{item.title}</Text>
-            <Text>{item.content}</Text>
-            <Text>{item.category}</Text>
-          </View>
-        )}
-      />
+      <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
+        <FlatList
+          data={filteredArticles}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </View>
   );
 };

@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native'
+import { StyleSheet, Text, View, FlatList, SafeAreaView, Image } from 'react-native'
 import React, { useState } from 'react';
-import { Appbar, Card } from 'react-native-paper';
+import { Appbar, Card, Avatar, Button } from 'react-native-paper';
 
 import dummyArticles from '../components/articles';
 
@@ -8,17 +8,42 @@ import dummyArticles from '../components/articles';
 const Subscribe = ({ navigation }) => {
   const [articles] = useState(dummyArticles);
 
-  console.log('Articles:', articles);
+  //console.log('Articles:', articles);
 
 
-  const renderItem = ({ item }) => (
-    <Card style={styles.articleCard}>
-      <Card.Content>
-        <Text style={styles.articleTitle}>{item.title}</Text>
-        <Text style={styles.articleCategory}>Category: {item.category}</Text>
-      </Card.Content>
-    </Card>
-  );
+    const renderItem = ({ item }) => {
+    return (
+      <Card style={styles.articleCard}>
+        <Card.Title
+          title={item.title}
+          subtitle={`Status: ${item.status} | ${item.timestamp}`}
+          left={(props) => (
+            <Avatar.Image
+              source={require('../assets/avatar.png') } 
+              size={40}
+            />
+          )}
+        />
+        {item.imagePath ? (
+          <Card.Cover source={require('../assets/image.png')} style={styles.articleImage} />
+        ) : null}
+        <Card.Content>
+          <Text style={styles.articleText}>{item.content}</Text>
+        </Card.Content>
+        <Card.Actions>
+          <Button icon="thumb-up" onPress={() => handleLike(item.id)}>
+            Like {item.likes}
+          </Button>
+          <Button icon="comment" onPress={() => handleComment(item.id)}>
+            Comment {item.comments}
+          </Button>
+        </Card.Actions>
+      </Card>
+    );
+  };
+
+  
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -38,7 +63,7 @@ const Subscribe = ({ navigation }) => {
         </View>
       </Appbar.Header>
 
-      <View style={{ alignItems: 'center', padding: 15, width: '100%' }}>
+      <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
         <FlatList
           data={articles}
           keyExtractor={(item) => item.id.toString()}
@@ -46,7 +71,6 @@ const Subscribe = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
         />
       </View>
-
     </View>
     </SafeAreaView>
   )
@@ -81,7 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: '500', 
   },
   articleCategory: {
-    fontSize: 14, // Adjust the font size as needed
+    fontSize: 10, // Adjust the font size as needed
     color: '#666', // Adjust the color as needed
   },
   })
