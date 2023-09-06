@@ -1,41 +1,24 @@
 import React from "react";
 import { ImageBackground, StyleSheet } from "react-native";
-import { StyledContainer, InnerContainer, PageLogo, PageTitle, StyledButton, ButtonText } from "../components/styles";
+import { LowerLoginContainer, PageLogo, PageTitle, StyledButton, ButtonText, UpperLoginContainer, LoginContainer, LoginLogo } from "../components/styles";
 
 
 const Login = () => {
     return (
     
-        <StyledContainer>
-            
-            <InnerContainer>
-            <ImageBackground source={require('../assets/welcome_background.png')} resizeMode="stretch" style={styles.image}>
-            <PageLogo resizeMode="cover" source={require('../assets/welcome_splashart.png')}/>  
+        <LoginContainer>
+        <UpperLoginContainer>
+        <LoginLogo resizeMode="cover" source={require('../assets/login_splashart.png')}/>  
 
-            </ImageBackground>
-            </InnerContainer>
-            <PageTitle>Take Down Anything You See</PageTitle>
+        </UpperLoginContainer>
 
-            <StyledButton>
-                <ButtonText>
-                    Get Started
-                </ButtonText>
-            </StyledButton>
-        </StyledContainer>
+        <LowerLoginContainer>
+
+       
+        </LowerLoginContainer>
+        </LoginContainer>
 
     );
 }
-
-const styles = StyleSheet.create({
-    image: {
-    
-      paddingLeft: 290,
-      paddingTop: 130,
-      paddingBottom: 30,
-      height: 400,
-      width: 800
-
-    }
-});
 
 export default Login;

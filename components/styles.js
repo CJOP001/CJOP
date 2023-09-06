@@ -19,8 +19,8 @@ const {primary, secondary, tertiary, darkLight, brand, green, red} = Colors;
 
 
 
-export const StyledContainer = styled.View`
-    flex: 2;
+export const WelcomeContainer = styled.View`
+    flex: 1;
     padding: 10px;
     padding-top: ${StatusBarHeight + 50}px;
     alignItems: center;
@@ -30,14 +30,34 @@ export const StyledContainer = styled.View`
   
 `;
 
-export const InnerContainer = styled.View`
-flex: 1;
-width: 100%;
-padding-top: 50px;
-alignItems: center;  
-padding-bottom: 220px;  
+export const LoginContainer = styled.View`
+    flex: 6;
+    position: "absolute";
+
+    `;
+
+export const UpperLoginContainer = styled.View`
+    flex: 3;
+    alignItems: center;
+    padding-top: 10px;
 
 `;
+
+export const InnerWelcomeContainer = styled.View`
+width: 100%;
+alignItems: center; 
+`;
+
+export const LowerLoginContainer = styled.View`
+flex: 3;
+width: 100%;
+padding-top: 0px;
+alignItems: center;  
+padding-bottom: 10px;
+
+`;
+
+
 
 export const PageLogo = styled.Image`
     width: 160px;
@@ -45,9 +65,7 @@ export const PageLogo = styled.Image`
     alignItems: center;
     padding-top: 10px;
     padding-bottom: 10px;
-`
-
-
+`;
 
 export const PageTitle = styled.Text`
     font-size: 36px;
@@ -55,18 +73,18 @@ export const PageTitle = styled.Text`
     font-weight: bold;
     alignItems: center;
     color: ${brand};
+    padding-top: 50px;
     padding-bottom: 20px;
 `;
 
 export const StyledButton = styled.TouchableOpacity`
 
-width: 280px;
-height: 66px;
+width: 70%;
+height: 5%;
 padding-top: 5px;
 padding-left: 53px;
 padding-right: 53px;
 padding-bottom: 50px;
-alignItems: center;
 text-align: center;
 background: #72E6FF;
 border-radius: 20px;
@@ -77,10 +95,10 @@ export const ButtonText = styled.Text`
 width: 270px;
 height: 40px;
 padding-top: 2px;
-padding-left: 40px;
-padding-right: 40px;
+padding-right: 98px;
+padding-top: 0px;
+padding-bottom: 3px; 
 text-align: center;
-alignItems: center;
 font-family: 'Roboto';
 font-style: normal;
 font-size: 34px;
@@ -88,4 +106,13 @@ font-size: 34px;
 
 color: #FFFFFF;
 
-`
+`;
+
+export const LoginLogo = styled.Image`
+    width: 80%;
+    height: 100%;
+    padding-top: 20px;
+    padding-bottom: 50px;
+    
+    
+`;
