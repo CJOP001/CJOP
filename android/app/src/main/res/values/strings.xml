@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">AwesomeProject</string>
+    <string name="posts">1 posts</string>
+    <string name="follow">Follow</string>
+    <string name="following">Following</string>
+    <string name="followers">Followers</string>
+    <string name="people">People</string>
+    <string name="profileDescription">A long description</string>
+    <string name="profileName">Test Name</string>
+    <string name="profileId">\@testId</string>
+    <string name="editProfile">Edit Profile</string>
+    <string name="save">Save Changes</string>
+    <string name="manage">Manage Friend</string>
+    <string name="joinDate">Joined April 2023</string>
+    <string name="searchPeople">Search for People</string>
+    <string name="buttonBack">^</string>
+    <string name="profile">Profile</string>
+    <string name="edit">Edit</string>
+
+</resources>
