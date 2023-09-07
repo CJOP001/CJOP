@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { Appbar, Card, Avatar, Button } from 'react-native-paper';
+import { Appbar, Avatar, Searchbar } from 'react-native-paper';
 import { categories } from '../components/categories';
 import {dummyArticles} from '../components/articles';
+
+import ArticleCard from '../components/ArticleCard';
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('Corporate');
@@ -10,35 +12,25 @@ const Home = () => {
    // Dummy data for articles
   const [articles] = useState(dummyArticles);
 
-  const renderItem = ({ item }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const onChangeSearch = (query) => {
+    // Update the search query state
+    setSearchQuery(query);
+  };
+
+  const renderSearchBar = () => {
     return (
-      <Card style={styles.articleCard}>
-        <Card.Title
-          title={item.title}
-          subtitle={`Status: ${item.status} | ${item.timestamp}`}
-          left={(props) => (
-            <Avatar.Image
-              source={require('../assets/avatar.png') } 
-              size={40}
-            />
-          )}
-        />
-        {item.imagePath ? (
-          <Card.Cover source={require('../assets/image.png')} style={styles.articleImage} />
-        ) : null}
-        <Card.Content>
-          <Text style={styles.articleText}>{item.content}</Text>
-        </Card.Content>
-        <Card.Actions>
-          <Button icon="thumb-up" onPress={() => handleLike(item.id)}>
-            Like {item.likes}
-          </Button>
-          <Button icon="comment" onPress={() => handleComment(item.id)}>
-            Comment {item.comments}
-          </Button>
-        </Card.Actions>
-      </Card>
+      <Searchbar
+        placeholder="Search"
+        onChangeText={onChangeSearch}
+        value={searchQuery}
+        style={styles.searchBar}
+      />
     );
+  };
+
+  const renderItem = ({ item }) => {
+    return <ArticleCard {...item} />;
   };
 
   // Filter articles based on the selected category
@@ -49,7 +41,12 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.Content title="Home" />
+        <Avatar.Image
+              source={require('../assets/avatar.png') } 
+              size={40}
+              style={{margin: 10, marginTop: 20}}
+            />
+        {renderSearchBar()}
       </Appbar.Header>
       <Appbar.Header>
       {/* Scrollable list of categories */}
@@ -104,10 +101,14 @@ const styles = StyleSheet.create({
   selectedCategoryButtonText: {
     color: '#fff', // Change the text color for selected category here
   },
-  articleItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+  articleCard: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  searchBar: {
+    flex: 2, 
+    margin: 20, // Add some right margin to separate it from other header content
+    marginTop: 30
   },
 });
 
