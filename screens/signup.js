@@ -1,5 +1,4 @@
 import React from "react";
-import { ImageBackground, StyleSheet } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { LowerSignUpContainer, SignUpDetailsLabel, Colors, 
     SignInText, UpperSignUpContainer, SignUpContainer, SignUpLogo, LoginDetails, 

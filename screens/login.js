@@ -1,7 +1,7 @@
 import React from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 import { StatusBar } from 'expo-status-bar';
-import { LowerLoginContainer, PageLogo, PageTitle, StyledDetailsLabel, Colors, 
+import { LowerLoginContainer, StyledDetailsLabel, Colors, 
     SignInText, UpperLoginContainer, LoginContainer, LoginLogo, LoginDetails, 
     Continue, StyledFormArea, LoginTitle, LoginInfo, StyledDetailsInput, 
     SignInButton, ExtraText,TextLink, TextLinkContent, ExtraView } from "../components/styles";
