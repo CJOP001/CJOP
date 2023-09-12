@@ -1,10 +1,12 @@
 import * as React from "react";
-import { StyleSheet, View, Image, Text } from "react-native";
-import IOSBottomBar5Tabs from "../components/IOSBottomBar5Tabs";
+import { StyleSheet, View, Image, Text, Modal } from "react-native";
 import { Color, FontSize, FontFamily } from "../GlobalStyles";
 
 const AddingPost = () => {
   return (
+   <Modal transparent={true} animationType="fade" visible={visible}>
+      <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
     <View style={styles.addingPost}>
       <View style={styles.addingPostChild} />
       <View style={[styles.bellAlertoutline, styles.iconLayout2]} />
@@ -151,6 +153,7 @@ const AddingPost = () => {
       <Text style={[styles.goLive, styles.goLiveTypo]}>Go Live</Text>
       <Text style={[styles.createAPost, styles.goLiveTypo]}>Create a Post</Text>
     </View>
+    </Modal>
   );
 };
 
