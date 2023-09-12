@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, SafeAreaView, Image } from 'react-native'
+import { StyleSheet, Text, View, FlatList, SafeAreaView, RefreshControl } from 'react-native'
 import React, { useState } from 'react';
 import { Appbar, Card, Avatar, Button } from 'react-native-paper';
 
@@ -13,6 +13,19 @@ const Subscribe = ({ navigation }) => {
   const renderItem = ({ item }) => {
     return <ArticleCard {...item} />;
   };
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+  
+    // Simulate data fetching or perform data updates here
+    // For example, you can fetch new articles or update the existing ones
+  
+    // After fetching/updating data, set refreshing to false
+    setRefreshing(false);
+  };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -37,6 +50,9 @@ const Subscribe = ({ navigation }) => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
           />
         </View>
       </View>
