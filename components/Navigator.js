@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, TouchableOpacity, View } from 'react-native';
 
 import Home from '../screens/Home';
-import PostingDesc from '../screens/PostingDesc'
+import PostingDesc from '../screens/PostingDesc';
 import Payment from '../screens/Payment';
 import AddingPost from '../screens/AddingPost';
 import Subscribe from '../screens/Subscribe';
@@ -18,7 +18,7 @@ function HomeScreen({ navigation }) {
   const [isAddingPostVisible, setAddingPostVisible] = React.useState(false);
 
   const handleAddingPostPress = () => {
-    setAddingPostVisible(true);
+    setAddingPostVisible(!isAddingPostVisible); // Toggle visibility
   };
 
   return (
@@ -30,33 +30,76 @@ function HomeScreen({ navigation }) {
           tabBarStyle: {
             position: 'absolute',
             backgroundColor: '#ffffff',
-            display: 'flex',
+            height: 60, // Adjust the height as needed
+            borderTopWidth: 0, // Remove top border
           },
           tabBarLabelStyle: {
             fontSize: 12,
           },
-          tabBarIcon: ({ color, size }) => {
-            let iconName;
-            if (route.name === 'TabHome') {
-              iconName = require('../assets/home-icon.png');
-            } else if (route.name === 'Payment') {
-              iconName = require('../assets/wallet-icon.png');
-            } else if (route.name === 'Subscribe') {
-              iconName = require('../assets/mynews-icon.png');
-            } else if (route.name === 'Profile') {
-              iconName = require('../assets/profile-icon.png');
-            }
-            return (
-              <Image
-                source={iconName}
-                style={{ width: size, height: size, tintColor: color }}
-              />
-            );
-          },
         })}
+        tabBar={({ state, descriptors, navigation }) => (
+          <View style={{ flexDirection: 'row', height: 60, backgroundColor: '#ffffff' }}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
+
+              if (route.name === 'AddingPost') {
+                return (
+                  <TouchableOpacity
+                    key={route.key}
+                    onPress={handleAddingPostPress}
+                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+                  >
+                    <Image
+                      source={require('../assets/addnews-icon.png')}
+                      style={{ width: 30, height: 30 }}
+                    />
+                  </TouchableOpacity>
+                );
+              }
+
+              const isFocused = state.index === index;
+
+              return (
+                <TouchableOpacity
+                  key={route.key}
+                  onPress={() => {
+                    const event = navigation.emit({
+                      type: 'tabPress',
+                      target: route.key,
+                      canPreventDefault: true,
+                    });
+
+                    if (!isFocused && !event.defaultPrevented) {
+                      navigation.navigate(route.name);
+                    }
+                  }}
+                  style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <Image
+                    source={
+                      route.name === 'TabHome'
+                        ? require('../assets/home-icon.png')
+                        : route.name === 'Payment'
+                        ? require('../assets/wallet-icon.png')
+                        : route.name === 'Subscribe'
+                        ? require('../assets/mynews-icon.png')
+                        : route.name === 'Profile'
+                        ? require('../assets/profile-icon.png')
+                        : null
+                    }
+                    style={{ width: 30, height: 30, tintColor: isFocused ? 'blue' : 'gray' }}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       >
         <Tab.Screen name="TabHome" component={Home} />
         <Tab.Screen name="Payment" component={Payment} />
+        <Tab.Screen name="AddingPost" component={AddingPost} />
         <Tab.Screen name="Subscribe" component={Subscribe} />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
@@ -64,21 +107,6 @@ function HomeScreen({ navigation }) {
       {isAddingPostVisible && (
         <AddingPost isVisible={isAddingPostVisible} onClose={() => setAddingPostVisible(false)} />
       )}
-
-      {/* Add a button to trigger AddingPost */}
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          right: 20,
-        }}
-        onPress={handleAddingPostPress}
-      >
-        <Image
-          source={require('../assets/addnews-icon.png')}
-          style={{ width: 50, height: 50 }}
-        />
-      </TouchableOpacity>
     </View>
   );
 }
