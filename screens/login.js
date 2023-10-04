@@ -39,12 +39,8 @@ const Login = () => {
                                     keyboardType="phone-pad"
                                     pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                                 />
-                            </StyledFormArea>)}
-                    </Formik>
-            </LoginDetails>
-            <Continue>
-            <SignInButton>
-                <SignInText>
+                                <SignInButton onPress={handleSubmit}>
+                <SignInText >
                     Sign In
                 </SignInText>
             </SignInButton>
@@ -54,7 +50,10 @@ const Login = () => {
                     <TextLinkContent> Sign Up</TextLinkContent>
                 </TextLink>
             </ExtraView>
-            </Continue>
+                            </StyledFormArea>)}
+                    </Formik>
+            </LoginDetails>
+            
         </LowerLoginContainer>
         </LoginContainer>
 
