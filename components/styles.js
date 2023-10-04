@@ -95,8 +95,8 @@ padding-bottom: 10px;
 `;
 
 export const LowerVerificationContainer = styled.View`
-flex: 3;
-width: 100%;
+flex: 4;
+width: 90%;
 padding-top: 0px;
 alignItems: center;  
 padding-bottom: 10px;
@@ -168,7 +168,7 @@ border-radius: 12px;
 
 export const SignUpButton = styled.TouchableOpacity`
 
-width: 70%;
+width: 50%;
 height: 5%;
 padding: 20px;
 padding-top: 10px;
@@ -177,6 +177,7 @@ padding-right: 50px;
 padding-bottom: 35px;
 background: #72E6FF;
 border-radius: 12px;
+align-items: center;
 `;
 
 export const VerifyButton = styled.TouchableOpacity`
@@ -219,13 +220,12 @@ color: #FFFFFF;
 
 export const SignInText = styled.Text`
 
-width: 40%;
+
 height: 30px;
 justify-content: center;
 padding-top: 2px;
 padding-bottom: 5px; 
-padding-left: 30px;
-padding-right: 30px;
+padding-right: 1px;
 text-align: center;
 font-family: 'Roboto';
 font-style: normal;
@@ -315,6 +315,7 @@ color: #7C82A1;
 export const StyledFormArea =styled.View`
     width: 90%;
     line-height: 1.8px;
+    align-items: center;
 `;
 
 export const StyledDetailsInput =styled.TextInput`
@@ -336,9 +337,10 @@ font-size: 16px;
 color: ${tertiary};
 border-radius: 10px;
 width: 70%;
-height: 40%;
+height: 45%;
 text-align: left;
-padding-left: 30px;
+padding-left: 10px;
+padding-right: 30px;
 flex: none;
 border: 2px ${secondary};
 `;
@@ -357,8 +359,9 @@ color: ${tertiary};
 font-size: 15px;
 padding-top: 10px;
 padding-left: 10px;
+padding-right: 20px;
 padding-bottom: 5px;
-text-align: left;
+text-align: center;
 `;
 
 export const ExtraView = styled.View`

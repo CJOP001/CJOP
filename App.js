@@ -5,6 +5,6 @@ import Verification from './screens/verification';
 
 export default function App() {
   return (
-    <Verification />
+    <SignUp />
   );
 };

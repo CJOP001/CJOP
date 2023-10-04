@@ -48,11 +48,7 @@ const SignUp = () => {
                                 value={values.username}
                                 pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                             />
-                        </StyledFormArea>)}
-                    </Formik>
-            </LoginDetails>
-            <SignUpContinue>
-            <SignUpButton>
+                            <SignUpButton>
                 <SignInText>
                     Sign Up
                 </SignInText>
@@ -63,6 +59,11 @@ const SignUp = () => {
                     <TextLinkContent> Log in</TextLinkContent>
                 </TextLink>
             </ExtraView>
+                        </StyledFormArea>)}
+                    </Formik>
+            </LoginDetails>
+            <SignUpContinue>
+            
             </SignUpContinue>
         </LowerSignUpContainer>
         </SignUpContainer>
