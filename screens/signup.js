@@ -1,18 +1,18 @@
 import React from "react";
 import { StatusBar } from 'expo-status-bar';
 import { LowerSignUpContainer, SignUpDetailsLabel, Colors, 
-    SignUpText, UpperSignUpContainer, SignUpContainer, SignUpLogo, LoginDetails, 
-    SignUpContinue, StyledFormArea, SignUpTitle, SignUpInfo, SignUpDetailsInput, 
-    SignUpButton, ExtraText,TextLink, TextLinkContent, ExtraView} from "../components/styles";
+    SignUpText, UpperSignUpContainer, SignUpContainer, SignUpLogo, SignUpDetails, 
+     StyledFormArea, SignUpTitle, SignUpInfo, SignUpDetailsInput, 
+    SignUpButton, ExtraText,TextLink, TextLinkContent, ExtraView, SignUpInput} from "../components/styles";
 import { Formik } from "formik";
-import { View, KeyboardAvoidingView } from "react-native";
+import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { View } from "react-native";
 
 const {darkLight} = Colors;
 
 const SignUp = () => {
     return (
-    
-        <SignUpContainer>
+        <KeyboardAvoidingWrapper>   
             <StatusBar style="dark"/>
         <UpperSignUpContainer>
         <SignUpLogo resizeMode="cover" source={require('../assets/signup_splashart.png')}/>  
@@ -21,7 +21,7 @@ const SignUp = () => {
         <LowerSignUpContainer>
         <SignUpTitle>Welcome to CJOP</SignUpTitle>
         <SignUpInfo>Become a journalist in your own right. Sign up below to begin your journalist's journey.</SignUpInfo>
-            <LoginDetails>
+            <SignUpDetails>
                 <Formik 
                 initialValues={{phone_number: '', username: ''}}
                     onSubmit={(values) => {console.log(values);
@@ -29,6 +29,7 @@ const SignUp = () => {
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
                             (<StyledFormArea>
+                                <SignUpInput>
                                 <PhoneInput 
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
@@ -39,6 +40,7 @@ const SignUp = () => {
                                     keyboardType="phone-pad"
                                     pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                                 />
+                                
                                 <UsernameInput 
                                 label="Username"
                                 placeholder="eg. Titanfall#456"
@@ -48,6 +50,7 @@ const SignUp = () => {
                                 value={values.username}
                                 pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                             />
+                            </SignUpInput>
                             <SignUpButton onPress={handleSubmit}>
                 <SignUpText>
                     Sign Up
@@ -61,16 +64,15 @@ const SignUp = () => {
             </ExtraView>
                         </StyledFormArea>)}
                     </Formik>
-            </LoginDetails>  
+            </SignUpDetails>  
         </LowerSignUpContainer>
-        </SignUpContainer>
-
+        </KeyboardAvoidingWrapper>
     );
 };
 
 const PhoneInput = ({label, ...props}) => {
     return (
-        <View>
+        <View style={{marginRight: 20}}>
             <SignUpDetailsLabel>{label}</SignUpDetailsLabel>
             <SignUpDetailsInput {...props} />
         </View>

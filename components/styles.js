@@ -80,25 +80,21 @@ padding-top: ${StatusBarHeight + 50}px;
 `;
 
 export const UpperLoginContainer = styled.View`
-flex: 3;
-padding-top: 70px;
+flex: 1;
+align-items: center
 `;
 
 export const LowerLoginContainer = styled.View`
-flex: 3;
-width: 100%;
-padding-top: 0px;
-alignItems: center;  
-padding-bottom: 10px;
-margin: auto;
-`;
-
-export const LoginDetails = styled.View`
 flex: 1;
-flex-direction: row;
-position: static;
-
+width: 100%;
+padding-bottom: 10px;
 `;
+
+    export const LoginDetails = styled.View`
+    flex: 1;
+    align-items: center;
+    `;
+
 
 export const SignInButton = styled.TouchableOpacity`
 width: 50%;
@@ -128,8 +124,7 @@ color: #FFFFFF;
 
 export const LoginLogo = styled.Image`
     width: 80%;
-    height: 115%;
-    margin: auto;  
+    height: 330px;
 `;
 
 export const LoginTitle =styled.Text`
@@ -137,7 +132,7 @@ font-size: 24px;
 font-family: 'Roboto';
 letter-spacing: 0px;
 text-align: left;
-padding-top: 60px;
+padding: 15px;
 padding-left: 15px;
 `;
 
@@ -151,49 +146,59 @@ color: #7C82A1;
 `;
 
 export const StyledDetailsInput =styled.TextInput`
-padding: 10px;
-font-size: 16px;
+padding: 8px;
+font-size: 15px;
 color: ${tertiary};
 border-radius: 10px;
-width: 90%;
-height: 60px;
+width: 100%;
+height: 40px;
 text-align: left;
 padding-left: 10px;
-padding-right: 35px;
-flex: none;
+padding-right: 40px;
 border: 2px ${secondary};
-margin-bottom: 35px;
+margin-bottom: 10px;
 `;
 
 export const StyledDetailsLabel =styled.Text`
 color: ${tertiary};
-font-size: 15px;
-padding-top: 20px;
-padding-left: 10px;
 padding-bottom: 10px;
+padding-left: px;
+padding-right: 20px;
 text-align: left;
+font-size: 15px;
 `;
 
 
 //SignUp components
 export const SignUpContainer = styled.View`
-flex: 6;
+flex: 1;
 padding-top: ${StatusBarHeight + 50}px;
+position: absolute;
 `;
 
 export const UpperSignUpContainer = styled.View`
 flex: 2;
-padding-top: 30px;
+padding-top: 0px;
 align-items: center;
-margin-bottom: 20px;
 `;
 
 export const LowerSignUpContainer = styled.View`
 flex: 4;
-width: 100%;
-alignItems: center;  
-margin-top: 20px;
+margin-top: 0;
+justify-content: space-around;
 `;
+
+export const SignUpDetails = styled.View`
+flex: 3;
+alignItems: center;  
+margin-top: 30px;
+
+`;
+
+export const SignUpInput = styled.View`
+flex-direction: row;
+
+    `;
 
 
 export const SignUpButton = styled.TouchableOpacity`
@@ -207,7 +212,7 @@ padding-bottom: 35px;
 background: #72E6FF;
 border-radius: 12px;
 align-items: center;
-margin-top: 10px;
+margin-top: 60px;
 `;
 
 export const SignUpText = styled.Text`
@@ -228,35 +233,36 @@ export const SignUpLogo = styled.Image`
 `;
 
 export const SignUpTitle =styled.Text`
+padding: 15px;
 font-size: 24px;
 font-family: 'Roboto';
 letter-spacing: 0px;
 text-align: left;
-padding-top: 60px;
-padding-right: 180px;
+padding-left: 20px;
 `;
 
 export const SignUpDetailsInput =styled.TextInput`
-font-size: 16px;
+padding: 8px;
+font-size: 15px;
 color: ${tertiary};
 border-radius: 10px;
-width: 70%;
-height: 50px;
+width: 100%;
+height: 40px;
 text-align: left;
 padding-left: 10px;
-padding-right: 30px;
-flex: none;
+padding-right: 20px;
 border: 2px ${secondary};
 margin-bottom: 10px;
-margin-top: 5px;
 `;
 
 export const SignUpDetailsLabel =styled.Text`
 color: ${tertiary};
-padding-top: 10px;
-padding-left: 10px;
+padding-bottom: 10px;
+padding-left: 5px;
 padding-right: 20px;
-text-align: center;
+text-align: left;
+font-size: 15px;
+
 `;
 
 export const SignUpInfo =styled.Text`
@@ -377,7 +383,6 @@ color: #7C82A1;
 export const StyledFormArea =styled.View`
     width: 90%;
     align-items: center;
-    margin: auto;
 `;
 
 export const ExtraView = styled.View`
@@ -385,6 +390,7 @@ export const ExtraView = styled.View`
     flex-direction: row;
     align-items: center;
     padding-top: 10px;
+    margin-bottom: 20px;
 `;
 
 export const ExtraText = styled.Text`

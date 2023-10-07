@@ -7,19 +7,21 @@ import { LowerLoginContainer, StyledDetailsLabel, Colors,
     SignInButton, ExtraText,TextLink, TextLinkContent, ExtraView } from "../components/styles";
 import { Formik } from "formik";
 import { View } from "react-native";
+import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 const {darkLight} = Colors;
 
 const Login = () => {
     return (
     
-        <LoginContainer>
+        <KeyboardAvoidingWrapper>
             <StatusBar style="dark"/>
         <UpperLoginContainer>
         <LoginLogo resizeMode="cover" source={require('../assets/login_splashart.png')}/>  
-        <LoginTitle>Welcome Back!</LoginTitle>
+       
         </UpperLoginContainer>
         <LowerLoginContainer>
+        <LoginTitle>Welcome Back!</LoginTitle>
         <LoginInfo>I am happy to see you again. You can continue where you left off by logging in</LoginInfo>
             <LoginDetails>
                 <Formik 
@@ -55,14 +57,14 @@ const Login = () => {
             </LoginDetails>
             
         </LowerLoginContainer>
-        </LoginContainer>
+        </KeyboardAvoidingWrapper>
 
     );
 };
 
 const PhoneInput = ({label, ...props}) => {
     return (
-        <View>
+        <View style={{marginTop:30 }}>
             <StyledDetailsLabel>{label}</StyledDetailsLabel>
             <StyledDetailsInput {...props} />
         </View>
