@@ -1,11 +1,11 @@
 import React from "react";
 import { StatusBar } from 'expo-status-bar';
 import { LowerSignUpContainer, SignUpDetailsLabel, Colors, 
-    SignInText, UpperSignUpContainer, SignUpContainer, SignUpLogo, LoginDetails, 
+    SignUpText, UpperSignUpContainer, SignUpContainer, SignUpLogo, LoginDetails, 
     SignUpContinue, StyledFormArea, SignUpTitle, SignUpInfo, SignUpDetailsInput, 
-    SignUpButton, ExtraText,TextLink, TextLinkContent, ExtraView } from "../components/styles";
+    SignUpButton, ExtraText,TextLink, TextLinkContent, ExtraView} from "../components/styles";
 import { Formik } from "formik";
-import { View } from "react-native";
+import { View, KeyboardAvoidingView } from "react-native";
 
 const {darkLight} = Colors;
 
@@ -49,9 +49,9 @@ const SignUp = () => {
                                 pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                             />
                             <SignUpButton onPress={handleSubmit}>
-                <SignInText>
+                <SignUpText>
                     Sign Up
-                </SignInText>
+                </SignUpText>
             </SignUpButton>
             <ExtraView>
                 <ExtraText>Already have an account?</ExtraText>
@@ -61,10 +61,7 @@ const SignUp = () => {
             </ExtraView>
                         </StyledFormArea>)}
                     </Formik>
-            </LoginDetails>
-            <SignUpContinue>
-            
-            </SignUpContinue>
+            </LoginDetails>  
         </LowerSignUpContainer>
         </SignUpContainer>
 
