@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const NewsCreation = () => {
+const NewsCreationModal = () => {
   return (
     <View>
-      <Text>NewsCreation</Text>
+      <Text>NewsCreationModal</Text>
     </View>
   )
 }
 
-export default NewsCreation
+export default NewsCreationModal
 
 const styles = StyleSheet.create({})
