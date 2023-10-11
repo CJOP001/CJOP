@@ -1,21 +1,17 @@
-const Stack = createNativeStackNavigator();
-import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React from 'react';
+import AppNavigator from './components/Navigator';
+import 'react-native-gesture-handler';
 
-import AddingPost from "./screens/AddingPost";
-import AppNavigator from "./components/Navigator";
-import IOSBottomBar5Tabs from "./components/IOSBottomBar5Tabs";
-import AnnouncementPost from "./screens/AnnouncementPost";
-import CreatePost from "./screens/CreatePost";
+import { AppRegistry } from 'react-native';
+import PaymentModal from './screens/Payment_Modal';
 
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { View, Text, Pressable, TouchableOpacity, Button } from "react-native";
+export default function App() {
 
-const App = () => {
-  const [hideSplashScreen, setHideSplashScreen] = React.useState(true);
+  AppRegistry.registerComponent('CJOP', () => PaymentModal);
 
   return (
-  <AppNavigator/>
+
+      <AppNavigator/>
+
   );
-};
-export default App;
+}

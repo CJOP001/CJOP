@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, Image, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import { StackNavigationProp } from '@react-navigation/stack';
 import OverlaySheetModal from './PostingModal';
 
 const PostingDesc = ({ }) => {
@@ -25,16 +24,15 @@ const PostingDesc = ({ }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
-        <View style={styles.customBackAction}>
-          <Appbar.BackAction
-            onPress={() => {
-              console.log('Going back');
-              navigation.goBack();
-            }}
-          />
-        </View>
+        <Appbar.BackAction
+          onPress={() => {
+            console.log('Going back');
+            navigation.goBack();
+          }}
+          style={styles.customBackAction}
+        />
         <Appbar.Content title="Create" style={styles.appContent} />
       </Appbar.Header>
 
@@ -99,34 +97,33 @@ const PostingDesc = ({ }) => {
       <View style={styles.iconContainer}>
         <TouchableOpacity style={styles.icon}>
           <Image
-              source={require('../assets/camera_icon.png')} // Replace with the path to your icon image
-              style={{ width: 35, height: 35 }} // Set the width and height of the image
-              />
-              </TouchableOpacity>
+            source={require('../assets/camera_icon.png')} // Replace with the path to your icon image
+            style={{ width: '100', aspectRatio: 1 }} // Use aspectRatio for responsive size
+          />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.icon}>
           <Image
-              source={require('../assets/paperclip_icon.png')} // Replace with the path to your icon image
-              style={{ width: 30, height: 30, marginLeft:15 }} // Set the width and height of the image
-              />
+            source={require('../assets/paperclip_icon.png')} // Replace with the path to your icon image
+            style={{ width: '100%', aspectRatio: 1, marginLeft: '10%' }} // Use aspectRatio for responsive size and margin for spacing
+          />
         </TouchableOpacity>
         <TouchableOpacity style={styles.icon}>
-           <Image
-               source={require('../assets/photo_icon.png')} // Replace with the path to your icon image
-               style={{ width: 35, height: 35, marginLeft:30}} // Set the width and height of the image
-               />
+          <Image
+            source={require('../assets/photo_icon.png')} // Replace with the path to your icon image
+            style={{ width: '100%', aspectRatio: 1, marginLeft: '10%' }} // Use aspectRatio for responsive size and margin for spacing
+          />
         </TouchableOpacity>
-
-      <TouchableOpacity style={styles.icon1} onPress={toggleModal}>
-           <Image
-               source={require('../assets/send_icon.png')} // Replace with the path to your icon image
-               style={{ width: 40, height: 40, marginLeft:75, marginTop:-7}} // Set the width and height of the image
-               />
-              </TouchableOpacity>
+        <TouchableOpacity style={styles.icon1} onPress={toggleModal}>
+          <Image
+            source={require('../assets/send_icon.png')} // Replace with the path to your icon image
+            style={{ width: '100%', aspectRatio: 1, marginLeft: '10%' }} // Use aspectRatio for responsive size and margin for spacing
+          />
+        </TouchableOpacity>
       </View>
 
       <OverlaySheetModal isVisible={isModalVisible} text="Your modal text goes here" onCancel={toggleModal} />
 
-    </View>
+    </ScrollView>
   );
 };
 
@@ -139,13 +136,12 @@ const styles = StyleSheet.create({
     marginLeft: -10,
   },
   appContent: {
-    right: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dropdownContainer: {
-    paddingHorizontal: 16,
-    marginTop: 20,
+    paddingHorizontal: '5%', // Adjust as needed
+    marginTop: '5%', // Adjust as needed
     alignItems: 'center',
   },
   dropdownHeader: {
@@ -153,8 +149,8 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 15,
     backgroundColor: 'rgba(0, 0, 0, 0.25)',
-    width: 275,
-    padding: 10,
+    width: '90%', // Adjust as needed
+    padding: '2%', // Adjust as needed
   },
   selectedValueText: {
     fontSize: 16,
@@ -166,76 +162,56 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   dropdownList: {
-    width: 200,
+    width: '70%', // Adjust as needed
     backgroundColor: 'white',
     borderRadius: 4,
     elevation: 5,
-    padding: 10,
+    padding: '2%', // Adjust as needed
   },
   dropdownItem: {
-    paddingVertical: 8,
+    paddingVertical: '2%', // Adjust as needed
   },
   imageContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
-    marginTop: 27,
-  },
-  profileContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-      marginLeft: 10,
-      marginTop: 27,
+    marginLeft: '5%', // Adjust as needed
+    marginTop: '3%', // Adjust as needed
   },
   profile_image: {
-      width: '25%',
-      height: '25%',
-      borderRadius: 77,
-      borderWidth: 4,
-      borderColor: '#FFF',
-    },
-  image: {
-    width: '77%',
-    height: '74%',
-    flexShrink: 0,
-    borderRadius: 77,
+    width: '25%',
+    aspectRatio: 1,
+    borderRadius: 50, // Make it a circle
     borderWidth: 4,
     borderColor: '#FFF',
   },
   imageText: {
-    marginLeft: 10,
+    marginLeft: '5%', // Adjust as needed
     fontSize: 16,
   },
   textInput: {
-    margin: 20,
+    margin: '5%',
     borderWidth: 1.25,
-    marginRight: 42,
-    height: 345,
-    width: 368,
+    marginRight: '10%',
     borderColor: 'white',
     borderRadius: 15,
-    padding: 10,
+    padding: '2%',
   },
   iconContainer: {
     flexDirection: 'row',
-    marginHorizontal: 3,
-    marginTop: -3,
+    justifyContent: 'space-around',
+    marginHorizontal: '3%',
+    marginTop: '2%', 
   },
   icon: {
-    width: 20, // Adjust width as needed
-    height: 20, // Adjust height as needed
-    margin: 9, // Adjust margin as needed
-    marginLeft: 20,
-    backgroundColor: 'white', // Set the background color or add your icon image here
+    width: '15%',
+    aspectRatio: 1,
+    backgroundColor: 'white',
   },
   icon1: {
-  width: 40,
-  height: 40, // Adjust height as needed
-  margin: 9, // Adjust margin as needed
-  marginLeft: 130,
-  backgroundColor: 'white',
+    width: '15%',
+    aspectRatio: 1,
+    backgroundColor: 'white',
   },
-
 });
 
 export default PostingDesc;
