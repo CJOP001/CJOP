@@ -3,7 +3,7 @@ import { ImageBackground, StyleSheet } from "react-native";
 import { WelcomeContainer, InnerWelcomeContainer, PageLogo, PageTitle, StyledButton, ButtonText } from "../components/styles";
 
 
-const Welcome = () => {
+const Welcome = ({navigation}) => {
     return (
     
         <WelcomeContainer>
@@ -16,7 +16,7 @@ const Welcome = () => {
             </InnerWelcomeContainer>
             <PageTitle>Take Down Anything You See</PageTitle>
 
-            <StyledButton>
+            <StyledButton onPress={() => navigation.navigate("Login")}>
                 <ButtonText>
                     Get Started
                 </ButtonText>

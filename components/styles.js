@@ -24,6 +24,7 @@ export const WelcomeContainer = styled.View`
     padding-top: ${StatusBarHeight + 50}px;
     alignItems: center;
     padding-bottom: 40px;
+    margin-top: 20px;
 `;
 
 export const InnerWelcomeContainer = styled.View`
@@ -74,10 +75,7 @@ color: #FFFFFF;
 
 
 //Login components
-export const LoginContainer = styled.KeyboardAvoidingView`
-flex: 6;
-padding-top: ${StatusBarHeight + 50}px;
-`;
+
 
 export const UpperLoginContainer = styled.View`
 flex: 1;
@@ -170,11 +168,6 @@ font-size: 15px;
 
 
 //SignUp components
-export const SignUpContainer = styled.View`
-flex: 1;
-padding-top: ${StatusBarHeight + 50}px;
-position: absolute;
-`;
 
 export const UpperSignUpContainer = styled.View`
 flex: 2;

@@ -10,7 +10,7 @@ import { View } from "react-native";
 
 const {darkLight} = Colors;
 
-const SignUp = () => {
+const SignUp = ({navigation}) => {
     return (
         <KeyboardAvoidingWrapper>   
             <StatusBar style="dark"/>
@@ -25,6 +25,7 @@ const SignUp = () => {
                 <Formik 
                 initialValues={{phone_number: '', username: ''}}
                     onSubmit={(values) => {console.log(values);
+                        navigation.navigate('Verification');
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -58,7 +59,7 @@ const SignUp = () => {
             </SignUpButton>
             <ExtraView>
                 <ExtraText>Already have an account?</ExtraText>
-                <TextLink>
+                    <TextLink onPress={() => navigation.navigate("Login")}>
                     <TextLinkContent> Log in</TextLinkContent>
                 </TextLink>
             </ExtraView>

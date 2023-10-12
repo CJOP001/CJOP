@@ -3,7 +3,7 @@ import { ImageBackground, StyleSheet } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { LowerLoginContainer, StyledDetailsLabel, Colors, 
     SignInText, UpperLoginContainer, LoginContainer, LoginLogo, LoginDetails, 
-    Continue, StyledFormArea, LoginTitle, LoginInfo, StyledDetailsInput, 
+    StyledFormArea, LoginTitle, LoginInfo, StyledDetailsInput, 
     SignInButton, ExtraText,TextLink, TextLinkContent, ExtraView } from "../components/styles";
 import { Formik } from "formik";
 import { View } from "react-native";
@@ -11,7 +11,7 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 const {darkLight} = Colors;
 
-const Login = () => {
+const Login = ({navigation}) => {
     return (
     
         <KeyboardAvoidingWrapper>
@@ -27,6 +27,8 @@ const Login = () => {
                 <Formik 
                 initialValues={{country_code: '', phone_number: ''}}
                     onSubmit={(values) => {console.log(values);
+                        navigation.navigate('Verification');
+
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -48,8 +50,8 @@ const Login = () => {
             </SignInButton>
             <ExtraView>
                 <ExtraText>Don't have an account?</ExtraText>
-                <TextLink>
-                    <TextLinkContent> Sign Up</TextLinkContent>
+                <TextLink onPress={() => navigation.navigate("SignUp")}>
+                    <TextLinkContent > Sign Up</TextLinkContent>
                 </TextLink>
             </ExtraView>
                             </StyledFormArea>)}
@@ -70,6 +72,7 @@ const PhoneInput = ({label, ...props}) => {
         </View>
     )
 }
+
 
 export default Login;
 

@@ -8,7 +8,7 @@ import { LowerVerificationContainer,
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
 
-const Verification = () => {
+const Verification = (navigation) => {
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 4;
