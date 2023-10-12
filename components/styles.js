@@ -85,7 +85,7 @@ align-items: center
 export const LowerLoginContainer = styled.View`
 flex: 1;
 width: 100%;
-padding-bottom: 10px;
+padding-bottom: 20px;
 `;
 
     export const LoginDetails = styled.View`
@@ -105,6 +105,7 @@ padding-bottom: 35px;
 background: #72E6FF;
 border-radius: 12px;
 margin-top: 10px;
+marginLeft: 32px
 `;
 
 export const SignInText = styled.Text`
@@ -121,8 +122,8 @@ color: #FFFFFF;
 `;
 
 export const LoginLogo = styled.Image`
-    width: 80%;
-    height: 330px;
+    width: 85%;
+    height: 350px;
 `;
 
 export const LoginTitle =styled.Text`
@@ -155,6 +156,7 @@ padding-left: 10px;
 padding-right: 40px;
 border: 2px ${secondary};
 margin-bottom: 10px;
+marginLeft: 32px;
 `;
 
 export const StyledDetailsLabel =styled.Text`
@@ -164,6 +166,8 @@ padding-left: px;
 padding-right: 20px;
 text-align: left;
 font-size: 15px;
+marginLeft: 32px;
+
 `;
 
 
@@ -176,9 +180,10 @@ align-items: center;
 `;
 
 export const LowerSignUpContainer = styled.View`
-flex: 4;
+flex: 3;
 margin-top: 0;
 justify-content: space-around;
+paddingBottom: 20px;
 `;
 
 export const SignUpDetails = styled.View`
@@ -205,7 +210,8 @@ padding-bottom: 35px;
 background: #72E6FF;
 border-radius: 12px;
 align-items: center;
-margin-top: 60px;
+margin-top: 30px;
+marginLeft: 30px;
 `;
 
 export const SignUpText = styled.Text`
@@ -243,18 +249,20 @@ width: 100%;
 height: 40px;
 text-align: left;
 padding-left: 10px;
-padding-right: 20px;
+padding-right: 10px;
 border: 2px ${secondary};
 margin-bottom: 10px;
+marginLeft: 10px;
 `;
 
 export const SignUpDetailsLabel =styled.Text`
 color: ${tertiary};
 padding-bottom: 10px;
-padding-left: 5px;
 padding-right: 20px;
 text-align: left;
 font-size: 15px;
+marginTop: 20px;
+marginLeft: 10px;
 
 `;
 
@@ -274,6 +282,7 @@ export const VerificationContainer = styled.Pressable`
     flex: 5;
     padding-top: ${StatusBarHeight + 50}px;
     align-items: center;
+    backgroundColor: #FFFFFF;
     `;
 
 export const UpperVerificationContainer = styled.View`
@@ -330,6 +339,7 @@ export const OTPInput = styled.View`
     min-width: 15%;
     border-radius: 10px;
     padding: 15px;
+    borderColor: #D3D3D3;
 `;
 
 export const VerificationText = styled.Text`
@@ -376,10 +386,13 @@ color: #7C82A1;
 export const StyledFormArea =styled.View`
     width: 90%;
     align-items: center;
+    paddingLeft: 10px;
+    justify-content: center;
 `;
 
 export const ExtraView = styled.View`
     justify-content: center;
+    alignItems: center;
     flex-direction: row;
     align-items: center;
     padding-top: 10px;

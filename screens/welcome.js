@@ -1,27 +1,27 @@
 import React from "react";
-import { ImageBackground, StyleSheet } from "react-native";
-import { WelcomeContainer, InnerWelcomeContainer, PageLogo, PageTitle, StyledButton, ButtonText } from "../components/styles";
+import { ImageBackground, StyleSheet, View, Text, TouchableOpacity, Image, StatusBar } from "react-native";
+import { Colors } from "../components/styles";
 
 
 const Welcome = ({navigation}) => {
     return (
     
-        <WelcomeContainer>
+        <View style={styles.WelcomeContainer}>
             
-            <InnerWelcomeContainer>
+            <View style={styles.InnerWelcomeContainer}>
             <ImageBackground source={require('../assets/welcome_background.png')} resizeMode="stretch" style={styles.image}>
-            <PageLogo resizeMode="cover" source={require('../assets/welcome_splashart.png')}/>  
+            <Image style={styles.PageLogo} resizeMode="cover" source={require('../assets/welcome_splashart.png')}/>  
 
             </ImageBackground>
-            </InnerWelcomeContainer>
-            <PageTitle>Take Down Anything You See</PageTitle>
+            </View>
+            <Text style={styles.PageTitle}>Take Down Anything You See</Text>
 
-            <StyledButton onPress={() => navigation.navigate("Login")}>
-                <ButtonText>
+            <TouchableOpacity style={styles.StyledButton} onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.ButtonText}>
                     Get Started
-                </ButtonText>
-            </StyledButton>
-        </WelcomeContainer>
+                </Text>
+            </TouchableOpacity>
+        </View>
 
     );
 }
@@ -35,7 +35,58 @@ const styles = StyleSheet.create({
       height: 400,
       width: 800
 
+    },
+    WelcomeContainer: {
+        flex: 1,
+        padding: 10,
+        paddingTop: StatusBar.currentHeight,
+        alignItems: "center",
+        paddingBottom: 40
+    },
+    InnerWelcomeContainer: {
+        width: "100%",
+        alignItems: "center"
+    },
+    PageTitle: {
+        fontSize: 36,
+        textAlign: "left",
+        fontWeight: "bold",
+        alignItems: "center",
+        color: Colors.brand,
+        paddingTop: 50,
+        paddingBottom: 10
+    },
+    StyledButton: {
+        width: "70%",
+        height: "5%",
+        paddingTop: 5,
+        paddingLeft: 3,
+        paddingRight: 3,
+        paddingBottom: 50,
+        textAlign: "center",
+        backgroundColor: '#72E6FF',
+        borderRadius: 20,
+        marginTop: 20,
+        alignItems: "center"
+    },
+    ButtonText: {
+        height: 40,
+        paddingBottom: 3, 
+        textAlign: 'center',
+        fontFamily: 'Roboto',
+        fontStyle: 'normal',
+        fontSize: 34,
+        color: '#FFFFFF'
+    },
+    PageLogo: {
+        width: 160,
+        height: 315,
+        paddingBottom: 10
     }
+
+
+
 });
 
 export default Welcome;
+
