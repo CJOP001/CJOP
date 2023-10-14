@@ -8,32 +8,36 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 
 const Login = ({navigation}) => {
+
+
     const [fetchError, setFetchError] = useState(null)
     const [phoneNumber, setPhoneNumber] = useState(null)
 
-    const phone_number = useState("")
+    var fetchPN = ""
+    
+        const fetchPhoneNumber = async () =>{
+            try {
+                const {data, error} = await supabase
+                .from('app_users')
+                .select()
+                .eq('phone_no',fetchPN);
 
-    useEffect(() => {
-    const fetchPhoneNumber = async () => {
-        const {data, error} = await supabase
-        .from('app_users')
-        .select('phone_no')
-        .single(phone_number)
-
-        if (error) {
-            setFetchError('Data retrieval fail.')
-            setPhoneNumber(null)
-            console.log(error)
+                if (data != "") {       
+                    navigation.navigate('Verification');
+                }
+                else if(error)
+                {
+                    throw error;
+                }
+            }
+            catch (error)
+            {
+                console.log(error);
+            }
+              
         }
-        if (data)
-        {
-            setPhoneNumber(data)
-            setFetchError(null)
-        }
-
-    }   
-    fetchPhoneNumber()   
-    }, [])
+        
+    
     return (
     
         <KeyboardAvoidingWrapper>
@@ -47,9 +51,9 @@ const Login = ({navigation}) => {
         <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
                 <Formik 
                 initialValues={{phone_number: ''}}
-                    onSubmit={(values) => {console.log(values);
-                        navigation.navigate('Verification');
-
+                    onSubmit={(values) => { console.log(values);
+                        fetchPN = values.phone_number
+                        fetchPhoneNumber()
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -76,7 +80,7 @@ const Login = ({navigation}) => {
                     </Formik>
                     <View style={styles.ExtraView}>
                 <Text style={styles.ExtraText}>Don't have an account?</Text>
-                <TouchableOpacity style={styles.TextLink} onPress={() => navigation.navigate("SignUp")}>
+                <TouchableOpacity style={styles.TextLink} onPress={() =>  navigation.navigate("SignUp")}>
                     <Text style={styles.TextLinkContent} > Sign Up</Text>
                 </TouchableOpacity>
             </View>

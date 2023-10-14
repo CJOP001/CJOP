@@ -109,7 +109,7 @@ const Verification = (navigation) => {
 
 const styles = StyleSheet.create({
 VerificationText: {
-    fontSize: 22,
+    fontSize: 15,
     textAlign: "center",
     color: "#333647"
 },
@@ -159,7 +159,7 @@ VerificationInput: {
     marginLeft: 10
 },
 VerificationPressable: {
-    width: "80%",
+    width: "90%",
     flexDirection: "row",
     justifyContent: "space-around"   
 },
@@ -177,9 +177,9 @@ HiddenTextInput: {
 
 const OTPInput = styled.View`
     background-color: #F3F4F6;
-    min-width: 15%;
+    min-width: 12%;
     border-radius: 10px;
-    padding: 15px;
+    padding: 13px;
     borderColor: #D3D3D3;
 `;
 
