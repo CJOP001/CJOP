@@ -1,4 +1,5 @@
-import React from "react";
+import {React, useEffect, useState} from "react";
+import supabase from "../supabase/supabase";
 import { StatusBar } from 'expo-status-bar';
 import { Colors} from "../components/styles";
 import { Formik } from "formik";
@@ -8,6 +9,33 @@ import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "rea
 const {darkLight} = Colors;
 
 const SignUp = ({navigation}) => {
+
+    const [fetchError, setFetchError] = useState(null)
+    const [phoneNumber, setPhoneNumber] = useState(null)
+
+    const phone_number = useState("")
+
+    useEffect(() => {
+    const fetchPhoneNumber = async () => {
+        const {data, error} = await supabase
+        .from('app_users')
+        .select('phone_no')
+        .single(phone_number)
+
+        if (error) {
+            setFetchError('Data retrieval fail.')
+            setPhoneNumber(null)
+            console.log(error)
+        }
+        if (data)
+        {
+            setPhoneNumber(data)
+            setFetchError(null)
+        }
+
+    }   
+    fetchPhoneNumber()   
+    }, [])
     return (
         <KeyboardAvoidingWrapper>   
             <StatusBar style="dark"/>

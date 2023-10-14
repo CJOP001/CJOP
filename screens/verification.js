@@ -10,7 +10,7 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 const Verification = (navigation) => {
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
-    const pinLength = 4;
+    const pinLength = 6;
 
     const textInputRef = useRef(null);
 
@@ -63,7 +63,7 @@ const Verification = (navigation) => {
             <Text style={styles.VerificationTitle}>
                 Verification Code
             </Text>
-            <Text style={styles.VerificationInfo}>Enter the 4 digit Verification Code we have sent to your email to proceed.</Text>
+            <Text style={styles.VerificationInfo}>Enter the 6 digit Verification Code we have sent to your email to proceed.</Text>
             <View style={styles.VerificationInput}>
                 < Pressable style={styles.VerificationPressable} onPress={handleOnPress}>
                     {codeDigitsArray.map(toCodeDigitInput)}

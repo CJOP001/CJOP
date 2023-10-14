@@ -1,12 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {View, Image, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from "../components/styles";
 import { Formik } from "formik";
+import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 
 const Login = ({navigation}) => {
+    const [fetchError, setFetchError] = useState(null)
+    const [phoneNumber, setPhoneNumber] = useState(null)
+
+    const phone_number = useState("")
+
+    useEffect(() => {
+    const fetchPhoneNumber = async () => {
+        const {data, error} = await supabase
+        .from('app_users')
+        .select('phone_no')
+        .single(phone_number)
+
+        if (error) {
+            setFetchError('Data retrieval fail.')
+            setPhoneNumber(null)
+            console.log(error)
+        }
+        if (data)
+        {
+            setPhoneNumber(data)
+            setFetchError(null)
+        }
+
+    }   
+    fetchPhoneNumber()   
+    }, [])
     return (
     
         <KeyboardAvoidingWrapper>
@@ -19,14 +46,15 @@ const Login = ({navigation}) => {
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
         <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
                 <Formik 
-                initialValues={{country_code: '', phone_number: ''}}
+                initialValues={{phone_number: ''}}
                     onSubmit={(values) => {console.log(values);
                         navigation.navigate('Verification');
 
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
-                            (<View style={styles.StyledFormArea}>
+                            (
+                            <View style={styles.StyledFormArea}>
                                 <PhoneInput 
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
@@ -35,7 +63,7 @@ const Login = ({navigation}) => {
                                     onBlur={handleBlur('phone_number')}
                                     value={values.phone_number}
                                     keyboardType="phone-pad"
-                                    pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
+                                    pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />
                                 <TouchableOpacity style={styles.SignInButton} onPress={handleSubmit}>
                 <Text style={styles.SignInText} >
@@ -43,7 +71,8 @@ const Login = ({navigation}) => {
                 </Text>
             </TouchableOpacity>
             
-                            </View>)}
+                            </View>
+                            )}
                     </Formik>
                     <View style={styles.ExtraView}>
                 <Text style={styles.ExtraText}>Don't have an account?</Text>
