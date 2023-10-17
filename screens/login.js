@@ -10,6 +10,7 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 const Login = ({navigation}) => {
 
 
+    
     const [fetchError, setFetchError] = useState(null)
     const [phoneNumber, setPhoneNumber] = useState(null)
 
@@ -19,11 +20,14 @@ const Login = ({navigation}) => {
             try {
                 const {data, error} = await supabase
                 .from('app_users')
-                .select()
+                .select('phone_no')
                 .eq('phone_no',fetchPN);
 
-                if (data != "") {       
+                if (data != "") {  
+                     if (data == fetchPN)
+                    {
                     navigation.navigate('Verification');
+                    }
                 }
                 else if(error)
                 {
@@ -50,9 +54,9 @@ const Login = ({navigation}) => {
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
         <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
                 <Formik 
-                initialValues={{phone_number: ''}}
+                initialValues={{phone_no: ''}}
                     onSubmit={(values) => { console.log(values);
-                        fetchPN = values.phone_number
+                        fetchPN = values.phone_no
                         fetchPhoneNumber()
                     }}
                     >
@@ -63,9 +67,9 @@ const Login = ({navigation}) => {
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
                                     placeholderTextColor={Colors.darkLight}
-                                    onChangeText={handleChange('phone_number')}
-                                    onBlur={handleBlur('phone_number')}
-                                    value={values.phone_number}
+                                    onChangeText={handleChange('phone_no')}
+                                    onBlur={handleBlur('phone_no')}
+                                    value={values.phone_no}
                                     keyboardType="phone-pad"
                                     pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />

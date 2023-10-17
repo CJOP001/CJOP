@@ -5,51 +5,81 @@ import { Colors} from "../components/styles";
 import { Formik } from "formik";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const {darkLight} = Colors;
 
 const SignUp = ({navigation}) => {
 
-    const [fetchError, setFetchError] = useState(null)
-    const [phoneNumber, setPhoneNumber] = useState(null)
+    const [phoneNumber, setPhoneNumber] = useState(null);
+    const [userName, setUserName] = useState(null);
+    const [show, setShow] = useState(false);
+    const [date, setDate] = useState(new Date());
+    const [dob, setDob] = useState();
 
-    const phone_number = useState("")
+    const onChange = (event, selectedDate) => {
+            const currentDate = selectedDate || date;
+            setShow(false);
+            setDate(currentDate);
+            setDob(currentDate);   
+    };
 
-    useEffect(() => {
-    const fetchPhoneNumber = async () => {
-        const {data, error} = await supabase
-        .from('app_users')
-        .select('phone_no')
-        .single(phone_number)
 
-        if (error) {
-            setFetchError('Data retrieval fail.')
-            setPhoneNumber(null)
-            console.log(error)
-        }
-        if (data)
-        {
-            setPhoneNumber(data)
-            setFetchError(null)
-        }
+    const showDatePicker = () => {
+        setShow(true);
 
-    }   
-    fetchPhoneNumber()   
-    }, [])
+    }
+
+    const newUser = async () => {
+    try{
+        const { data, error } = await supabase.auth.signUp({
+            phone: phoneNumber,
+            password: 'testing',
+            options: {
+                data: {
+                    username: userName,
+                }
+            }
+          })
+          if(error)
+          {
+            throw(error);
+          }
+          else{
+            navigation.navigate('Verification');
+          }
+    }
+    catch (error)
+    {
+        console.log(error);
+    }
+}
     return (
         <KeyboardAvoidingWrapper>   
             <StatusBar style="dark"/>
         <View style={styles.UpperSignUpContainer}>
         <Image style={styles.SignUpLogo} resizeMode="cover" source={require('../assets/signup_splashart.png')}/>  
-        
         </View>
         <View style={styles.LowerSignUpContainer}>
         <Text style={styles.SignUpTitle}>Welcome to CJOP</Text>
         <Text style={styles.SignUpInfo}>Become a journalist in your own right. Sign up below to begin your journalist's journey.</Text>
+        {show && (
+            <DateTimePicker
+            testID="dateTimePicker"
+            value={date}
+            mode="date"
+            is24Hour={true}
+            display="calendar"
+            onChange={onChange}/>
+        )}
                 <Formik 
-                initialValues={{phone_number: '', username: ''}}
+                initialValues={{phone_number: '', username: '',dob: '', email_address: '', city_name: '', 
+                                address: '', postcode: '', state: '', country: ''}}
                     onSubmit={(values) => {console.log(values);
-                        navigation.navigate('Verification');
+                        setPhoneNumber(values.phone_number);
+                        setUserName(values.username);
+                        newUser();
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -76,6 +106,70 @@ const SignUp = ({navigation}) => {
                                 pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                             />
                             </View>
+                            <DoBInput 
+                                    label="Date of birth"
+                                    placeholder="eg. dd/mm/yyyy"
+                                    placeholderTextColor={darkLight}
+                                    onChangeText={handleChange('dob')}
+                                    onBlur={handleBlur('dob')}
+                                    value={dob ? dob.toDateString() : ''}
+                                    isDate={true}
+                                    editable={false}
+                                    showDatePicker={showDatePicker}
+                                />
+                            <EmailInput 
+                                    label="Email Address"
+                                    placeholder="eg. your@email.com"
+                                    placeholderTextColor={darkLight}
+                                    onChangeText={handleChange('email_address')}
+                                    onBlur={handleBlur('email_address')}
+                                    value={values.email_address}
+                                />
+                            <AddressInput 
+                                label="Residence Address"
+                                placeholder="eg.12 84th Street Alabama"
+                                placeholderTextColor={darkLight}
+                                onChangeText={handleChange('address')}
+                                onBlur={handleBlur('address')}
+                                value={values.address}
+                                />
+                            <View style={styles.SignUpInput}>
+                            <CityInput 
+                                label="City Name"
+                                placeholder="eg. New York City"
+                                placeholderTextColor={darkLight}
+                                onChangeText={handleChange('city_name')}
+                                onBlur={handleBlur('city_name')}
+                                value={values.city_name}
+                                />
+                            <PostCodeInput 
+                                label="PostCode"
+                                placeholder="eg. 47800"
+                                placeholderTextColor={darkLight}
+                                onChangeText={handleChange('postcode')}
+                                onBlur={handleBlur('postcode')}
+                                value={values.postcode}
+                            />
+                            </View>
+                            <View style={styles.SignUpInput}>
+                            <StateInput 
+                                label="State Name"
+                                placeholder="eg. California"
+                                placeholderTextColor={darkLight}
+                                onChangeText={handleChange('state')}
+                                onBlur={handleBlur('state')}
+                                value={values.state}
+                                />
+                            <CountryInput 
+                                label="Country"
+                                placeholder="eg. United States"
+                                placeholderTextColor={darkLight}
+                                onChangeText={handleChange('country')}
+                                onBlur={handleBlur('country')}
+                                value={values.country}
+                                />    
+                                </View>
+                            
                             <TouchableOpacity style={styles.SignUpButton} onPress={handleSubmit}>
                 <Text style={styles.SignUpText}>
                     Sign Up
@@ -112,6 +206,69 @@ const UsernameInput = ({label, ...props}) => {
     )
 }
 
+const EmailInput = ({label, ...props}) => {
+    return (
+        <View style={{ width: "60%"}}>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    ) 
+}
+
+const AddressInput = ({label, ...props}) => {
+    return (
+        <View>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    )
+}
+
+const CityInput = ({label, ...props}) => {
+    return (
+        <View style={{marginRight: 60}}>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    )
+}
+const PostCodeInput = ({label, ...props}) => {
+    return (
+        <View>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    )
+}
+
+const StateInput = ({label, ...props}) => {
+    return (
+        <View style={{marginRight: 30, width: "50%"}}>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    )
+}
+const CountryInput = ({label, ...props}) => {
+    return (
+        <View>
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TextInput style={styles.SignUpDetailsInput} {...props} />
+        </View>
+    )
+}
+const DoBInput = ({label, showDatePicker, ...props}) => {
+    return (
+        <View style={{width: "45%"}} >
+            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
+            <TouchableOpacity onPress={showDatePicker}>
+                <TextInput style={styles.SignUpDetailsInput} {...props}/>
+            </TouchableOpacity>
+        </View>
+    )
+}
+
+
 const styles = StyleSheet.create({
 UpperSignUpContainer: {
     flex: 2,
@@ -144,12 +301,13 @@ SignUpInfo: {
 },
 StyledFormArea: {
     width: "90%",
-    alignItems: "center",
+    alignItems: "left",
     paddingLeft: 10,
     justifyContent: "center"    
 },
 SignUpInput: {
-    flexDirection: "row"
+    flexDirection: "row",
+    alignItems: 'left'
 },
 SignUpButton: {
     width: "50%",
@@ -163,7 +321,7 @@ SignUpButton: {
     borderRadius: 12,
     alignItems: "center",
     marginTop: 30,
-    marginLeft: 30
+    marginLeft: 105
 },
 SignUpText: {
     height: 30,
@@ -199,26 +357,24 @@ TextLinkContent: {
 },
 SignUpDetailsLabel: {
     color: Colors.tertiary,
-    paddingBottom: 10,
     paddingRight: 20,
     textAlign: "left",
     fontSize: 15,
-    marginTop: 20,
-    marginLeft: 10
+    marginTop: 10,
+    marginLeft: 12
 },
 SignUpDetailsInput: {
     padding: 8,
     fontSize: 15,
     color: Colors.tertiary,
     borderRadius: 10,
-    width: "100%",
+    width: "95%",
     height: 40,
     textAlign: "left",
     paddingLeft: 10,
     paddingRight: 10,
     borderWidth: 2,
     borderColor: Colors.secondary,
-    marginBottom: 10,
     marginLeft: 10
 }
 });
