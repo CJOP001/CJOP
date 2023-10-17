@@ -4,10 +4,9 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Payment from '../screens/Payment';
 import PostingDesc from '../screens/PostingDesc';
+import PostingModal from '../screens/PostingModal'
 import Subscribe from '../screens/Subscribe';
 import Profile from '../screens/Profile';
-import AddingPost from '../screens/AddingPost';
-
 
 const Stack = createNativeStackNavigator();
 
