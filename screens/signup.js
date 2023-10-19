@@ -14,6 +14,13 @@ const SignUp = ({navigation}) => {
 
     const [phoneNumber, setPhoneNumber] = useState(null);
     const [userName, setUserName] = useState(null);
+    const [email, setEmail] = useState(null);
+    const [city, setCity] = useState(null);
+    const [address, setAddress] = useState(null);
+    const [postCode, setPostCode] = useState(null);
+    const [countryState, setCountryState] = useState(null);
+    const [countryName, setCountryName] = useState(null);
+
     const [show, setShow] = useState(false);
     const [date, setDate] = useState(new Date());
     const [dob, setDob] = useState();
@@ -24,31 +31,55 @@ const SignUp = ({navigation}) => {
             setDate(currentDate);
             setDob(currentDate);   
     };
-
+    
 
     const showDatePicker = () => {
         setShow(true);
 
     }
 
-    const newUser = async () => {
+    const AddNewUser = async () => {
     try{
         const { data, error } = await supabase.auth.signUp({
             phone: phoneNumber,
             password: 'testing',
-            options: {
-                data: {
-                    username: userName,
-                }
-            }
           })
           if(error)
           {
             throw(error);
           }
           else{
-            navigation.navigate('Verification');
+            const {data, error} = await supabase.auth.signInWithOtp({
+                phone: phoneNumber,
+            })
+            if(error)
+            {
+                console.log(error)
+            }
+            else if(data)
+            {
+                 const {data, error} = await supabase
+                    .from('app_users')
+                    .insert({'fullname':  userName,
+                            'email':  email,
+                            'phone_no': phoneNumber,
+                            'address':  address,
+                            'dob': dob,
+                            'city': city,
+                            'postcode': postCode,
+                            'state': countryState,
+                            'country': countryName,
+                            'status': 'Active'})
+                if(error)
+                {
+                    console.log(error);
+                }
+                else{
+                    console.log(data);
+                }
+                navigation.navigate('Verification', {phone: phoneNumber,})
           }
+        }
     }
     catch (error)
     {
@@ -79,7 +110,13 @@ const SignUp = ({navigation}) => {
                     onSubmit={(values) => {console.log(values);
                         setPhoneNumber(values.phone_number);
                         setUserName(values.username);
-                        newUser();
+                        setEmail(values.email_address);
+                        setAddress(values.address);
+                        setCity(values.city_name);
+                        setPostCode(values.postcode);
+                        setCountryState(values.state);
+                        setCountryName(values.country);
+                        AddNewUser;
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -93,7 +130,6 @@ const SignUp = ({navigation}) => {
                                     onBlur={handleBlur('phone_number')}
                                     value={values.phone_number}
                                     keyboardType="phone-pad"
-                                    pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
                                 />
                                 
                                 <UsernameInput 
@@ -103,7 +139,8 @@ const SignUp = ({navigation}) => {
                                 onChangeText={handleChange('username')}
                                 onBlur={handleBlur('username')}
                                 value={values.username}
-                                pattern="^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$"
+                                minLength={10}
+                                maxLength={50}
                             />
                             </View>
                             <DoBInput 
@@ -124,6 +161,8 @@ const SignUp = ({navigation}) => {
                                     onChangeText={handleChange('email_address')}
                                     onBlur={handleBlur('email_address')}
                                     value={values.email_address}
+                                    inputMode="email"
+                                    maxLength={40}
                                 />
                             <AddressInput 
                                 label="Residence Address"
@@ -132,6 +171,9 @@ const SignUp = ({navigation}) => {
                                 onChangeText={handleChange('address')}
                                 onBlur={handleBlur('address')}
                                 value={values.address}
+                                multiline={true}
+                                numberOfLines = {4}
+                                maxLength={50}
                                 />
                             <View style={styles.SignUpInput}>
                             <CityInput 
@@ -141,11 +183,13 @@ const SignUp = ({navigation}) => {
                                 onChangeText={handleChange('city_name')}
                                 onBlur={handleBlur('city_name')}
                                 value={values.city_name}
+                                maxLength={30}
                                 />
                             <PostCodeInput 
                                 label="PostCode"
                                 placeholder="eg. 47800"
                                 placeholderTextColor={darkLight}
+                                maxLength={5}
                                 onChangeText={handleChange('postcode')}
                                 onBlur={handleBlur('postcode')}
                                 value={values.postcode}
@@ -217,9 +261,9 @@ const EmailInput = ({label, ...props}) => {
 
 const AddressInput = ({label, ...props}) => {
     return (
-        <View>
+        <View style={{height: 60, marginBottom: 50}}>
             <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInput} {...props} />
+            <TextInput style={styles.SignUpDetailsInputForAddress} {...props} />
         </View>
     )
 }
@@ -376,6 +420,22 @@ SignUpDetailsInput: {
     borderWidth: 2,
     borderColor: Colors.secondary,
     marginLeft: 10
+},  
+
+SignUpDetailsInputForAddress: {
+    padding: 8,
+    fontSize: 15,
+    color: Colors.tertiary,
+    borderRadius: 10,
+    width: "95%",
+    height: 80,
+    textAlign: "left",
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderWidth: 2,
+    borderColor: Colors.secondary,
+    marginLeft: 10,
+    alignItems: "baseline"
 }
 });
 

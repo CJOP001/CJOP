@@ -9,6 +9,7 @@ import Welcome from '../screens/welcome';
 import Login from '../screens/login';
 import SignUp from '../screens/signup';
 import Verification from '../screens/verification';
+import AppSplash from '../screens/app_splash';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,8 @@ const RootStack = () =>
                 <Stack.Screen name="Login" component={Login}/>
                 <Stack.Screen name="SignUp" component={SignUp}/>
                 <Stack.Screen name="Verification" component={Verification}/>
+                <Stack.Screen name="AppSplash" component={AppSplash}/>
+
 
             </Stack.Navigator>
         </NavigationContainer>

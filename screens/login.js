@@ -14,24 +14,20 @@ const Login = ({navigation}) => {
     const [fetchError, setFetchError] = useState(null)
     const [phoneNumber, setPhoneNumber] = useState(null)
 
-    var fetchPN = ""
+    var fetchPN = "";
     
         const fetchPhoneNumber = async () =>{
             try {
-                const {data, error} = await supabase
-                .from('app_users')
-                .select('phone_no')
-                .eq('phone_no',fetchPN);
-
-                if (data != "") {  
-                     if (data == fetchPN)
-                    {
-                    navigation.navigate('Verification');
-                    }
-                }
-                else if(error)
+                const {data, error} = await supabase.auth.signInWithOtp({
+                    phone: phoneNumber,
+                })
+                if(error)
                 {
                     throw error;
+                }
+                else if(data)
+                {
+                    navigation.navigate('Verification', {phone: phoneNumber,})
                 }
             }
             catch (error)
@@ -54,10 +50,10 @@ const Login = ({navigation}) => {
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
         <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
                 <Formik 
-                initialValues={{phone_no: ''}}
+                initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
-                        fetchPN = values.phone_no
-                        fetchPhoneNumber()
+                        setPhoneNumber(values.phone_number);
+                        fetchPhoneNumber();
                     }}
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
@@ -67,9 +63,9 @@ const Login = ({navigation}) => {
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
                                     placeholderTextColor={Colors.darkLight}
-                                    onChangeText={handleChange('phone_no')}
-                                    onBlur={handleBlur('phone_no')}
-                                    value={values.phone_no}
+                                    onChangeText={handleChange('phone_number')}
+                                    onBlur={handleBlur('phone_number')}
+                                    value={values.phone_number}
                                     keyboardType="phone-pad"
                                     pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />

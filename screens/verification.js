@@ -4,10 +4,11 @@ import styled from 'styled-components';
 import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import supabase from "../supabase/supabase";
 
 
 
-const Verification = (navigation) => {
+const Verification = ({navigation, route}) => {
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 6;
@@ -50,8 +51,53 @@ const Verification = (navigation) => {
             </StyledOTPInput>
         );
     }
+    const resendSMS = async() =>{
+        try {
+            const {data, error} = await supabase.auth.signInWithOtp({
+                phone: route.params.phone,
+            });
+              if(error)
+              {
+                throw(error)
+              }
+              else{
+                console.log(data);
+              }
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+    }
 
     const codeDigitsArray = new Array(pinLength).fill(0);
+
+    const VerifyOtp = async () => {
+        if(pinReady)
+        {
+            try {
+                const {data, error} = await supabase.auth.verifyOtp({
+                    phone: route.params.phone,
+                    token: code,
+                    type: 'sms',
+                })
+                if(error)
+                {
+                    throw(error)
+                }
+                else{
+               
+                navigation.navigate("AppSplash");
+                }
+            } catch (error)
+            {
+                console.log(error);
+            }
+        }
+        else{
+            console.log("Pin not ready.");
+        }
+    }
 
     return (
         <KeyboardAvoidingWrapper>
@@ -89,6 +135,7 @@ const Verification = (navigation) => {
                     height: 60,
                     width: "50%",
                     }}
+                    onPress={VerifyOtp}
                 >
                 <Text
                     style={{
@@ -101,6 +148,12 @@ const Verification = (navigation) => {
                     Verify Pin
                 </Text>
             </TouchableOpacity>
+            <View style={styles.ExtraView}>
+                <Text style={styles.ExtraText}>SMS expired?</Text>
+                    <TouchableOpacity style={styles.TextLink} onPress={resendSMS}>
+                    <Text style={styles.TextLinkContent}> Resend the Code</Text>
+                </TouchableOpacity>
+            </View>
             </Pressable>
             
         </KeyboardAvoidingWrapper>
@@ -169,6 +222,27 @@ HiddenTextInput: {
     height: 1,
     opacity: 0
 },
+ExtraView: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 10,
+    marginBottom: 20
+},
+ExtraText: {
+    justifyContent: "center",
+    textAlign: "center",
+    color: Colors.tertiary  ,
+    fontSize: 15
+},
+TextLink: {
+    justifyContent: "center"
+},
+TextLinkContent: {
+    color: "#800080",
+    fontSize: 15
+}
 
 
 
