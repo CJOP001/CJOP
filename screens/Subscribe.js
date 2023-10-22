@@ -50,7 +50,7 @@ const Subscribe = ({ navigation }) => {
       </Appbar.Header>
 
       {/* Main content */}
-      <View style={{ alignItems: 'left', padding: 10, width: '100%', height: contentHeight }}>
+      <View style={{ alignItems: 'left', padding: 10, flex:1 }}>
         {/* FlatList for articles */}
         <FlatList
           data={articles}
