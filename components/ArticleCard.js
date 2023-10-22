@@ -50,7 +50,7 @@ const ArticleCard = React.memo(
       </Card.Content>
       {imagePath ? (
         <Card.Cover
-          source={require('../assets/image.png')}
+          source={{ uri: imagePath }}
           style={styles.articleImage}
           resizeMode="cover" // Set resizeMode to 'contain'
         />
