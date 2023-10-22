@@ -11,21 +11,27 @@ import {
   BackHandler,
 } from "react-native";
 import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
-import { categories } from "../components/categories";
-import { friends } from "../components/Friends";
+import { fcategories } from "../components/friendlist";
+import { dummyFriends } from "../components/Friends";
 import ArticleCard from "../components/ArticleCard";
 
-const renderItem = ({ item }) => {
-  return <ArticleCard {...item} />;
-};
-
-function sortFollowing() {}
-
-function sortFollowers() {}
-
-function sortPeople() {}
-
 const FriendsList = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [selectedCategory, setSelectedCategory] = useState("Following");
+
+  const onChangeSearch = (query) => {
+    // Update the search query state
+    setSearchQuery(query);
+  };
+
+  const [peopleList] = useState(dummyFriends);
+
+  // Filter people based on the selected category
+  const filteredPeople = selectedCategory
+    ? peopleList.filter((people) => people.state === selectedCategory)
+    : peopleList;
+
   return (
     <View>
       <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
@@ -40,8 +46,8 @@ const FriendsList = () => {
         <Appbar.Content title="Manage Friends" style={styles.appContent} />
       </Appbar.Header>
       <View>
-        <Card mode="outlined" style={styles.FriendsList}></Card>
         {/*Search Bar */}
+
         <Searchbar
           placeholder="Search"
           onChangeText={onChangeSearch}
@@ -50,56 +56,55 @@ const FriendsList = () => {
         />
 
         {/*Tabs*/}
-        <Card.Title
-          left={(props) => (
-            <Button
-              title="Following"
-              mode="contained"
-              onPress={() => sortFollowing()}
-              labelStyle={{ fontSize: 21, color: "white" }}
-              style={{
-                transform: [{ translateX: -60 }],
-              }}
+        <Card style={styles.buttonTab}>
+          <Card.Title>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.categoryScrollView}
+            >
+              {fcategories.map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.categoryButton,
+                    category === selectedCategory
+                      ? styles.selectedCategoryButton
+                      : null,
+                  ]}
+                  onPress={() => setSelectedCategory(category)}
+                >
+                  <Text
+                    style={[
+                      styles.categoryButtonText,
+                      category === selectedCategory
+                        ? styles.selectedCategoryButtonText
+                        : null,
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </Card.Title>
+
+          {/*List*/}
+          <View style={{ alignItems: "left", padding: 15, width: "100%" }}>
+            <FlatList
+              data={dummyFriends}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <ListItem
+                  roundAvatar
+                  title={$item.nickname}
+                  subtitle={item.name}
+                  avatar={{ uri: item.picture.thumbnail }}
+                />
+              )}
             />
-          )}
-          center={(props) => (
-            <Button
-              title="Followers"
-              mode="contained"
-              onPress={() => sortFollowers()}
-              labelStyle={{ fontSize: 21, color: "white" }}
-              style={{
-                transform: [{ translateX: -60 }],
-              }}
-            />
-          )}
-          right={(props) => (
-            <Button
-              title="People"
-              mode="contained"
-              onPress={() => sortPeople()}
-              labelStyle={{ fontSize: 21, color: "white" }}
-              style={{
-                transform: [{ translateX: -60 }],
-              }}
-            />
-          )}
-        />
-        {/*List*/}
-        <View style={{ alignItems: "left", padding: 15, width: "100%" }}>
-          <FlatList
-            data={friends}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <ListItem
-                roundAvatar
-                title={$item.nickname}
-                subtitle={item.name}
-                avatar={{ uri: item.picture.thumbnail }}
-              />
-            )}
-          />
-        </View>
+          </View>
+        </Card>
       </View>
     </View>
   );
@@ -121,6 +126,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  buttonTab: {},
   FriendsList: {
     height: "25%",
     width: "100%",
@@ -135,5 +141,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     transform: [{ translateX: 10 }],
     padding: 10,
+  },
+  categoryScrollView: {
+    padding: 10,
+  },
+  categoryButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 30,
+    marginRight: 10,
+    backgroundColor: "#f0f0f0",
+  },
+  selectedCategoryButton: {
+    backgroundColor: "#72E6FF",
+  },
+  categoryButtonText: {
+    color: "#333", // Change the text color here
+  },
+  selectedCategoryButtonText: {
+    color: "#fff", // Change the text color for selected category here
   },
 });

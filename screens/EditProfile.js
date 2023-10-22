@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   Image,
+  Platform,
   FlatList,
   TouchableOpacity,
   ScrollView,
@@ -12,12 +13,10 @@ import {
   Pressable,
 } from "react-native";
 import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
-import { categories } from "../components/categories";
-import { dummyArticles } from "../components/articles";
-import ArticleCard from "../components/ArticleCard";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
+import { FileObject } from "@supabase/storage-js";
 
 const supabase = createClient(
   "https://imbrgdnynoeyqyotpxaq.supabase.co",
@@ -25,14 +24,48 @@ const supabase = createClient(
 );
 
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
-const renderItem = ({ item }) => {
-  return <ArticleCard {...item} />;
-};
 
-const SelfProfile = () => {
+const EditProfile = () => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
+  const [image, setImage] = useState(null);
+  const [file, setFile] = useState();
+
+  const uploadAvatar = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (result) {
+      setImage(result.assets[0].uri);
+      setFile(result.assets[0].uri);
+      uploadImage;
+    }
+
+    const uploadImage = async (e) => {
+      e.preventDefault();
+      const filename = `${userdata.nameid}-${file.name}`;
+      console.log("attempt starts");
+      console.log(file + filename);
+      const { data, error } = await supabase.storage
+        .from("testing")
+        .upload(filename, file);
+      if (error) {
+        // Handle error
+        console.log("Something went wrong!");
+      } else {
+        // Handle success
+        console.log("uploaded!");
+      }
+    };
+  };
+
+  const submit = async () => {};
 
   const getData = async () => {
     const { data, error, count } = await supabase
@@ -88,10 +121,10 @@ const SelfProfile = () => {
           />
         </View>
         {/*Title Bar*/}
-        <Appbar.Content title="Your Profile" style={styles.appContent} />
+        <Appbar.Content title="Edit Profile" style={styles.appContent} />
       </Appbar.Header>
       {userdata.map((userdata) => (
-        <View>
+        <View key={userdata.id}>
           {/*Profile Background*/}
           <Card mode="outlined" style={styles.profile}>
             <Card.Cover
@@ -99,38 +132,46 @@ const SelfProfile = () => {
               style={{ height: 125, minWidth: "100%" }}
             />
             {/*Profile Image*/}
-            <Card.Title
-              left={(props) => (
-                <Avatar.Image
-                  source={{
-                    uri: userdata.user_image,
-                  }}
-                  size={80}
-                  style={{ transform: [{ translateY: -20 }] }}
-                />
-              )} /*Edit Profile button*/
-              right={(props) => (
-                <Pressable style={styles.button}>
-                  <Text style={styles.buttonText}>Follow</Text>
-                </Pressable>
-              )}
-            />
+            <Pressable onPress={uploadAvatar}>
+              <Card.Title
+                left={(props) => (
+                  <Avatar.Image
+                    source={{
+                      uri: userdata.user_image,
+                    }}
+                    size={150}
+                    style={styles.profileimage}
+                  />
+                )}
+                right={(props) =>
+                  image && (
+                    <Avatar.Image
+                      source={{
+                        uri: image,
+                      }}
+                      size={150}
+                      style={styles.tempprofileimage}
+                    />
+                  )
+                }
+              />
+            </Pressable>
             <Card.Content
-              style={{ margin: 5, transform: [{ translateY: -15 }] }}
+              style={{
+                margin: 5,
+                alignItems: "center",
+                marginBottom: 80,
+              }}
             >
               <Text>{userdata.fullname}</Text>
-              <Text>@{userdata.nameid}</Text>
+              <Text style={{ marginBottom: 10 }}>@{userdata.nameid}</Text>
+              <Text>{userdata.description}</Text>
             </Card.Content>
             <Card.Content
               style={{
-                transform: [{ translateX: 20 }, { translateY: -10 }],
-                marginBottom: 10,
+                alignItems: "center",
               }}
             >
-              {/*Profile Description*/}
-              <Text>{userdata.description}</Text>
-            </Card.Content>
-            <Card.Content>
               <View style={styles.container}>
                 <Image
                   source={require("../assets/calendar-icon.png")}
@@ -145,29 +186,27 @@ const SelfProfile = () => {
               </View>
             </Card.Content>
             <Card.Content
-              style={{ transform: [{ translateX: 20 }], flexDirection: "row" }}
+              style={{
+                marginBottom: 50,
+                alignItems: "center",
+              }}
             >
               <Text>
                 Following: {following} | Followers: {followers}
               </Text>
             </Card.Content>
+
+            <Pressable style={styles.button} onPress={submit}>
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </Pressable>
           </Card>
-          {/* List of articles */}
-          <View style={{ alignItems: "left", padding: 15, width: "100%" }}>
-            <FlatList
-              data={dummyArticles}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderItem}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
         </View>
       ))}
     </View>
   );
 };
 
-export default SelfProfile;
+export default EditProfile;
 
 const styles = StyleSheet.create({
   text: {
@@ -184,7 +223,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   profile: {
-    height: "25%",
+    height: "100%",
     width: "100%",
     alignItems: "center",
   },
@@ -195,8 +234,29 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: "row",
-    transform: [{ translateX: 10 }],
     padding: 10,
+    alignItems: "center",
+  },
+  button: {
+    width: "25%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: "white",
+    borderWidth: 5,
+    borderColor: "#72E6FF",
+    translateX: -50,
+    borderRadius: 20,
+  },
+  buttonText: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: "bold",
+    letterSpacing: 0.25,
+    color: "#72E6FF",
   },
   button: {
     alignItems: "center",
@@ -217,5 +277,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 0.25,
     color: "#72E6FF",
+  },
+  profileimage: {
+    alignItems: "center",
+    transform: [{ translateY: -30 }, { translateX: 113 }],
+  },
+  tempprofileimage: {
+    alignItems: "center",
+    transform: [{ translateY: -30 }, { translateX: -113 }],
   },
 });
