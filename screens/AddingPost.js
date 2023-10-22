@@ -15,7 +15,6 @@ const AddingPost = ({ isVisible, onClose }) => {
 
   const handleGoLivePress = () => {
     setIsGoLivePressed(true);
-    // Add your logic for handling the "Go Live" press here
   };
 
   return (
@@ -102,57 +101,61 @@ const styles = StyleSheet.create({
     borderTopRightRadius: screenWidth * 0.1,
     justifyContent: 'flex-end',
     position: 'absolute',
-    bottom: 2.5,
+    bottom: '2.5%',
     left: screenWidth * 0.02,
     borderBottomLeftRadius: screenWidth * 0.1,
     borderBottomRightRadius: screenWidth * 0.1,
     right: screenWidth * 0.02,
-    minHeight: screenHeight * 0.3,
+    minHeight: screenHeight * 0.345,
   },
   bottomSheetTitle: {
-    bottom: screenHeight * 0.001,
+    bottom: screenHeight * 0.0015,
     fontSize: screenWidth * 0.05,
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: screenWidth * 0.04,
+    padding: screenWidth * 0.1,
     color: 'black',
   },
   actionButton1: {
     bottom: screenHeight * 0.02,
     backgroundColor: 'white',
     borderRadius: screenWidth * 0.05,
-    paddingHorizontal: screenWidth * 0.05,
-    paddingVertical: screenWidth * 0.05,
+    paddingHorizontal: screenWidth * 0.03,
+    paddingVertical: screenWidth * 0.03,
   },
   actionButton2: {
     bottom: screenHeight * 0.01,
     backgroundColor: 'white',
     borderRadius: screenWidth * 0.05,
-    paddingHorizontal: screenWidth * 0.05,
-    paddingVertical: screenWidth * 0.05,
+    paddingHorizontal: screenWidth * 0.03,
+    paddingVertical: screenWidth * 0.03,
   },
   actionButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    width: screenWidth * 0.15,
-    height: screenWidth * 0.15,
+    borderRadius: 50,
+    width: screenWidth * 0.16,
+    height: screenWidth * 0.16,
     right: -screenWidth * 0.109,
     marginRight: screenWidth * 0.1,
   },
   subIconContainer: {
-    bottom: 1, // Adjust the position as needed
-    right: screenWidth * 0.08, // Adjust the position as needed
+    bottom: 0.7,
+    right: screenWidth * 0.0855,
   },
   subIcon: {
-    width: screenWidth * 0.04, // Adjust the sub-icon size as needed
-    height: screenWidth * 0.04, // Adjust the sub-icon size as needed
+    marginRight: '10%',
+    right: '10%',
+    width: screenWidth * 0.065,
+    height: screenWidth * 0.065,
   },
   actionButtonPressed: {
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   actionButtonText: {
+    paddingHorizontal: '-15%',
     fontSize: screenWidth * 0.035,
     fontWeight: 'medium',
     textAlign: 'center',

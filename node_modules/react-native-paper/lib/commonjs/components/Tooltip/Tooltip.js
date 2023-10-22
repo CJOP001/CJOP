@@ -41,6 +41,7 @@ const Tooltip = _ref => {
     leaveTouchDelay = 1500,
     title,
     theme: themeOverrides,
+    titleMaxFontSizeMultiplier,
     ...rest
   } = _ref;
   const isWeb = _reactNative.Platform.OS === 'web';
@@ -159,7 +160,8 @@ const Tooltip = _ref => {
     variant: "labelLarge",
     style: {
       color: theme.colors.surface
-    }
+    },
+    maxFontSizeMultiplier: titleMaxFontSizeMultiplier
   }, title))), /*#__PURE__*/React.createElement(_reactNative.Pressable, _extends({
     ref: childrenWrapperRef,
     style: styles.pressContainer

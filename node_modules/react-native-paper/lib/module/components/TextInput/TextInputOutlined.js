@@ -170,7 +170,8 @@ const TextInputOutlined = _ref => {
     maxFontSizeMultiplier: rest.maxFontSizeMultiplier,
     testID,
     contentStyle,
-    opacity: parentState.value || parentState.focused ? parentState.labelLayout.measured ? 1 : 0 : 1
+    opacity: parentState.value || parentState.focused ? parentState.labelLayout.measured ? 1 : 0 : 1,
+    isV3
   };
   const minHeight = height || (dense ? MIN_DENSE_HEIGHT_OUTLINED : MIN_HEIGHT);
   const outlinedHeight = inputHeight + (!height ? dense ? densePaddingTop / 2 : paddingTop : 0);

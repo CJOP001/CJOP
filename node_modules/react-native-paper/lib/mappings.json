@@ -118,6 +118,10 @@
       "path": "lib/module/components/HelperText/HelperText",
       "name": "default"
     },
+    "Icon": {
+      "path": "lib/module/components/Icon",
+      "name": "default"
+    },
     "IconButton": {
       "path": "lib/module/components/IconButton/IconButton",
       "name": "default"

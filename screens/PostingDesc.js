@@ -1,216 +1,249 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, Image, TextInput, ScrollView, Dimensions } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  ScrollView,
+  Dimensions,
+  Platform,
+} from 'react-native';
+import { Appbar, List } from 'react-native-paper';
 import OverlaySheetModal from './PostingModal';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
+import * as ImagePicker from 'expo-image-picker';
+import CameraModal from './CameraModal';
+import { FlatList } from 'react-native';
 
-// Create a CameraModal component
-const CameraModal = ({ isVisible, onClose, onPictureTaken }) => {
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
-  const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
-  const cameraRef = useRef(null);
+class PostingDesc extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isModalVisible: false,
+      isDropdownVisible: false,
+      selectedValue: null,
+      textInputValue: '',
+      items: ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7', 'Option 8', 'Option 9', 'Option 10'],
+      image: null,
+      cameraVisible: false,
+    };
+  }
 
-  const takePicture = async () => {
-    if (cameraRef.current) {
-      try {
-        const { uri } = await cameraRef.current.takePictureAsync();
-        onPictureTaken(uri);
-        onClose();
-      } catch (e) {
-        console.log('Error taking picture:', e);
-      }
-    }
+   // Define the handleSelect function
+    handleSelect = (selectedItem) => {
+      // Update the selected value in the state
+      this.setState({ selectedValue: selectedItem });
+
+      // Close the dropdown
+      this.toggleDropdown();
+    };
+
+  // Toggle the dropdown visibility
+  toggleDropdown = () => {
+    this.setState((prevState) => ({ isDropdownVisible: !prevState.isDropdownVisible }));
   };
 
-  return (
-    <Modal visible={isVisible} transparent={true} animationType="slide">
-      <View style={styles.cameraModal}>
-        <Camera
-          style={styles.camera}
-          type={cameraType}
-          flashMode={flashMode}
-          ref={cameraRef}
-        />
-        <View style={styles.cameraControls}>
-                <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                  <Image source={require('../assets/cross_button.png')} style={styles.closeButtonImage} />
-                </TouchableOpacity>
-          <View style={styles.captureButtonContainer}>
-            <TouchableOpacity style={styles.captureButton} onPress={takePicture} />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-const PostingDesc = ({ navigation }) => {
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(null);
-  const [textInputValue, setTextInputValue] = useState('');
-  const items = ['Option 1', 'Option 2', 'Option 3'];
-  const [hasCameraPermission, setHasCameraPermission] = useState(null);
-  const [image, setImage] = useState(null);
-  const [cameraVisible, setCameraVisible] = useState(false);
-
-  // Function to toggle the dropdown visibility
-  const toggleDropdown = () => {
-    setDropdownVisible(!isDropdownVisible);
-  };
-
-  // Function to toggle the modal visibility
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
+  // Toggle the modal visibility
+  toggleModal = () => {
+    this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
   };
 
   // Function to handle retaking the image
-  const retakeImage = () => {
-    setImage(null); // Reset the image state to null
+  retakeImage = () => {
+    this.setState({ image: null });
   };
 
-  const handlePictureTaken = (uri) => {
-    setImage(uri);
+  // Handle when a picture is taken using the camera
+  handlePictureTaken = (uri) => {
+    this.setState({ image: uri });
   };
 
-  useEffect(() => {
-    (async () => {
-      // Request media library permissions
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('No access to media library');
-      }
 
-      // Request camera permissions
-      const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status === 'granted');
-    })();
-  }, []);
+  // Toggle the camera modal visibility
+ toggleCamera = async () => {
+     const cameraStatus = await Camera.getCameraPermissionsAsync();
+     if (cameraStatus.status === 'undetermined' || cameraStatus.status === 'denied') {
+       // Request camera permissions
+       const newStatus = await Camera.requestCameraPermissionsAsync();
+       if (newStatus.status === 'granted') {
+         // Camera permission granted, open the camera modal
+         this.setState((prevState) => ({ cameraVisible: !prevState.cameraVisible }));
+       } else {
+         // Camera permission denied
+         console.log('No access to camera');
+       }
+     } else if (cameraStatus.status === 'granted') {
+       // Camera permission already granted, open the camera modal
+       this.setState((prevState) => ({ cameraVisible: !prevState.cameraVisible }));
+     } else {
+       // Camera permission denied
+       console.log('No access to camera');
+     }
+   };
 
-  if (hasCameraPermission === false) {
-    return <Text> No Access to Camera </Text>;
-  }
+  // Select an image from the device's gallery
+  pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
 
-  // Get the screen dimensions
-  const screenWidth = Dimensions.get('window').width;
+    if (!result.canceled) {
+      const selectedImage = result.assets[0];
+      this.setState({ image: selectedImage.uri});
+    }
+  };
 
-  return (
-    <ScrollView style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
-        <Appbar.BackAction
-          onPress={() => {
-            console.log('Going back');
-            navigation.goBack();
-          }}
-          style={styles.customBackAction}
-        />
-        <Appbar.Content title="Create" style={styles.appContent} />
-      </Appbar.Header>
+  render() {
+    const {
+      isDropdownVisible,
+      selectedValue,
+      textInputValue,
+      items,
+      image,
+      cameraVisible,
+      toggleCamera,
+    } = this.state;
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
 
-      {/* Custom drop-down list */}
-      <View style={styles.dropdownContainer}>
-        <TouchableOpacity onPress={toggleDropdown}>
-          <View style={styles.dropdownHeader}>
-            <Text style={styles.selectedValueText}>
-              {selectedValue || 'Select the categories'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        {isDropdownVisible && (
-          <Modal
-            transparent={true}
-            animationType="fade"
-            visible={isDropdownVisible}
-            onRequestClose={toggleDropdown}
-          >
-            <TouchableOpacity
-              style={styles.overlay}
-              activeOpacity={1}
-              onPress={toggleDropdown}
-            >
-              <View style={{ ...styles.dropdownList, width: screenWidth * 0.9 }}>
-                {items.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.dropdownItem}
-                    onPress={() => handleSelect(item)}
-                  >
-                    <Text>{item}</Text>
+    return (
+      <ScrollView style={styles.container}>
+        <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
+          <Appbar.BackAction
+            onPress={() => {
+              console.log('Going back');
+              this.props.navigation.goBack();
+            }}
+            style={styles.customBackAction}
+          />
+          <Appbar.Content title="Create" style={styles.appContent} />
+        </Appbar.Header>
+
+        <View style={styles.dropdownContainer}>
+                  <TouchableOpacity onPress={this.toggleDropdown}>
+                    <View style={styles.dropdownHeader}>
+                      <Text style={styles.selectedValueText}>
+                        {selectedValue || 'Select the categories'}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
-                ))}
-              </View>
-            </TouchableOpacity>
-          </Modal>
-        )}
-      </View>
+                  {isDropdownVisible && (
+                    <Modal
+                      transparent={true}
+                      animationType="fade"
+                      visible={isDropdownVisible}
+                      onRequestClose={this.toggleDropdown}
+                    >
+                      <TouchableOpacity
+                        style={styles.overlay}
+                        activeOpacity={1}
+                        onPress={this.toggleDropdown}
+                      >
+                        <View style={{ ...styles.dropdownList, width: screenWidth * 0.9 }}>
+                          <FlatList
+                            data={items}
+                            keyExtractor={(item) => item}
+                            initialNumToRender={5}
+                            renderItem={({ item, index }) => (
+                              <TouchableOpacity
+                                key={index}
+                                style={styles.dropdownItem}
+                                onPress={() => this.handleSelect(item)}
+                              >
+                                <Text>{item}</Text>
+                              </TouchableOpacity>
+                            )}
+                              style={{ height: screenHeight * 0.25 }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </Modal>
+                  )}
+                </View>
 
-      {/* Image and Text */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('../assets/userProfile.png')}
-          style={styles.profile_image}
+        {/* Image and Text */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={require('../assets/userProfile.png')}
+            style={styles.profile_image}
+          />
+          <Text style={styles.imageText}>Agugu</Text>
+        </View>
+
+        {/* Text Input */}
+        <TextInput
+          style={styles.textInput}
+          onChangeText={(text) => this.setState({ textInputValue: text })}
+          value={textInputValue}
+          placeholder="Enter your text here"
+          multiline={true}
+          textAlignVertical="top"
         />
-        <Text style={styles.imageText}>Agugu</Text>
-      </View>
 
-      {/* Text Input */}
-      <TextInput
-        style={styles.textInput}
-        onChangeText={(text) => setTextInputValue(text)}
-        value={textInputValue}
-        placeholder="Enter your text here"
-        multiline={true}
-        textAlignVertical="top"
-      />
+        {/* Clickable Icons */}
+        <View style={styles.iconContainer}>
+          <TouchableOpacity style={styles.icon} onPress={this.toggleCamera}>
+            <Image
+              source={require('../assets/camera_icon.png')}
+              style={{ width: screenWidth * 0.07, height: screenWidth * 0.07 }}
+            />
+          </TouchableOpacity>
 
-      {/* Clickable Icons */}
-      <View style={styles.iconContainer}>
-        <TouchableOpacity style={styles.icon} onPress={() => setCameraVisible(true)}>
-          <Image
-            source={require('../assets/camera_icon.png')}
-            style={{ width: screenWidth * 0.07, height: screenWidth * 0.07 }}
-          />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.icon} onPress={this.pickImage}>
+            <Image
+              source={require('../assets/photo_icon.png')}
+              style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginRight: '5%' }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.icon}>
+            <Image
+              source={require('../assets/paperclip_icon.png')}
+              style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginLeft: '5%' }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.icon} onPress={this.toggleModal}>
+            <Image
+              source={require('../assets/send_icon.png')}
+              style={{ width: screenWidth * 0.1, height: screenWidth * 0.1, marginLeft: '3%', marginTop: '-14%' }}
+            />
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.icon}>
-          <Image
-            source={require('../assets/photo_icon.png')}
-            style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginRight: '5%' }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.icon}>
-          <Image
-            source={require('../assets/paperclip_icon.png')}
-            style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginLeft: '5%' }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.icon} onPress={toggleModal}>
-          <Image
-            source={require('../assets/send_icon.png')}
-            style={{ width: screenWidth * 0.1, height: screenWidth * 0.1, marginLeft: '3%', marginTop: '-14%' }}
-          />
-        </TouchableOpacity>
-      </View>
+        {/* Overlay modal for the modal text */}
+        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} />
 
-      <OverlaySheetModal isVisible={isModalVisible} text="Your modal text goes here" onCancel={toggleModal} textInputValue={textInputValue} />
+        {/* Conditional rendering of Camera modal */}
+        <CameraModal isVisible={cameraVisible} onClose={this.toggleCamera} onPictureTaken={this.handlePictureTaken} />
 
-      {/* Conditional rendering of Camera modal */}
-      <CameraModal isVisible={cameraVisible} onClose={() => setCameraVisible(false)} onPictureTaken={handlePictureTaken} />
+        {/* Conditional rendering of "Retake" button */}
+        {image && (
+          <TouchableOpacity style={styles.retakeButton} onPress={this.retakeImage}>
+            <Text style={styles.retakeButtonText}>Retake</Text>
+          </TouchableOpacity>
+        )}
 
-      {/* Conditional rendering of "Retake" button */}
-      {image && (
-        <TouchableOpacity style={styles.retakeButton} onPress={retakeImage}>
-          <Text style={styles.retakeButtonText}>Retake</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Display the taken image */}
-      {image && <Image source={{ uri: image }} style={styles.takenImage} />}
-
-    </ScrollView>
-  );
-};
+        {/* Display the taken image with flexible size */}
+              {image && (
+                <Image
+                  source={{ uri: image }}
+                  style={{
+                    width: screenWidth * 0.8,
+                    height: screenHeight * 0.3,
+                    alignSelf: 'center',
+                    margin: '20%',
+                    marginTop: '5%'
+                  }}
+                />
+              )}
+      </ScrollView>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -302,41 +335,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 20,
   },
-  captureButtonContainer: {
-    flex: 1,
-    alignItems: 'center', // Center the capture button
-    justifyContent: 'center', // Center the capture button
-  },
-  captureButton: {
-    backgroundColor: 'white',
-    width: 60,
-    height: 60,
-    borderRadius: 40,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
-  closeButtonImage: {
-    width: 30,
-    height: 30,
-  },
   retakeButton: {
     backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 50,
-    alignSelf: 'center',
-    marginTop: 10,
+      padding: 10,
+      borderRadius: 50,
+      alignSelf: 'center',
+      marginTop: '2%',
+      width: '40%',
+      height: '5%',
   },
   retakeButtonText: {
     color: 'white',
+    textAlign: 'center',
   },
-  takenImage: {
-    width: 200,
-    height: 200,
-    margin: 20,
-  },
+
 });
 
 export default PostingDesc;

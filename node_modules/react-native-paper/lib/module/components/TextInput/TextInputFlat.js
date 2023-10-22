@@ -196,7 +196,8 @@ const TextInputFlat = _ref => {
     maxFontSizeMultiplier: rest.maxFontSizeMultiplier,
     testID,
     contentStyle,
-    opacity: parentState.value || parentState.focused ? parentState.labelLayout.measured ? 1 : 0 : 1
+    opacity: parentState.value || parentState.focused ? parentState.labelLayout.measured ? 1 : 0 : 1,
+    isV3
   };
   const affixTopPosition = {
     [AdornmentSide.Left]: leftAffixTopPosition,

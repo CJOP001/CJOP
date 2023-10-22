@@ -18,6 +18,10 @@ export declare type Props = {
      */
     title: string;
     /**
+     * Specifies the largest possible scale a title font can reach.
+     */
+    titleMaxFontSizeMultiplier?: number;
+    /**
      * @optional
      */
     theme?: ThemeProp;
@@ -42,7 +46,7 @@ export declare type Props = {
  * ```
  */
 declare const Tooltip: {
-    ({ children, enterTouchDelay, leaveTouchDelay, title, theme: themeOverrides, ...rest }: Props): React.JSX.Element;
+    ({ children, enterTouchDelay, leaveTouchDelay, title, theme: themeOverrides, titleMaxFontSizeMultiplier, ...rest }: Props): React.JSX.Element;
     displayName: string;
 };
 export default Tooltip;
