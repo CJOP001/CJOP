@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Portal, Dialog, Button } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+
 
 import TabNavigator from './TabNavigator';
 import Payment from '../screens/Payment';
@@ -24,7 +26,7 @@ function CustomDrawerContent(props) {
     // Implement your logout logic here
     // For example, you can clear the user session and navigate to the login screen
     // After successful logout, hide the dialog
-    //navigation.navigate('');
+    props.navigation.navigate('AppSplash');
     props.hideLogoutDialog();
   };
 
@@ -208,9 +210,11 @@ function DrawerNavigator() {
           component={FriendsList} 
           options={{
             headerShown: false,
-            drawerLabel: 'Friends',
+            drawerLabel: ({ focused, color }) => (
+              <Text style={{ color: focused ? color : 'gray' }}>Friends</Text>
+            ),
             drawerIcon: ({ color }) => (
-              <CustomDrawerIcon icon="account-multiple" iconStyle={{ tintColor: color }} /> 
+              <CustomDrawerIcon source={require('../assets/friends-icon.png')} iconStyle={{ tintColor: color }} /> 
               ),
           }}
           listeners={({ navigation }) => ({
