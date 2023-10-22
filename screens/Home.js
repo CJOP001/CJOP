@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, StatusBar } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, StatusBar, RefreshControl } from 'react-native';
 import { Appbar, Avatar, Searchbar } from 'react-native-paper';
 import { categories } from '../components/categories';
 import {dummyArticles} from '../components/articles';
@@ -16,6 +16,7 @@ const Home = () => {
 
   const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('Corporate');
+  const [isRefreshing, setRefreshing] = useState(false);
 
    // Dummy data for articles
   const [articles] = useState(dummyArticles);
@@ -59,6 +60,12 @@ const Home = () => {
     TRANSITIONS[0],
   );
 
+  const handleRefresh = async () => {
+    setRefreshing(true); // Start the refresh animation
+
+
+      setRefreshing(false); // Stop the refresh animation when data is fetched
+    }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -105,6 +112,13 @@ const Home = () => {
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           initialNumToRender={5}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={['#72E6FF']} // Customize the color of the refresh spinner
+            />
+          }
         />
       </View>
       </View>
