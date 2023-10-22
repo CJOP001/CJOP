@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, StatusBar } from 'react-native';
 import { Appbar, Avatar, Searchbar } from 'react-native-paper';
 import { categories } from '../components/categories';
 import {dummyArticles} from '../components/articles';
@@ -7,6 +7,10 @@ import {dummyArticles} from '../components/articles';
 import ArticleCard from '../components/ArticleCard';
 
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const STYLES = ['default', 'dark-content', 'light-content'];
+const TRANSITIONS = ['fade', 'slide', 'none'];
 
 const Home = () => {
 
@@ -49,8 +53,22 @@ const Home = () => {
     console.log(openDrawer);
   };
 
+  const [hidden, setHidden] = useState(false);
+  const [statusBarStyle, setStatusBarStyle] = useState(STYLES[0]);
+  const [statusBarTransition, setStatusBarTransition] = useState(
+    TRANSITIONS[0],
+  );
+
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        animated={true}
+        backgroundColor="#72E6FF"
+        barStyle={statusBarStyle}
+        showHideTransition={statusBarTransition}
+        hidden={hidden}
+      />
       <Appbar.Header>
         <TouchableOpacity onPress={openDrawer}>
           <Avatar.Image
@@ -90,7 +108,7 @@ const Home = () => {
         />
       </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

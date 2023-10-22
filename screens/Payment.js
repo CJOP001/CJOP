@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl } from 'react-native';
-import { Appbar, Button, Card } from 'react-native-paper';
-import { Tab } from '@rneui/themed';
+import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
+import { Appbar, Button, Card, SegmentedButtons } from 'react-native-paper';
+import { Tab, TabView } from '@rneui/themed';
 import supabase from '../supabase/supabase';
 import PaymentModal from './Payment_Modal';
 
@@ -15,6 +15,7 @@ const Payment = ({ navigation }) => {
   const [index, setIndex] = useState(0);
   const [spentHistoryData, setSpentHistoryData] = useState([]);
   const [isRefreshing, setRefreshing] = useState(false);
+  const [value, setValue] = React.useState('');
 
   // Constants
   const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
@@ -172,12 +173,14 @@ const Payment = ({ navigation }) => {
           Transfer Credit
         </Text>
 
+
         <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
           <Tab
             value={index}
             onChange={setIndex}
             indicatorStyle={{ backgroundColor: '#72E6FF', height: 3 }}
             style={{ flex: 1 }}
+            
           >
             <Tab.Item
               title="Spent"
@@ -220,7 +223,7 @@ export default Payment;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
   },
   text: {
     fontSize: 40,
@@ -241,5 +244,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 24,
     fontWeight: '500',
+    color: '#ffffff'
   },
 });

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { View, Modal, Text, TouchableOpacity, TouchableHighlight, StyleSheet, Dimensions, Image, Alert, Linking } from 'react-native';
+import { View, Modal, Text, TouchableOpacity, TouchableHighlight, StyleSheet, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import PostingDesc from '../screens/PostingDesc';
 
 const AddingPost = ({ isVisible, onClose }) => {
+  const navigation = useNavigation();
   const [isCreatePostPressed, setIsCreatePostPressed] = useState(false);
   const [isGoLivePressed, setIsGoLivePressed] = useState(false);
-  const navigation = useNavigation();
-
 
   const handleCreatePostPress = () => {
     setIsCreatePostPressed(true);
@@ -16,7 +15,7 @@ const AddingPost = ({ isVisible, onClose }) => {
     navigation.navigate('PostStack');
   };
 
-  const handleGoLivePress = async () => {
+  const handleGoLivePress = () => {
     setIsGoLivePressed(true);
     const currentScreen = navigation.getState().routes[navigation.getState().index];
     console.log('Current Screen:', currentScreen.name);
@@ -43,7 +42,6 @@ const AddingPost = ({ isVisible, onClose }) => {
         >
           <View style={styles.bottomSheet}>
             <Text style={styles.bottomSheetTitle}>Create</Text>
-            
             <TouchableHighlight
               style={[
                 styles.actionButton1,
@@ -98,6 +96,7 @@ const AddingPost = ({ isVisible, onClose }) => {
 };
 
 const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -108,76 +107,69 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: screenWidth * 0.1,
+    borderTopRightRadius: screenWidth * 0.1,
     justifyContent: 'flex-end',
     position: 'absolute',
-    bottom: 2.5,
-    left: 10,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    right: 10,
-    minHeight: 265,
+    bottom: '2.5%',
+    left: screenWidth * 0.02,
+    borderBottomLeftRadius: screenWidth * 0.1,
+    borderBottomRightRadius: screenWidth * 0.1,
+    right: screenWidth * 0.02,
+    minHeight: screenHeight * 0.345,
   },
   bottomSheetTitle: {
-    bottom: 35,
-    fontSize: 20,
+    bottom: screenHeight * 0.0015,
+    fontSize: screenWidth * 0.05,
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: 20,
+    padding: screenWidth * 0.1,
     color: 'black',
   },
   actionButton1: {
-    bottom: 24,
+    bottom: screenHeight * 0.02,
     backgroundColor: 'white',
-    borderRadius: 15,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    borderRadius: screenWidth * 0.05,
+    paddingHorizontal: screenWidth * 0.03,
+    paddingVertical: screenWidth * 0.03,
   },
   actionButton2: {
-    bottom: 12,
+    bottom: screenHeight * 0.01,
     backgroundColor: 'white',
-    borderRadius: 15,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    borderRadius: screenWidth * 0.05,
+    paddingHorizontal: screenWidth * 0.03,
+    paddingVertical: screenWidth * 0.03,
   },
   actionButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    width: 55,
-    height: 55,
-    right: -28,
-    marginRight: 50,
     borderRadius: 50,
+    width: screenWidth * 0.16,
+    height: screenWidth * 0.16,
+    right: -screenWidth * 0.109,
+    marginRight: screenWidth * 0.1,
   },
   subIconContainer: {
-    bottom: 1, // Adjust the position as needed
-    right: 60, // Adjust the position as needed
+    bottom: 0.7,
+    right: screenWidth * 0.0855,
   },
   subIcon: {
-    width: 24, // Adjust the sub-icon size as needed
-    height: 24, // Adjust the sub-icon size as needed
-    marginRight: 50
+    marginRight: '10%',
+    right: '10%',
+    width: screenWidth * 0.065,
+    height: screenWidth * 0.065,
   },
   actionButtonPressed: {
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   actionButtonText: {
-    fontSize: 17,
+    paddingHorizontal: '-15%',
+    fontSize: screenWidth * 0.035,
     fontWeight: 'medium',
     textAlign: 'center',
     color: 'black',
-  },
-  bottomSheetText2: {
-    bottom: 48,
-    fontSize: 17,
-    fontWeight: 'medium',
-    textAlign: 'left',
-    padding: 20,
-    color: 'black',
-    left: 95,
   },
 });
 

@@ -9,8 +9,9 @@ const reloadOptions = [10, 15, 20, 50, 100, 500];
 
 const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, currentUserID }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInsertCreditAmount = async (selectedAmount) => {
+  const handleUpdateCreditAmount = async (selectedAmount) => {
     try {
       // Retrieve the user's current credit balance from data source
       const { data, error } = await supabase
@@ -89,6 +90,7 @@ const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, 
                 uppercase={false}
                 disabled={selectedAmount === amount}
                 labelStyle={styles.amountText}
+                
               >
                 {amount}
               </Button>
@@ -97,13 +99,20 @@ const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, 
             {/* Add the Confirm Reload and Cancel buttons to the grid */}
             <Button
               mode="contained"
-              onPress={() => {
-                onClose(selectedAmount);
-                setSelectedAmount(null);
-                handleInsertCreditAmount(selectedAmount);;
+              onPress={async () => {
+                setIsLoading(true);
+                try {
+                  await handleUpdateCreditAmount(selectedAmount);
+                  setIsLoading(false);
+                  onClose(selectedAmount);
+                  setSelectedAmount(null);
+                } catch (error){
+                  console.error('Error:', error);
+                }
               }}
               style={[styles.modalButton, styles.confirmButton]}
               disabled={selectedAmount === null}
+              loading={isLoading}
             >
               Confirm Reload
             </Button>

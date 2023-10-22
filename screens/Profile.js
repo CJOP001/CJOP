@@ -19,9 +19,10 @@ const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
 const follow = ({}) => {};
-const Profile = ({ navigation }) => {
+const Profile = ({navigation}) => {
   return (
     <View>
+      {/*Header Section*/}
       <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
         <View style={styles.customBackAction}>
           <Appbar.BackAction
@@ -31,22 +32,25 @@ const Profile = ({ navigation }) => {
             }}
           />
         </View>
-        <Appbar.Content title="Profile" style={styles.appContent} />
+        {/*Title Bar*/}
+        <Appbar.Content title="Profilee" style={styles.appContent} />
       </Appbar.Header>
       <View>
+        {/*Profile Background*/}
         <Card mode="outlined" style={styles.profile}>
           <Card.Cover
             source={require("../assets/background.png")}
             style={{ height: 125, minWidth: "100%" }}
           />
+          {/*Profile Image*/}
           <Card.Title
             left={(props) => (
               <Avatar.Image
-                source={require("../assets/avatar.png")}
+                source={require("../assets/avatar.png")} /* TODO: Eventually change to depend on database*/
                 size={80}
                 style={{ transform: [{ translateY: -20 }] }}
               />
-            )}
+            )} /*Edit Profile button*/
             right={(props) => (
               <Button
                 title="Follow"
@@ -61,7 +65,9 @@ const Profile = ({ navigation }) => {
           />
           <Card.Content style={{ margin: 5, transform: [{ translateY: -15 }] }}>
             <Text>Profile</Text>
+            {/*Placeholder Profile Nickname*/}
             <Text>@Profile</Text>
+            {/*Placeholder Profile Name*/}
           </Card.Content>
           <Card.Content
             style={{
@@ -70,6 +76,7 @@ const Profile = ({ navigation }) => {
             }}
           >
             <Text>A long description</Text>
+            {/*Placeholder description*/}
           </Card.Content>
           <Card.Content>
             <View style={styles.container}>
@@ -84,7 +91,9 @@ const Profile = ({ navigation }) => {
             style={{ transform: [{ translateX: 20 }], flexDirection: "row" }}
           >
             <Text>Following:</Text>
+            {/*TODO: Append following count*/}
             <Text>Followers:</Text>
+            {/*TODO: Append Follower count*/}
           </Card.Content>
         </Card>
         {/* List of articles */}

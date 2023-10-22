@@ -12,13 +12,20 @@ import {
 } from "react-native";
 import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
 import { categories } from "../components/categories";
-import { dummyArticles } from "../components/articles";
+import { friends } from "../components/Friends";
 import ArticleCard from "../components/ArticleCard";
 
 const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
-const FriendsList = ({ navigation } ) => {
+
+function sortFollowing() {}
+
+function sortFollowers() {}
+
+function sortPeople() {}
+
+const FriendsList = () => {
   return (
     <View>
       <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
@@ -33,7 +40,66 @@ const FriendsList = ({ navigation } ) => {
         <Appbar.Content title="Manage Friends" style={styles.appContent} />
       </Appbar.Header>
       <View>
-        <Card mode="outlined" style={styles.profile}></Card>
+        <Card mode="outlined" style={styles.FriendsList}></Card>
+        {/*Search Bar */}
+        <Searchbar
+          placeholder="Search"
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={styles.searchBar}
+        />
+
+        {/*Tabs*/}
+        <Card.Title
+          left={(props) => (
+            <Button
+              title="Following"
+              mode="contained"
+              onPress={() => sortFollowing()}
+              labelStyle={{ fontSize: 21, color: "white" }}
+              style={{
+                transform: [{ translateX: -60 }],
+              }}
+            />
+          )}
+          center={(props) => (
+            <Button
+              title="Followers"
+              mode="contained"
+              onPress={() => sortFollowers()}
+              labelStyle={{ fontSize: 21, color: "white" }}
+              style={{
+                transform: [{ translateX: -60 }],
+              }}
+            />
+          )}
+          right={(props) => (
+            <Button
+              title="People"
+              mode="contained"
+              onPress={() => sortPeople()}
+              labelStyle={{ fontSize: 21, color: "white" }}
+              style={{
+                transform: [{ translateX: -60 }],
+              }}
+            />
+          )}
+        />
+        {/*List*/}
+        <View style={{ alignItems: "left", padding: 15, width: "100%" }}>
+          <FlatList
+            data={friends}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <ListItem
+                roundAvatar
+                title={$item.nickname}
+                subtitle={item.name}
+                avatar={{ uri: item.picture.thumbnail }}
+              />
+            )}
+          />
+        </View>
       </View>
     </View>
   );
@@ -55,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  profile: {
+  FriendsList: {
     height: "25%",
     width: "100%",
     alignItems: "center",
