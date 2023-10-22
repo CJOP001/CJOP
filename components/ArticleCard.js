@@ -59,13 +59,13 @@ const ArticleCard = React.memo(
       <Card.Actions style={styles.iconContainer}>
         <View style={styles.iconContainerLeft}>
           <TouchableOpacity onPress={handleLikePress}>
-            <View style={[styles.iconWrapper, likePressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, likePressed && { tintColor: '#72E6FF' }]}>
               <Image source={likeIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
           <Text>{likes}</Text>
           <TouchableOpacity onPress={handleCommentPress}>
-            <View style={[styles.iconWrapper, commentPressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, commentPressed && { tintColor: '#72E6FF' }]}>
               <Image source={commentIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
@@ -73,7 +73,7 @@ const ArticleCard = React.memo(
         </View>
         <View style={styles.iconContainerRight}>
           <TouchableOpacity onPress={handleSharePress}>
-            <View style={[styles.iconWrapper, sharePressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, sharePressed && { tintColor: '#72E6FF' }]}>
               <Image source={shareIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
   articleCard: {
     width: '100%',
     marginBottom: 20,
+    backgroundColor: '#ffffff'
   },
   iconContainer: {
     flexDirection: 'row',
@@ -113,7 +114,8 @@ const styles = StyleSheet.create({
     marginLeft: 'auto', // Pushes the right icon to the right
   },
   articleImage: {
-    aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
+    //aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
+    margin: 10,
   },
   // ... other styles
 });
