@@ -7,15 +7,16 @@ import likeIcon from '../assets/like.png';
 import commentIcon from '../assets/comments.png';
 import shareIcon from '../assets/share.png'; // Import your share icon
 
-const ArticleCard = ({
-  title,
-  status,
-  timestamp,
-  imagePath,
-  content,
-  likes,
-  comments,
-}) => {
+const ArticleCard = React.memo(
+  ({
+    username,
+    status,
+    timestamp,
+    imagePath,
+    content,
+    likes,
+    comments,
+  }) => {
   const [likePressed, setLikePressed] = useState(false);
   const [commentPressed, setCommentPressed] = useState(false);
   const [sharePressed, setSharePressed] = useState(false); // State for the share icon
@@ -35,7 +36,7 @@ const ArticleCard = ({
   return (
     <Card style={styles.articleCard}>
       <Card.Title
-        title={title}
+        title={username}
         subtitle={`Status: ${status} | ${timestamp}`}
         left={(props) => (
           <Avatar.Image
@@ -44,12 +45,17 @@ const ArticleCard = ({
           />
         )}
       />
-      {imagePath ? (
-        <Card.Cover source={require('../assets/image.png')} style={styles.articleImage} />
-      ) : null}
       <Card.Content>
         <Text style={styles.articleText}>{content}</Text>
       </Card.Content>
+      {imagePath ? (
+        <Card.Cover
+          source={require('../assets/image.png')}
+          style={styles.articleImage}
+          resizeMode="cover" // Set resizeMode to 'contain'
+        />
+      ) : null}
+      
       <Card.Actions style={styles.iconContainer}>
         <View style={styles.iconContainerLeft}>
           <TouchableOpacity onPress={handleLikePress}>
@@ -75,14 +81,14 @@ const ArticleCard = ({
       </Card.Actions>
     </Card>
   );
-};
+});
 
 export default ArticleCard;
 
 const styles = StyleSheet.create({
   articleCard: {
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   iconContainer: {
     flexDirection: 'row',
@@ -106,5 +112,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 'auto', // Pushes the right icon to the right
   },
+  articleImage: {
+    aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
+  },
   // ... other styles
 });
+
+
+

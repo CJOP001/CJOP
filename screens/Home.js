@@ -6,7 +6,11 @@ import {dummyArticles} from '../components/articles';
 
 import ArticleCard from '../components/ArticleCard';
 
+import { useNavigation } from '@react-navigation/native';
+
 const Home = () => {
+
+  const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('Corporate');
 
    // Dummy data for articles
@@ -38,14 +42,23 @@ const Home = () => {
     ? articles.filter(article => article.category === selectedCategory)
     : articles;
 
+  const imageUrl = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg'
+
+  const openDrawer = () => {
+    navigation.openDrawer();
+    console.log(openDrawer);
+  };
+
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Avatar.Image
-              source={require('../assets/avatar.png') } 
-              size={40}
-              style={{margin: 10, marginTop: 20}}
-            />
+        <TouchableOpacity onPress={openDrawer}>
+          <Avatar.Image
+            source={{ uri: imageUrl }}
+            size={40}
+            style={{ margin: 10, marginTop: 20 }}
+          />
+        </TouchableOpacity>
         {renderSearchBar()}
       </Appbar.Header>
       <Appbar.Header>
@@ -66,13 +79,16 @@ const Home = () => {
       </ScrollView>
       </Appbar.Header>
       {/* List of articles */}
+      <View style={styles.articleListContainer}>
       <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
         <FlatList
           data={filteredArticles}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={5}
         />
+      </View>
       </View>
     </View>
   );
@@ -81,6 +97,7 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#E9EFF7'
   },
   categoryScrollView: {
     padding: 10,
@@ -108,8 +125,11 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 2, 
     margin: 20, // Add some right margin to separate it from other header content
-    marginTop: 30
+    marginTop: 30,
   },
+  articleListContainer: {
+    flex: 1, // Expand to fill available space
+  }
 });
 
 export default Home;

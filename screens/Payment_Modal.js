@@ -1,11 +1,71 @@
+//Payment_Modal.js
 import React, { useState } from 'react';
 import { View, Modal, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-paper';
+import supabase from '../supabase/supabase';
 
 const reloadOptions = [10, 15, 20, 50, 100, 500];
 
-const PaymentModal = ({ visible, onClose }) => {
+
+const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, currentUserID }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
+
+  const handleInsertCreditAmount = async (selectedAmount) => {
+    try {
+      // Retrieve the user's current credit balance from data source
+      const { data, error } = await supabase
+        .from('credits')
+        .select('credit_amount')
+        .eq('user_id', currentUserID);
+  
+      if (error) {
+        throw error;
+      }
+  
+      if (data && data.length > 0) {
+        // Calculate the new credit balance
+        const currentCreditAmount = data[0].credit_amount;
+        const newCreditAmount = currentCreditAmount + selectedAmount;
+  
+        // Update the user's credit balance in the data source
+        const { error: updateError } = await supabase
+          .from('credits')
+          .update({ credit_amount: newCreditAmount })
+          .eq('user_id', currentUserID);
+  
+        if (updateError) {
+          throw updateError;
+        }
+  
+        console.log('Credit amount inserted successfully:', selectedAmount);
+        console.log('User ID:', currentUserID);
+        console.log('New Credit Balance:', newCreditAmount);
+  
+        // After inserting the credit amount, update the spent history data
+        const currentDate = new Date();
+        const date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+  
+        const updatedSpentHistory = [
+          {
+            credit_amount: selectedAmount,
+            date: date,
+          },
+          ...spentHistoryData,
+        ];
+  
+        updateSpentHistory(updatedSpentHistory);
+  
+        onClose(selectedAmount);
+        setSelectedAmount(null);
+      } else {
+        console.error('No balance data found.');
+      }
+    } catch (error) {
+      console.error('Error updating credit amount:', error);
+    }
+  };
+  
+  
 
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
@@ -40,6 +100,7 @@ const PaymentModal = ({ visible, onClose }) => {
               onPress={() => {
                 onClose(selectedAmount);
                 setSelectedAmount(null);
+                handleInsertCreditAmount(selectedAmount);;
               }}
               style={[styles.modalButton, styles.confirmButton]}
               disabled={selectedAmount === null}
@@ -49,7 +110,7 @@ const PaymentModal = ({ visible, onClose }) => {
             <Button
               mode="contained"
               onPress={() => {
-                setSelectedAmount(null); // Clear the selected amount
+                setSelectedAmount(selectedAmount); // Clear the selected amount
                 onClose(); // Close the modal
               }}
               style={[styles.modalButton, styles.cancelButton]}

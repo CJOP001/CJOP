@@ -1,22 +1,80 @@
 // StackNavigator.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Payment from '../screens/Payment';
-import NewsCreation from '../screens/NewsCreationModal';
-import Subscribe from '../screens/Subscribe';
-import Profile from '../screens/Profile';
+
+import TabNavigator from './TabNavigator';
+import Home from '../screens/Home';
+import PostingDesc from '../screens/PostingDesc';
+import PaymentModal from '../screens/Payment_Modal';
+import PostingModal from '../screens/PostingModal';
+import DrawerNavigator from './DrawerNavigator';
+import AddingPost from '../screens/AddingPost';
+import LiveStream from '../screens/LiveStream';
+import TermsAndConditions from '../screens/TermsAndConditions';
+
+import Welcome from '../screens/welcome';
+import Login from '../screens/login';
+import Verification from '../screens/verification';
+import AppSplash from '../screens/app_splash';
+import SignUp from '../screens/signup';
 
 const Stack = createNativeStackNavigator();
 
 function StackNavigator() {
   return (
-    <Stack.Navigator initialRouteName='Home'>
-      <Stack.Screen name="Payment" component={Payment} />
-      <Stack.Screen name="NewsCreation" component={NewsCreation} />
-      <Stack.Screen name="Subscribe" component={Subscribe} />
-      <Stack.Screen name="Profile" component={Profile} />
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='LoginStack'>
+      <Stack.Screen name='TabNavigator' component={TabNavigator} />
+      <Stack.Screen name='AddingPostStack' component={AddingPostStack} />
+      <Stack.Screen name='PostStack' component={PostStack} />
+      <Stack.Screen name='LiveStack' component={LiveStack} />
+      <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
+      <Stack.Screen name='LoginStack' component={LoginStack} />
+      
     </Stack.Navigator>
   );
 }
+
+function PostStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: true }}>
+      <Stack.Screen name='PostingDesc' component={PostingDesc} />
+      <Stack.Screen name='PostingModal' component={PostingModal} />
+    </Stack.Navigator>
+  );
+}
+
+function AddingPostStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='AddingPost' component={AddingPost} />
+    </Stack.Navigator>
+  );
+}
+
+
+function LiveStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='LiveStream' component={LiveStream} />
+    </Stack.Navigator>
+  );
+}
+
+function LoginStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
+      <Stack.Screen name="Welcome" component={Welcome}/>
+      <Stack.Screen name="Login" component={Login}/>
+      <Stack.Screen name="SignUp" component={SignUp}/>
+      <Stack.Screen name="Verification" component={Verification}/>
+      <Stack.Screen name="AppSplash" component={AppSplash}/>
+    </Stack.Navigator>
+  );
+}
+
+
+
+
 
 export default StackNavigator;
