@@ -5,67 +5,134 @@ import {
   Text,
   Image,
   Platform,
-  FlatList,
   TouchableOpacity,
-  ScrollView,
   Button,
   BackHandler,
   Pressable,
+  TextInput,
 } from "react-native";
-import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
+import { Appbar, Avatar, Card } from "react-native-paper";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
 import * as ImagePicker from "expo-image-picker";
-import { FileObject } from "@supabase/storage-js";
+import { decode } from "base64-arraybuffer";
 
 const supabase = createClient(
   "https://imbrgdnynoeyqyotpxaq.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYnJnZG55bm9leXF5b3RweGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTIyNDI2NzEsImV4cCI6MjAwNzgxODY3MX0.fQ62JtlzvH-HM3tEXrp-rqcAXjb4jwUo1xzlhXw_cjE"
 );
 
+//change USERID to obtain itself from the previous page
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
 
 const EditProfile = () => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
-  const [image, setImage] = useState(null);
   const [file, setFile] = useState();
+  const [fileB, setFileB] = useState();
+  const [newname, changeName] = useState();
+  const [newdesc, changeDesc] = useState();
+  const [newproflink, changeProfLink] = useState();
+  const [newbacklink, changeBackLink] = useState();
 
   const uploadAvatar = async () => {
-    // No permissions request is necessary for launching the image library
+    //launch the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      base64: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
+    //if the result is obtained
     if (result) {
-      setImage(result.assets[0].uri);
-      setFile(result.assets[0].uri);
-      uploadImage;
-    }
-
-    const uploadImage = async (e) => {
-      e.preventDefault();
-      const filename = `${userdata.nameid}-${file.name}`;
-      console.log("attempt starts");
-      console.log(file + filename);
+      setFile(result.assets[0].base64);
+      console.log("upload atttempt!");
+      //the filename is <userid>.jpg
+      const filename = `/Avatars/${userID}.jpg`;
+      console.log("initialize upload");
+      //supabase does not recognize image bodies, so need a base64 decoder
       const { data, error } = await supabase.storage
-        .from("testing")
-        .upload(filename, file);
+        .from("UserImage")
+        .upload(filename, decode(file), {
+          contentType: "image/png",
+          upsert: true,
+        });
       if (error) {
         // Handle error
         console.log("Something went wrong!");
       } else {
         // Handle success
         console.log("uploaded!");
+        changeProfLink(
+          "https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage" +
+            filename
+        );
       }
-    };
+    } else;
   };
 
-  const submit = async () => {};
+  const uploadBackground = async () => {
+    //launch the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      base64: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    //if the result is obtained
+    if (result) {
+      setFileB(result.assets[0].base64);
+      console.log("upload atttempt!");
+      //the filename is <userid>-background.jpg
+      const filename = `/Backgrounds/${userID}-background.jpg`;
+      console.log("initialize upload");
+      //supabase does not recognize image bodies, so need a base64 decoder
+      const { data, error } = await supabase.storage
+        .from("UserImage")
+        .upload(filename, decode(fileB), {
+          contentType: "image/png",
+          upsert: true,
+        });
+      if (error) {
+        // Handle error
+        console.log("Something went wrong!");
+      } else {
+        // Handle success
+        console.log("uploaded!");
+        changeBackLink(
+          "https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage" +
+            filename
+        );
+      }
+    } else;
+  };
+
+  const submit = async () => {
+    console.log("updating data now!");
+    console.log(newname);
+    console.log(newdesc);
+    console.log(newproflink);
+    console.log(newbacklink);
+    const { data, error } = await supabase
+      .from("app_users")
+      .update({
+        fullname: newname,
+        description: newdesc,
+        user_image: newproflink,
+        background_image: newbacklink,
+      })
+      .eq("id", userID);
+    if (error) {
+      console.log("update failed!");
+    } else {
+      console.log("update sucessful!");
+    }
+  };
 
   const getData = async () => {
     const { data, error, count } = await supabase
@@ -84,6 +151,12 @@ const EditProfile = () => {
       )
       .eq("id", userID);
     SetUser(data);
+    console.log(data[0].background_image);
+    console.log("getdata");
+    changeName(data[0].fullname);
+    changeDesc(data[0].description);
+    changeProfLink(data[0].user_image);
+    changeBackLink(data[0].background_image);
   };
 
   const getFollowing = async () => {
@@ -130,42 +203,47 @@ const EditProfile = () => {
             <Card.Cover
               source={{ uri: userdata.background_image }}
               style={{ height: 125, minWidth: "100%" }}
+              onTouchStart={uploadBackground}
             />
             {/*Profile Image*/}
-            <Pressable onPress={uploadAvatar}>
-              <Card.Title
-                left={(props) => (
-                  <Avatar.Image
-                    source={{
-                      uri: userdata.user_image,
-                    }}
-                    size={150}
-                    style={styles.profileimage}
-                  />
-                )}
-                right={(props) =>
-                  image && (
-                    <Avatar.Image
-                      source={{
-                        uri: image,
-                      }}
-                      size={150}
-                      style={styles.tempprofileimage}
-                    />
-                  )
-                }
-              />
-            </Pressable>
+            <Card.Title
+              left={(props) => (
+                <Avatar.Image
+                  source={{
+                    uri: userdata.user_image,
+                  }}
+                  size={150}
+                  style={styles.profileimage}
+                  onTouchStart={uploadAvatar}
+                />
+              )}
+            />
             <Card.Content
               style={{
                 margin: 5,
                 alignItems: "center",
+                marginTop: 60,
                 marginBottom: 80,
               }}
             >
-              <Text>{userdata.fullname}</Text>
+              <TextInput
+                editable
+                style={styles.username}
+                onChangeText={changeName}
+                defaultValue={userdata.fullname}
+                keyboardType="default"
+              />
               <Text style={{ marginBottom: 10 }}>@{userdata.nameid}</Text>
-              <Text>{userdata.description}</Text>
+
+              <TextInput
+                editable
+                style={styles.description}
+                onChangeText={changeDesc}
+                defaultValue={userdata.description}
+                keyboardType="default"
+                multiline
+                numberOfLines={4}
+              />
             </Card.Content>
             <Card.Content
               style={{
@@ -187,7 +265,7 @@ const EditProfile = () => {
             </Card.Content>
             <Card.Content
               style={{
-                marginBottom: 50,
+                marginBottom: 30,
                 alignItems: "center",
               }}
             >
@@ -238,27 +316,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    width: "25%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 4,
-    elevation: 3,
-    backgroundColor: "white",
-    borderWidth: 5,
-    borderColor: "#72E6FF",
-    translateX: -50,
-    borderRadius: 20,
-  },
-  buttonText: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: "bold",
-    letterSpacing: 0.25,
-    color: "#72E6FF",
-  },
-  button: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 5,
@@ -280,10 +337,27 @@ const styles = StyleSheet.create({
   },
   profileimage: {
     alignItems: "center",
-    transform: [{ translateY: -30 }, { translateX: 113 }],
+    marginTop: 50,
+    marginBottom: 10,
+    paddingBottom: 10,
+    transform: [{ translateX: 113 }],
   },
-  tempprofileimage: {
-    alignItems: "center",
-    transform: [{ translateY: -30 }, { translateX: -113 }],
+  username: {
+    fontSize: 16,
+    minWidth: "100%",
+    borderColor: "#000000",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    fontWeight: "bold",
+  },
+  description: {
+    minWidth: "100%",
+    minHeight: "10%",
+    fontSize: 10,
+    borderColor: "#000000",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
   },
 });

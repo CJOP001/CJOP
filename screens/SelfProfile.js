@@ -17,7 +17,6 @@ import { dummyArticles } from "../components/articles";
 import ArticleCard from "../components/ArticleCard";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
-import { launchImageLibrary } from "react-native-image-picker";
 
 const supabase = createClient(
   "https://imbrgdnynoeyqyotpxaq.supabase.co",
