@@ -11,6 +11,8 @@ import DrawerNavigator from './DrawerNavigator';
 import AddingPost from '../screens/AddingPost';
 import LiveStream from '../screens/LiveStream';
 import TermsAndConditions from '../screens/TermsAndConditions';
+import Profile from '../screens/Profile';
+import EditProfile from '../screens/EditProfile';
 
 import Welcome from '../screens/welcome';
 import Login from '../screens/login';
@@ -29,14 +31,15 @@ function StackNavigator() {
       <Stack.Screen name='LiveStack' component={LiveStack} />
       <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
       <Stack.Screen name='LoginStack' component={LoginStack} />
-      
+      <Stack.Screen name='Login' component={Login} />
+      <Stack.Screen name='EditProfile' component={EditProfile} />
     </Stack.Navigator>
   );
 }
 
 function PostStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='PostingDesc' component={PostingDesc} />
       <Stack.Screen name='PostingModal' component={PostingModal} />
     </Stack.Navigator>
@@ -72,7 +75,6 @@ function LoginStack() {
     </Stack.Navigator>
   );
 }
-
 
 
 

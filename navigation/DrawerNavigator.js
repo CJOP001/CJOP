@@ -1,9 +1,10 @@
 // DrawerNavigator.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Portal, Dialog, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import supabase from '../supabase/supabase';
 
 
 import TabNavigator from './TabNavigator';
@@ -15,18 +16,20 @@ import StackNavigator from './StackNavigator';
 
 const Drawer = createDrawerNavigator();
 
+const userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
+
 function CustomDrawerContent(props) {
 
   const followersCount = 100;
   const followingCount = 200;
 
-  const { color } = props;
+  const { color, userFullName } = props;
 
   const handleLogout = () => {
     // Implement your logout logic here
     // For example, you can clear the user session and navigate to the login screen
     // After successful logout, hide the dialog
-    props.navigation.navigate('AppSplash');
+    props.navigation.navigate('LoginStack');
     props.hideLogoutDialog();
   };
 
@@ -42,8 +45,8 @@ function CustomDrawerContent(props) {
             }}
           />
           <View style={styles.infoContainer}>
-            <Text style={styles.username}>Username</Text>
-            <Text style={styles.alias}>Alias</Text>
+            <Text style={styles.username}>{userFullName}</Text>
+            <Text style={styles.alias}>@{userFullName}</Text>
           </View>
         </View>
       </View>
@@ -144,6 +147,25 @@ function DrawerNavigator() {
   const [isLogoutDialogVisible, setLogoutDialogVisible] = useState(false);
   const showLogoutDialog = () => setLogoutDialogVisible(true);
   const hideLogoutDialog = () => setLogoutDialogVisible(false);
+  const [userFullName, setUserFullName] = useState('');
+
+
+  const getData = async () => {
+    const { data, error, count } = await supabase
+      .from('app_users')
+      .select('fullname')
+      .eq('id', userID);
+
+    if (data.length > 0) {
+      // Check if data is available
+      setUserFullName(data[0].fullname); // Update userFullName with the fetched full name
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
 
       return (
         <View style={{ flex: 1 }}>
@@ -158,6 +180,7 @@ function DrawerNavigator() {
               isLogoutDialogVisible={isLogoutDialogVisible}
               showLogoutDialog={showLogoutDialog}
               hideLogoutDialog={hideLogoutDialog}
+              userFullName={userFullName}
             />
           )}
         >

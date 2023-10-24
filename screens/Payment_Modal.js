@@ -7,7 +7,7 @@ import supabase from '../supabase/supabase';
 const reloadOptions = [10, 15, 20, 50, 100, 500];
 
 
-const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, currentUserID }) => {
+const PaymentModal = ({ visible, onClose, updateCreditTransactions, creditTransactions, currentUserID }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,15 +46,16 @@ const PaymentModal = ({ visible, onClose, updateSpentHistory, spentHistoryData, 
         const currentDate = new Date();
         const date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
   
-        const updatedSpentHistory = [
+        const updatedCreditTransactions = [
           {
-            credit_amount: selectedAmount,
+            amount: selectedAmount,
             date: date,
+            transaction_type: 'reload',
           },
-          ...spentHistoryData,
+          ...creditTransactions,
         ];
   
-        updateSpentHistory(updatedSpentHistory);
+        updateCreditTransactions(updatedCreditTransactions);
   
         onClose(selectedAmount);
         setSelectedAmount(null);

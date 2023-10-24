@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
-import { Appbar, Button, Card, SegmentedButtons } from 'react-native-paper';
+import { Appbar, Button, Card } from 'react-native-paper';
 import { Tab, TabView } from '@rneui/themed';
 import supabase from '../supabase/supabase';
 import PaymentModal from './Payment_Modal';
@@ -13,12 +13,16 @@ const Payment = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [index, setIndex] = useState(0);
-  const [spentHistoryData, setSpentHistoryData] = useState([]);
+  const [creditTransactions, setCreditTransactions] = useState([]);
   const [isRefreshing, setRefreshing] = useState(false);
-  const [value, setValue] = React.useState('');
 
   // Constants
   const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
+
+  // Constants for transaction types
+  const TRANSACTION_RELOAD = 'reload';
+  const TRANSACTION_RECEIVED = 'received';
+  const TRANSACTION_POST = 'post';
 
   // Function to fetch balance
   const fetchBalance = async () => {
@@ -41,28 +45,23 @@ const Payment = ({ navigation }) => {
     }
   };
 
-  // Function to fetch spent history
-  const fetchSpentHistory = async () => {
+  // Function to fetch user's credit transactions
+  const fetchCreditTransactions = async () => {
     try {
       const { data, error } = await supabase
-        .from('credits')
-        .select('credit_amount, date, credit_action')
+        .from('credit_transactions')
+        .select('*')
         .eq('user_id', currentUserID)
         .order('date', { ascending: false });
       if (error) {
         throw error;
       }
-      setSpentHistoryData(data);
+      setCreditTransactions(data);
     } catch (error) {
-      console.error('Error fetching spent history:', error);
+      console.error('Error fetching credit transactions:', error);
     }
   };
 
-  // Fetch user's data when the component mounts
-  useEffect(() => {
-    fetchBalance();
-    fetchSpentHistory();
-  }, []);
 
   // Function to handle refresh
   const handleRefresh = async () => {
@@ -70,13 +69,18 @@ const Payment = ({ navigation }) => {
 
     try {
       await fetchBalance();
-      await fetchSpentHistory();
+      await fetchCreditTransactions();
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
       setRefreshing(false); // Stop the refresh animation when data is fetched
     }
   };
+
+  useEffect(() => {
+    fetchBalance();
+    fetchCreditTransactions();
+  }, []);
 
   // Function to toggle the modal
   const toggleModal = () => {
@@ -90,9 +94,9 @@ const Payment = ({ navigation }) => {
     setBalance(balance + amount);
   };
 
-  // Function to update spent history data
-  const updateSpentHistoryData = (newSpentHistoryData) => {
-    setSpentHistoryData(newSpentHistoryData);
+  // Function to update credit transactions
+  const updateCreditTransactions = (newCreditTransactions) => {
+    setCreditTransactions(newCreditTransactions);
   };
 
   const renderContent = () => {
@@ -100,16 +104,16 @@ const Payment = ({ navigation }) => {
       <View>
         {index === 0 && (
           <View style={{ flex: 1 }}>
-            {spentHistoryData.map((item, index) => (
+            {creditTransactions.map((item, index) => (
               <Card key={index} style={{ marginVertical: 10 }}>
                 <Card.Content>
                   <Image
                     source={require('../assets/credit-card.png')}
                     style={{ width: 30, height: 30, marginRight: 10 }}
                   />
-                  <Text>Credit Amount: {item.credit_amount}</Text>
-                  <Text>Date: {item.date}</Text>
-                  <Text>Credit Action: {item.credit_action}</Text>
+                  <Text>Credit Amount: {item.amount}</Text>
+                  <Text>Date: {new Date(item.date).toLocaleDateString()}</Text>
+                  <Text>Credit Action: {item.transaction_type}</Text>
                 </Card.Content>
               </Card>
             ))}
@@ -117,12 +121,12 @@ const Payment = ({ navigation }) => {
         )}
         {index === 1 && (
           <View>
-            <Text>Received History</Text>
+            <Text> No Received History</Text>
           </View>
         )}
         {index === 2 && (
           <View>
-            <Text>Withdraw History</Text>
+            <Text> No Withdraw History</Text>
             {/* Add your content for the "Withdraw" tab here */}
           </View>
         )}
@@ -164,8 +168,8 @@ const Payment = ({ navigation }) => {
         <PaymentModal
           visible={isModalVisible}
           onClose={(amount) => handleConfirmReload(amount)}
-          updateSpentHistory={updateSpentHistoryData}
-          spentHistoryData={spentHistoryData}
+          updateCreditTransactions={updateCreditTransactions}
+          creditTransactions={creditTransactions}
           currentUserID={currentUserID}
         />
 

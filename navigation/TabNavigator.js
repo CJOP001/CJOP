@@ -3,11 +3,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home';
 import Payment from '../screens/Payment';
 import Subscribe from '../screens/Subscribe';
-import Profile from '../screens/Profile';
+
 import AddingPost from '../screens/AddingPost';
 import { Image, TouchableOpacity, View } from 'react-native';
 import DrawerNavigator from './DrawerNavigator';
-import AddingPostStack from './StackNavigator'
+import AddingPostStack from './StackNavigator';
+import ProfileStack from './StackNavigator';
+import Profile from '../screens/Profile';
 
 
 const Tab = createBottomTabNavigator();

@@ -1,3 +1,4 @@
+
 import React, { Component, createRef, useEffect, useState } from 'react';
 import {
   Modal,
@@ -7,6 +8,7 @@ import {
   View,
   Text,
   Platform,
+  ActivityIndicator,
   StatusBar,
 } from 'react-native';
 import { Camera } from 'expo-camera';
@@ -19,21 +21,25 @@ class CameraModal extends Component {
       cameraType: Camera.Constants.Type.back,
       flashMode: Camera.Constants.FlashMode.off,
       hasCameraPermission: null,
+      processingImage: false,
     };
     this.cameraRef = createRef();
   }
 
-  async takePicture() {
-    if (this.cameraRef.current) {
-      try {
-        const { uri } = await this.cameraRef.current.takePictureAsync();
-        this.props.onPictureTaken(uri);
-        this.props.onClose();
-      } catch (e) {
-        console.log('Error taking picture:', e);
-      }
-    }
-  }
+   async takePicture() {
+       if (this.cameraRef.current) {
+         try {
+           this.setState({ processingImage: true }); // Start processing
+           const { uri } = await this.cameraRef.current.takePictureAsync();
+           this.props.onPictureTaken(uri);
+           this.props.onClose();
+         } catch (e) {
+           console.log('Error taking picture:', e);
+         } finally {
+           this.setState({ processingImage: false }); // Finish processing
+         }
+       }
+     }
 
   async flipCamera() {
     this.setState((prevState) => ({
@@ -44,69 +50,10 @@ class CameraModal extends Component {
     }));
   }
 
-  async requestCameraPermission() {
-    const cameraStatus = await Camera.getCameraPermissionsAsync();
-    if (cameraStatus.status === 'undetermined' || cameraStatus.status === 'denied') {
-      const newStatus = await Camera.requestCameraPermissionsAsync();
-      if (newStatus.status === 'granted') {
-        this.setState({ hasCameraPermission: true });
-        this.props.setHasCameraPermission(true);
-      } else {
-        this.setState({ hasCameraPermission: false });
-        this.props.setHasCameraPermission(false);
-      }
-    } else if (cameraStatus.status === 'granted') {
-      this.setState({ hasCameraPermission: true });
-      this.props.setHasCameraPermission(true);
-    } else {
-      this.setState({ hasCameraPermission: false });
-      this.props.setHasCameraPermission(false);
-    }
-  }
-
-  async componentDidMount() {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('No access to media library');
-    }
-
-    if (Platform.OS === 'android') {
-      const cameraStatus = await Camera.getCameraPermissionsAsync();
-      if (cameraStatus.status === 'undetermined' || cameraStatus.status === 'denied') {
-        this.setState({ hasCameraPermission: null });
-      } else if (cameraStatus.status === 'granted') {
-        this.setState({ hasCameraPermission: true });
-      } else {
-        this.setState({ hasCameraPermission: false });
-      }
-    }
-  }
 
   render() {
-    if (this.state.hasCameraPermission === null) {
-      return (
-        <View style={styles.centeredContainer}>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={() => this.requestCameraPermission()}
-          >
-            <Text style={styles.permissionButtonText}>Request Camera Permission</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    if (this.state.hasCameraPermission === false) {
-      return (
-        <View style={styles.centeredContainer}>
-          <Text style={styles.permissionInfoText}>
-            Go to Settings > App > Permissions and grant camera access.
-          </Text>
-        </View>
-      );
-    }
-
     return (
+
       <Modal visible={this.props.isVisible} transparent={true} animationType="slide">
         <View style={styles.cameraModal}>
           <Camera style={styles.camera} type={this.state.cameraType} flashMode={this.state.flashMode} ref={this.cameraRef} />
@@ -122,6 +69,12 @@ class CameraModal extends Component {
             </View>
           </View>
         </View>
+      {this.state.processingImage && (
+                <View style={styles.overlay}>
+                  <ActivityIndicator size="large" color="white" />
+                  <Text style={styles.processingText}>Processing Image...</Text>
+                </View>
+                )}
       </Modal>
     );
   }
@@ -190,6 +143,18 @@ const styles = StyleSheet.create({
     width: '10%',
     aspectRatio: 1,
   },
+  overlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+    processingText: {
+      color: 'white',
+      fontSize: 18,
+      marginTop: 10,
+    },
+
 });
 
 export default CameraModal;

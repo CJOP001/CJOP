@@ -87,7 +87,7 @@ const Verification = ({navigation, route}) => {
                 }
                 else{
                
-                navigation.navigate("AppSplash");
+                navigation.navigate("TabNavigator");
                 }
             } catch (error)
             {

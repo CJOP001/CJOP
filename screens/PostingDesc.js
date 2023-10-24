@@ -10,6 +10,7 @@ import {
   ScrollView,
   Dimensions,
   Platform,
+  FlatList
 } from 'react-native';
 import { Appbar, List } from 'react-native-paper';
 import OverlaySheetModal from './PostingModal';
@@ -17,7 +18,8 @@ import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import CameraModal from './CameraModal';
-import { FlatList } from 'react-native';
+import * as Permissions from 'expo-permissions';
+import { categories } from '../components/categories';
 
 class PostingDesc extends Component {
   constructor(props) {
@@ -27,9 +29,10 @@ class PostingDesc extends Component {
       isDropdownVisible: false,
       selectedValue: null,
       textInputValue: '',
-      items: ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7', 'Option 8', 'Option 9', 'Option 10'],
+      items: categories,
       image: null,
       cameraVisible: false,
+      hasCameraPermission: null,
     };
   }
 
@@ -63,40 +66,45 @@ class PostingDesc extends Component {
   };
 
 
-  // Toggle the camera modal visibility
- toggleCamera = async () => {
-     const cameraStatus = await Camera.getCameraPermissionsAsync();
-     if (cameraStatus.status === 'undetermined' || cameraStatus.status === 'denied') {
-       // Request camera permissions
-       const newStatus = await Camera.requestCameraPermissionsAsync();
-       if (newStatus.status === 'granted') {
-         // Camera permission granted, open the camera modal
-         this.setState((prevState) => ({ cameraVisible: !prevState.cameraVisible }));
-       } else {
-         // Camera permission denied
-         console.log('No access to camera');
-       }
-     } else if (cameraStatus.status === 'granted') {
-       // Camera permission already granted, open the camera modal
-       this.setState((prevState) => ({ cameraVisible: !prevState.cameraVisible }));
-     } else {
-       // Camera permission denied
-       console.log('No access to camera');
-     }
-   };
-
-  // Select an image from the device's gallery
-  pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const selectedImage = result.assets[0];
-      this.setState({ image: selectedImage.uri});
+// Toggle the camera modal visibility
+toggleCamera = async () => {
+  const { status } = await Camera.getCameraPermissionsAsync();
+  if (status !== 'granted') {
+    // Camera permission not granted, request permission
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
+      return;
     }
-  };
+  }
+  this.setState((prevState) => ({ cameraVisible: !prevState.cameraVisible }));
+};
+
+  // Function to request gallery permissions
+    requestGalleryPermission = async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        alert('Sorry, we need gallery permissions to access photos!');
+        return;
+      }
+    };
+
+    // Select an image from the device's gallery
+    pickImage = async () => {
+      // Request gallery permission first
+      await this.requestGalleryPermission();
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        const selectedImage = result.assets[0];
+        this.setState({ image: selectedImage.uri });
+      }
+    };
 
   render() {
     const {
@@ -172,13 +180,13 @@ class PostingDesc extends Component {
             source={require('../assets/userProfile.png')}
             style={styles.profile_image}
           />
-          <Text style={styles.imageText}>Agugu</Text>
+          <Text style={styles.imageText}>lwk1334</Text>
         </View>
 
         {/* Text Input */}
         <TextInput
           style={styles.textInput}
-          onChangeText={(text) => this.setState({ textInputValue: text })}
+          onChangeText={(text) => this.setState({ textInputValue:text})}
           value={textInputValue}
           placeholder="Enter your text here"
           multiline={true}
@@ -200,12 +208,7 @@ class PostingDesc extends Component {
               style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginRight: '5%' }}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.icon}>
-            <Image
-              source={require('../assets/paperclip_icon.png')}
-              style={{ width: screenWidth * 0.07, height: screenWidth * 0.07, marginLeft: '5%' }}
-            />
-          </TouchableOpacity>
+
           <TouchableOpacity style={styles.icon} onPress={this.toggleModal}>
             <Image
               source={require('../assets/send_icon.png')}

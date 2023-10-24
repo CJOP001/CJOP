@@ -5,86 +5,125 @@ import { Colors} from "../components/styles";
 import { Formik } from "formik";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const {darkLight} = Colors;
 
 const SignUp = ({navigation}) => {
-
-    const [phoneNumber, setPhoneNumber] = useState(null);
-    const [userName, setUserName] = useState(null);
-    const [email, setEmail] = useState(null);
-    const [city, setCity] = useState(null);
-    const [address, setAddress] = useState(null);
-    const [postCode, setPostCode] = useState(null);
-    const [countryState, setCountryState] = useState(null);
-    const [countryName, setCountryName] = useState(null);
-
-    const [show, setShow] = useState(false);
-    const [date, setDate] = useState(new Date());
-    const [dob, setDob] = useState();
-
-    const onChange = (event, selectedDate) => {
-            const currentDate = selectedDate || date;
-            setShow(false);
-            setDate(currentDate);
-            setDob(currentDate);   
-    };
     
 
-    const showDatePicker = () => {
-        setShow(true);
+    var tempPhone = "";
+    var tempUser = "";
+    var tempId = "";
+    var tempError = false;
 
-    }
-
-    const AddNewUser = async () => {
-    try{
-        const { data, error } = await supabase.auth.signUp({
-            phone: phoneNumber,
-            password: 'testing',
-          })
-          if(error)
-          {
-            throw(error);
-          }
-          else{
-            const {data, error} = await supabase.auth.signInWithOtp({
-                phone: phoneNumber,
-            })
-            if(error)
-            {
-                console.log(error)
-            }
-            else if(data)
-            {
-                 const {data, error} = await supabase
+        const CheckExistingProfile = async () => {
+        
+        tempId = trimString(tempId);
+        tempId = ToLowerCase(tempId);
+        try
+        {
+                const {data, error} = await supabase
                     .from('app_users')
-                    .insert({'fullname':  userName,
-                            'email':  email,
-                            'phone_no': phoneNumber,
-                            'address':  address,
-                            'dob': dob,
-                            'city': city,
-                            'postcode': postCode,
-                            'state': countryState,
-                            'country': countryName,
-                            'status': 'Active'})
-                if(error)
-                {
-                    console.log(error);
-                }
-                else{
-                    console.log(data);
-                }
-                navigation.navigate('Verification', {phone: phoneNumber,})
+                    .select('nameid')
+                    .eq('nameid', tempId);
+
+                    if(data == "")
+                    {   
+                        console.log("adding new user.....")
+                        tempError = false;
+                        SignUpUser();
+                        
+                        
+                    }
+                    else if(data != "")
+                    {
+                        tempError = true;
+                        console.log(data);
+                        console.log("duplicate profile name found, pls start again");
+                    }
+                    else if(error)
+                    {
+                        console.log(error);
+                    }
           }
-        }
-    }
     catch (error)
     {
         console.log(error);
     }
+}
+
+const trimString = (tempId) => 
+{
+    let string = tempId.split(" ").join("");
+    return string;
+}
+
+const ToLowerCase = (tempId) =>
+{
+    let lowerCaseText = tempId.toLowerCase();
+    return lowerCaseText;
+}
+
+const AddNewUser= async() =>
+{
+    console.log(tempError);
+                        const {reply, error} = await supabase
+                            .from('app_users')
+                            .insert({'fullname':  tempUser,
+                                    'phone_no': tempPhone,
+                                    'nameid': tempId,
+                                    'status': 'Active'})
+                        if(error)
+                        {
+                            console.log(error, "unsuccessful insert");
+                        }
+                         else{              
+                            console.log("successful insert");
+                            SendOTP();
+                            
+                    }
+}
+
+const SignUpUser = async() =>
+{
+    try
+    {const { data, error } = await supabase.auth.signUp({
+        phone: tempPhone,
+        password: 'testing',
+      })
+      if(error)
+      {
+        throw(error);
+      }
+    else
+    {
+        console.log("successful signup, sending OTP......")
+        AddNewUser();
+        
+    }
+}
+    catch(error)
+{
+    console.log(error, "unsuccessful signup");
+
+}
+}
+
+const SendOTP = async() => 
+{
+    const {data, error} = await supabase.auth.signInWithOtp({
+        phone: tempPhone,
+        })
+            if(error)
+            {
+                console.log(error, "No such number register with Twilio")
+            }
+            else if(data)
+            {
+            console.log("correct number inputted, redirecting to verification......")
+            navigation.navigate('Verification', {phone: tempPhone,})
+            }
 }
     return (
         <KeyboardAvoidingWrapper>   
@@ -95,29 +134,16 @@ const SignUp = ({navigation}) => {
         <View style={styles.LowerSignUpContainer}>
         <Text style={styles.SignUpTitle}>Welcome to CJOP</Text>
         <Text style={styles.SignUpInfo}>Become a journalist in your own right. Sign up below to begin your journalist's journey.</Text>
-        {show && (
-            <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode="date"
-            is24Hour={true}
-            display="calendar"
-            onChange={onChange}/>
-        )}
+        
                 <Formik 
-                initialValues={{phone_number: '', username: '',dob: '', email_address: '', city_name: '', address: '', postcode: '', state: '', country: ''}}
-                onSubmit={(values) => {console.log(values);
-                        setPhoneNumber(values.phone_number);
-                        setUserName(values.username);
-                        setEmail(values.email_address);
-                        setAddress(values.address);
-                        setCity(values.city_name);
-                        setPostCode(values.postcode);
-                        setCountryState(values.state);
-                        setCountryName(values.country);
-                        AddNewUser;
+                initialValues={{phone_number: '', username: '', name_id: ''}}
+                    onSubmit={(values) => {console.log(values);
+                        tempPhone = values.phone_number;
+                        tempUser = values.username;
+                        tempId = values.name_id;
+
+                        CheckExistingProfile();
                     }}
-                
                     >
                         {({handleChange, handleBlur, handleSubmit, values}) => 
                             (<View style={styles.StyledFormArea}>
@@ -133,7 +159,7 @@ const SignUp = ({navigation}) => {
                                 />
                                 
                                 <UsernameInput 
-                                label="Username"
+                                label="tempUser"
                                 placeholder="eg. Titanfall#456"
                                 placeholderTextColor={darkLight}
                                 onChangeText={handleChange('username')}
@@ -143,76 +169,23 @@ const SignUp = ({navigation}) => {
                                 maxLength={50}
                             />
                             </View>
-                            <DoBInput 
-                                    label="Date of birth"
-                                    placeholder="eg. dd/mm/yyyy"
-                                    placeholderTextColor={darkLight}
-                                    onChangeText={handleChange('dob')}
-                                    onBlur={handleBlur('dob')}
-                                    value={dob ? dob.toDateString() : ''}
-                                    isDate={true}
-                                    editable={false}
-                                    showDatePicker={showDatePicker}
-                                />
-                            <EmailInput 
-                                    label="Email Address"
-                                    placeholder="eg. your@email.com"
-                                    placeholderTextColor={darkLight}
-                                    onChangeText={handleChange('email_address')}
-                                    onBlur={handleBlur('email_address')}
-                                    value={values.email_address}
-                                    inputMode="email"
-                                    maxLength={40}
-                                />
-                            <AddressInput 
-                                label="Residence Address"
-                                placeholder="eg.12 84th Street Alabama"
+                            <ProfileInput 
+                                label="Profile Name"
+                                placeholder="eg. Reynold34"
                                 placeholderTextColor={darkLight}
-                                onChangeText={handleChange('address')}
-                                onBlur={handleBlur('address')}
-                                value={values.address}
-                                multiline={true}
-                                numberOfLines = {4}
+                                onChangeText={handleChange('name_id')}
+                                onBlur={handleBlur('name_id')}
+                                value={values.name_id}
+                                minLength={10}
                                 maxLength={50}
-                                />
-                            <View style={styles.SignUpInput}>
-                            <CityInput 
-                                label="City Name"
-                                placeholder="eg. New York City"
-                                placeholderTextColor={darkLight}
-                                onChangeText={handleChange('city_name')}
-                                onBlur={handleBlur('city_name')}
-                                value={values.city_name}
-                                maxLength={30}
-                                />
-                            <PostCodeInput 
-                                label="PostCode"
-                                placeholder="eg. 47800"
-                                placeholderTextColor={darkLight}
-                                maxLength={5}
-                                onChangeText={handleChange('postcode')}
-                                onBlur={handleBlur('postcode')}
-                                value={values.postcode}
                             />
-                            </View>
-                            <View style={styles.SignUpInput}>
-                            <StateInput 
-                                label="State Name"
-                                placeholder="eg. California"
-                                placeholderTextColor={darkLight}
-                                onChangeText={handleChange('state')}
-                                onBlur={handleBlur('state')}
-                                value={values.state}
-                                />
-                            <CountryInput 
-                                label="Country"
-                                placeholder="eg. United States"
-                                placeholderTextColor={darkLight}
-                                onChangeText={handleChange('country')}
-                                onBlur={handleBlur('country')}
-                                value={values.country}
-                                />    
-                                </View>
+                            <Text style={{ 
+                                        opacity: tempError? 1: 0,
+                                        fontSize: 15,
+                                        fontFamily: 'Roboto',
+                                        marginLeft: 15,
+                                        color: tempError? "#FF0F0F": "#000000",
+                                         }}>A profile name has already exist</Text>
                             
                             <TouchableOpacity style={styles.SignUpButton} onPress={handleSubmit}>
                 <Text style={styles.SignUpText}>
@@ -250,64 +223,11 @@ const UsernameInput = ({label, ...props}) => {
     )
 }
 
-const EmailInput = ({label, ...props}) => {
-    return (
-        <View style={{ width: "60%"}}>
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInput} {...props} />
-        </View>
-    ) 
-}
-
-const AddressInput = ({label, ...props}) => {
-    return (
-        <View style={{height: 60, marginBottom: 50}}>
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInputForAddress} {...props} />
-        </View>
-    )
-}
-
-const CityInput = ({label, ...props}) => {
-    return (
-        <View style={{marginRight: 60}}>
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInput} {...props} />
-        </View>
-    )
-}
-const PostCodeInput = ({label, ...props}) => {
+const ProfileInput = ({label, ...props}) => {
     return (
         <View>
             <Text style={styles.SignUpDetailsLabel}>{label}</Text>
             <TextInput style={styles.SignUpDetailsInput} {...props} />
-        </View>
-    )
-}
-
-const StateInput = ({label, ...props}) => {
-    return (
-        <View style={{marginRight: 30, width: "50%"}}>
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInput} {...props} />
-        </View>
-    )
-}
-const CountryInput = ({label, ...props}) => {
-    return (
-        <View>
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TextInput style={styles.SignUpDetailsInput} {...props} />
-        </View>
-    )
-}
-const DoBInput = ({label, showDatePicker, ...props}) => {
-    return (
-        <View style={{width: "45%"}} >
-            <Text style={styles.SignUpDetailsLabel}>{label}</Text>
-            <TouchableOpacity onPress={showDatePicker}>
-                <TextInput style={styles.SignUpDetailsInput} {...props}/>
-            </TouchableOpacity>
         </View>
     )
 }
@@ -326,7 +246,7 @@ LowerSignUpContainer: {
     flex: 3,
     marginTop: 0,
     justifyContent: "space-around",
-    paddingBottom: 20
+    paddingBottom: 30
 },
 SignUpTitle: {
     padding: 15,
@@ -420,23 +340,8 @@ SignUpDetailsInput: {
     borderWidth: 2,
     borderColor: Colors.secondary,
     marginLeft: 10
-},  
-
-SignUpDetailsInputForAddress: {
-    padding: 8,
-    fontSize: 15,
-    color: Colors.tertiary,
-    borderRadius: 10,
-    width: "95%",
-    height: 80,
-    textAlign: "left",
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderWidth: 2,
-    borderColor: Colors.secondary,
-    marginLeft: 10,
-    alignItems: "baseline"
 }
+
 });
 
 export default SignUp;
