@@ -28,7 +28,7 @@ const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
 
-const SelfProfile = () => {
+const OtherProfile = () => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
@@ -90,7 +90,7 @@ const SelfProfile = () => {
         <Appbar.Content title="Your Profile" style={styles.appContent} />
       </Appbar.Header>
       {userdata.map((userdata) => (
-        <View>
+        <View key={userdata.id}>
           {/*Profile Background*/}
           <Card mode="outlined" style={styles.profile}>
             <Card.Cover
@@ -110,7 +110,7 @@ const SelfProfile = () => {
               )} /*Edit Profile button*/
               right={(props) => (
                 <Pressable style={styles.button}>
-                  <Text style={styles.buttonText}>Edit Profile</Text>
+                  <Text style={styles.buttonText}>Follow</Text>
                 </Pressable>
               )}
             />
@@ -166,7 +166,7 @@ const SelfProfile = () => {
   );
 };
 
-export default SelfProfile;
+export default OtherProfile;
 
 const styles = StyleSheet.create({
   text: {

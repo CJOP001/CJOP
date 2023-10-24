@@ -12,8 +12,6 @@ import {
   Pressable,
 } from "react-native";
 import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
-import { fcategories } from "../components/friendlist";
-import { dummyFriends } from "../components/Friends";
 import { ListItem } from "react-native-elements";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
@@ -28,19 +26,18 @@ var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
 const FriendsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [selectedCategory, setSelectedCategory] = useState("Following");
-
   const onChangeSearch = (query) => {
     // Update the search query state
     setSearchQuery(query);
   };
 
-  const [peopleList] = useState(dummyFriends);
-  const [people, SetPeople] = useState([]);
+  //initial fake data because react will load this data regardless of if the data has been obtained yet
+  const [people, SetPeople] = useState([{ fullname: "" }]);
 
   const sortPeople = async () => {
     console.log("Start sorting all people");
-    const { data, error, count } = await supabase
+    //query for everyone that does not have the current user id
+    const { data, error } = await supabase
       .from("app_users")
       .select(
         `
@@ -56,31 +53,82 @@ const FriendsList = () => {
 
   const sortFollowing = async () => {
     console.log("Started sorting following.");
+    //query for every friend_id and their associated app_users data when the user_id is equal to the current session's user_id
+    //this one is objectively correct but fails due to not recognizing the correct foreign key
     const { data, error, count } = await supabase
       .from("friends")
       .select(`friend_id, app_users( user_image, fullname, nameid)`)
       .eq("user_id", userID);
-    console.log(data);
-  };
 
-  // const sortFollowers = async () => {
-  //   console.log("Started sorted followers.");
-  //   const { data, error, count } = await supabase
-  //     .from("friends")
-  //     .select(`user_id, app_users( user_image, fullname, nameid )`)
-  //     .eq("friend_id", userID);
-  //   console.log(data);
-  // };
+    //a reversed query of the above. Somehow the id field is left empty and the sort doesnt work.
+    // const { data, error } = await supabase
+    //   .from("app_users")
+    //   .select(`friends(user_id), user_image, fullname, nameid`)
+    //   .eq("friends.user_id", userID);
+
+    console.log(data);
+    SetPeople(data);
+  };
 
   const sortFollowers = async () => {
     console.log("Started sorted followers.");
+    //query for the user_id and their associated app_users data when the friend_id is equal to the current session's user_id
     const { data, error, count } = await supabase
-      .from("app_users")
-      .select(`friends.user_id, user_image, fullname, nameid `)
-      .eq("friends.friend_id", userID);
+      .from("friends")
+      .select(`user_id, app_users( user_image, fullname, nameid)`)
+      .eq("friend_id", userID);
     console.log(data);
+    SetPeople(data);
   };
 
+  function renderList() {
+    //render the elements based on the data obtained as the data obtained comes in slightly different formats
+    if (typeof people[0].fullname !== "undefined") {
+      console.log("sorting by 2d array");
+      //this returns the elements suitable for a two dimensional json array
+      return (
+        <FlatList
+          data={people}
+          keyExtractor={(item) => item.user_id}
+          renderItem={({ item }) => (
+            <ListItem>
+              <Avatar.Image
+                rounded
+                source={{
+                  uri: item.user_image,
+                }}
+              />
+              <ListItem.Title>{item.fullname}</ListItem.Title>
+              <ListItem.Subtitle>@{item.nameid}</ListItem.Subtitle>
+            </ListItem>
+          )}
+        />
+      );
+    } else {
+      console.log("sorting by 3d array");
+      // this returns the elements suitable for a three dimensional json array
+      return (
+        <FlatList
+          data={people}
+          keyExtractor={(item) => item.user_id}
+          renderItem={({ item }) => (
+            <ListItem>
+              <Avatar.Image
+                rounded
+                source={{
+                  uri: item.app_users.user_image,
+                }}
+              />
+              <ListItem.Title>{item.app_users.fullname}</ListItem.Title>
+              <ListItem.Subtitle>@{item.app_users.nameid}</ListItem.Subtitle>
+            </ListItem>
+          )}
+        />
+      );
+    }
+  }
+
+  //on page load, initialize sortPeople.
   useEffect(() => {
     sortPeople();
   }, []);
@@ -128,23 +176,12 @@ const FriendsList = () => {
           </View>
 
           {/*List*/}
-          <View style={{ alignItems: "left", padding: 15, width: "100%" }}>
-            <FlatList
-              data={people}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <ListItem>
-                  <Avatar.Image
-                    rounded
-                    source={{
-                      uri: item.user_image,
-                    }}
-                  />
-                  <ListItem.Title>{item.fullname}</ListItem.Title>
-                  <ListItem.Subtitle>@{item.nameid}</ListItem.Subtitle>
-                </ListItem>
-              )}
-            />
+          <View
+            style={{ alignItems: "left", padding: 15, width: "100%" }}
+            onload={sortPeople}
+            on
+          >
+            {renderList()}
           </View>
         </Card>
       </View>

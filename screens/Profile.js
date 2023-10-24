@@ -91,7 +91,7 @@ const SelfProfile = () => {
         <Appbar.Content title="Your Profile" style={styles.appContent} />
       </Appbar.Header>
       {userdata.map((userdata) => (
-        <View>
+        <View key={userdata.id}>
           {/*Profile Background*/}
           <Card mode="outlined" style={styles.profile}>
             <Card.Cover
@@ -111,7 +111,7 @@ const SelfProfile = () => {
               )} /*Edit Profile button*/
               right={(props) => (
                 <Pressable style={styles.button}>
-                  <Text style={styles.buttonText}>Follow</Text>
+                  <Text style={styles.buttonText}>Edit Profile</Text>
                 </Pressable>
               )}
             />
