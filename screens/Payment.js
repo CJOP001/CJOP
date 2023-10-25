@@ -24,58 +24,58 @@ const Payment = ({ navigation }) => {
   const TRANSACTION_RECEIVED = 'received';
   const TRANSACTION_POST = 'post';
 
-  // Function to fetch balance
-  const fetchBalance = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('credits')
-        .select('credit_amount')
-        .eq('user_id', currentUserID);
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        setBalance(data[0].credit_amount);
-      } else {
-        console.error('No balance data found.');
-      }
-    } catch (error) {
-      console.error('Error fetching balance:', error);
+// Function to fetch balance
+const fetchBalance = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('credits')
+      .select('credit_amount')
+      .eq('user_id', currentUserID);
+    if (error) {
+      throw error;
     }
-  };
 
-  // Function to fetch user's credit transactions
-  const fetchCreditTransactions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('credit_transactions')
-        .select('*')
-        .eq('user_id', currentUserID)
-        .order('date', { ascending: false });
-      if (error) {
-        throw error;
-      }
-      setCreditTransactions(data);
-    } catch (error) {
-      console.error('Error fetching credit transactions:', error);
+    if (data && data.length > 0) {
+      setBalance(data[0].credit_amount);
+    } else {
+      console.error('No balance data found.');
     }
-  };
+  } catch (error) {
+    console.error('Error fetching balance:', error);
+  }
+};
 
-
-  // Function to handle refresh
-  const handleRefresh = async () => {
-    setRefreshing(true); // Start the refresh animation
-
-    try {
-      await fetchBalance();
-      await fetchCreditTransactions();
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-    } finally {
-      setRefreshing(false); // Stop the refresh animation when data is fetched
+// Function to fetch user's credit transactions
+const fetchCreditTransactions = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('credit_transactions')
+      .select('*')
+      .eq('user_id', currentUserID)
+      .order('date', { ascending: false });
+    if (error) {
+      throw error;
     }
-  };
+    setCreditTransactions(data);
+  } catch (error) {
+    console.error('Error fetching credit transactions:', error);
+  }
+};
+
+
+// Function to handle refresh
+const handleRefresh = async () => {
+  setRefreshing(true); // Start the refresh animation
+
+  try {
+    await fetchBalance();
+    await fetchCreditTransactions();
+  } catch (error) {
+    console.error('Error refreshing data:', error);
+  } finally {
+    setRefreshing(false); // Stop the refresh animation when data is fetched
+  }
+};
 
   useEffect(() => {
     fetchBalance();
@@ -88,16 +88,32 @@ const Payment = ({ navigation }) => {
   };
 
   // Function to handle confirming the reload
-  const handleConfirmReload = (amount) => {
-    console.log(`Reload confirmed with amount: $${amount}`);
-    toggleModal();
-    setBalance(balance + amount);
-  };
+const handleConfirmReload = (amount) => {
+  console.log(`Reload confirmed with amount: $${amount}`);
+  toggleModal();
+};
 
-  // Function to update credit transactions
-  const updateCreditTransactions = (newCreditTransactions) => {
-    setCreditTransactions(newCreditTransactions);
-  };
+/*const handleReload = async (amount) => {
+  try {
+    // Perform the reload operation here (e.g., send a payment request to a payment gateway).
+    // If the reload is successful, call the update and insert functions.
+    const reloadSuccessful = await performReloadOperation(amount);
+
+    if (reloadSuccessful) {
+      // Call the update function to update the credit balance.
+      await handleUpdateCreditAmount(amount);
+
+      // Call the insert function to log the credit transaction.
+      await handleInsertCreditTransaction(amount);
+    } else {
+      // Handle the case where the reload was not successful.
+      console.error('Reload operation failed.');
+    }
+  } catch (error) {
+    console.error('Error handling reload:', error);
+  }
+};*/
+
 
   const renderContent = () => {
     return (
@@ -106,14 +122,18 @@ const Payment = ({ navigation }) => {
           <View style={{ flex: 1 }}>
             {creditTransactions.map((item, index) => (
               <Card key={index} style={{ marginVertical: 10 }}>
-                <Card.Content>
+                <Card.Content style={styles.cardContainer}>
                   <Image
                     source={require('../assets/credit-card.png')}
-                    style={{ width: 30, height: 30, marginRight: 10 }}
+                    style={styles.icon}
                   />
-                  <Text>Credit Amount: {item.amount}</Text>
-                  <Text>Date: {new Date(item.date).toLocaleDateString()}</Text>
-                  <Text>Credit Action: {item.transaction_type}</Text>
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.transactionType}> {item.transaction_type}</Text>
+                    <Text style={styles.amountText}> {new Date(item.date).toLocaleDateString()}</Text>
+                  </View>
+                  <Text style={styles.dateText}> {item.amount} credits</Text>
+                  
+                  
                 </Card.Content>
               </Card>
             ))}
@@ -168,13 +188,12 @@ const Payment = ({ navigation }) => {
         <PaymentModal
           visible={isModalVisible}
           onClose={(amount) => handleConfirmReload(amount)}
-          updateCreditTransactions={updateCreditTransactions}
           creditTransactions={creditTransactions}
           currentUserID={currentUserID}
         />
 
-        <Text style={{ fontFamily: '', textAlign: 'center', color: '#72E6FF', padding: 10, fontSize: 25, fontWeight: 'bold' }}>
-          Transfer Credit
+        <Text style={{ textAlign: 'center', color: '#72E6FF', padding: 10, fontSize: 25, fontWeight: 'bold' }}>
+          Learn About Credits
         </Text>
 
 
@@ -249,5 +268,33 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '500',
     color: '#ffffff'
+  },
+  cardContainer:{
+    flexDirection: 'row', 
+    alignItems: 'center', 
+  },
+  icon: {
+    width: 30, 
+    height: 30, 
+    marginRight: 10
+  },
+  infoContainer: {
+    flex: 1,
+    flexDirection: 'column', 
+    alignItems: 'left',
+  },
+  transactionType: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 20,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#7C82A1',
+    marginLeft: 20, 
+  },
+  amountText: {
+    fontSize: 16,
+    marginLeft: 20, 
   },
 });

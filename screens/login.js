@@ -73,7 +73,7 @@ const Login = ({navigation}) => {
                                     keyboardType="phone-pad"
                                     pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />
-                                <TouchableOpacity style={styles.SignInButton} onPress={handleSubmit} /*onPress={navigateToHomeScreen}*/>
+                                <TouchableOpacity style={styles.SignInButton} /*onPress={handleSubmit}*/ onPress={navigateToHomeScreen}>
                 <Text style={styles.SignInText} >
                     Sign In
                 </Text>

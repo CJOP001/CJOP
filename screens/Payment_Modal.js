@@ -7,65 +7,75 @@ import supabase from '../supabase/supabase';
 const reloadOptions = [10, 15, 20, 50, 100, 500];
 
 
-const PaymentModal = ({ visible, onClose, updateCreditTransactions, creditTransactions, currentUserID }) => {
+const PaymentModal = ({ visible, onClose, creditTransactions, currentUserID }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleUpdateCreditAmount = async (selectedAmount) => {
-    try {
-      // Retrieve the user's current credit balance from data source
-      const { data, error } = await supabase
-        .from('credits')
-        .select('credit_amount')
-        .eq('user_id', currentUserID);
-  
-      if (error) {
-        throw error;
-      }
-  
-      if (data && data.length > 0) {
-        // Calculate the new credit balance
-        const currentCreditAmount = data[0].credit_amount;
-        const newCreditAmount = currentCreditAmount + selectedAmount;
-  
-        // Update the user's credit balance in the data source
-        const { error: updateError } = await supabase
-          .from('credits')
-          .update({ credit_amount: newCreditAmount })
-          .eq('user_id', currentUserID);
-  
-        if (updateError) {
-          throw updateError;
-        }
-  
-        console.log('Credit amount inserted successfully:', selectedAmount);
-        console.log('User ID:', currentUserID);
-        console.log('New Credit Balance:', newCreditAmount);
-  
-        // After inserting the credit amount, update the spent history data
-        const currentDate = new Date();
-        const date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
-  
-        const updatedCreditTransactions = [
-          {
-            amount: selectedAmount,
-            date: date,
-            transaction_type: 'reload',
-          },
-          ...creditTransactions,
-        ];
-  
-        updateCreditTransactions(updatedCreditTransactions);
-  
-        onClose(selectedAmount);
-        setSelectedAmount(null);
-      } else {
-        console.error('No balance data found.');
-      }
-    } catch (error) {
-      console.error('Error updating credit amount:', error);
+const handleUpdateCreditAmount = async (selectedAmount) => {
+  try {
+    // Retrieve the user's current credit balance from data source
+    const { data, error } = await supabase
+      .from('credits')
+      .select('credit_amount')
+      .eq('user_id', currentUserID);
+
+    if (error) {
+      throw error;
     }
-  };
+
+    if (data && data.length > 0) {
+      // Calculate the new credit balance
+      const currentCreditAmount = data[0].credit_amount;
+      const newCreditAmount = currentCreditAmount + selectedAmount;
+
+      // Update the user's credit balance in the data source
+      const { error: updateError } = await supabase
+        .from('credits')
+        .update({ credit_amount: newCreditAmount })
+        .eq('user_id', currentUserID);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      onClose(selectedAmount);
+      setSelectedAmount(null);
+    } else {
+      console.error('No balance data found.');
+    }
+  } catch (error) {
+    console.error('Error updating credit amount:', error);
+  }
+};
+
+const handleInsertCreditTransaction = async (selectedAmount) => {
+  try {
+    const transactionTime = new Date();
+
+    // Insert a record in the credit_transaction table
+    const { error: insertError, data: insertedTransaction } = await supabase
+      .from('credit_transactions')
+      .insert([
+        {
+          user_id: currentUserID,
+          transaction_type: 'Reload',
+          amount: selectedAmount,
+          date: transactionTime.toISOString(),
+        },
+      ]);
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    if (insertedTransaction && insertedTransaction.length > 0) {
+      // Log the inserted transaction
+      console.log('Inserted Transaction:', insertedTransaction[0]);
+    } 
+  } catch (error) {
+    console.error('Error inserting credit transaction:', error);
+  }
+};
   
   
 
@@ -104,6 +114,7 @@ const PaymentModal = ({ visible, onClose, updateCreditTransactions, creditTransa
                 setIsLoading(true);
                 try {
                   await handleUpdateCreditAmount(selectedAmount);
+                  await handleInsertCreditTransaction(selectedAmount);
                   setIsLoading(false);
                   onClose(selectedAmount);
                   setSelectedAmount(null);
@@ -120,7 +131,7 @@ const PaymentModal = ({ visible, onClose, updateCreditTransactions, creditTransa
             <Button
               mode="contained"
               onPress={() => {
-                setSelectedAmount(selectedAmount); // Clear the selected amount
+                setSelectedAmount(null); // Clear the selected amount
                 onClose(); // Close the modal
               }}
               style={[styles.modalButton, styles.cancelButton]}
