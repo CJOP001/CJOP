@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView } from 'react-native';
+
+import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, StatusBar, RefreshControl } from 'react-native';
 import { Appbar, Avatar, Searchbar } from 'react-native-paper';
 import { categories } from '../components/categories';
 import {dummyArticles} from '../components/articles';
 
 import ArticleCard from '../components/ArticleCard';
 
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const STYLES = ['default', 'dark-content', 'light-content'];
+const TRANSITIONS = ['fade', 'slide', 'none'];
+
 const Home = () => {
+
+  const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('Corporate');
+  const [isRefreshing, setRefreshing] = useState(false);
 
    // Dummy data for articles
   const [articles] = useState(dummyArticles);
@@ -38,14 +48,44 @@ const Home = () => {
     ? articles.filter(article => article.category === selectedCategory)
     : articles;
 
+
+  const imageUrl = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg'
+
+  const openDrawer = () => {
+    navigation.openDrawer();
+    console.log(openDrawer);
+  };
+
+  const [hidden, setHidden] = useState(false);
+  const [statusBarStyle, setStatusBarStyle] = useState(STYLES[0]);
+  const [statusBarTransition, setStatusBarTransition] = useState(
+    TRANSITIONS[0],
+  );
+
+  const handleRefresh = async () => {
+    setRefreshing(true); // Start the refresh animation
+
+
+      setRefreshing(false); // Stop the refresh animation when data is fetched
+    }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        animated={true}
+        backgroundColor="#72E6FF"
+        barStyle={statusBarStyle}
+        showHideTransition={statusBarTransition}
+        hidden={hidden}
+      />
       <Appbar.Header>
-        <Avatar.Image
-              source={require('../assets/avatar.png') } 
-              size={40}
-              style={{margin: 10, marginTop: 20}}
-            />
+        <TouchableOpacity onPress={openDrawer}>
+          <Avatar.Image
+            source={{ uri: imageUrl }}
+            size={40}
+            style={{ margin: 10, marginTop: 20 }}
+          />
+        </TouchableOpacity>
         {renderSearchBar()}
       </Appbar.Header>
       <Appbar.Header>
@@ -66,21 +106,32 @@ const Home = () => {
       </ScrollView>
       </Appbar.Header>
       {/* List of articles */}
+      <View style={styles.articleListContainer}>
       <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
         <FlatList
           data={filteredArticles}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={5}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={['#72E6FF']} // Customize the color of the refresh spinner
+            />
+          }
         />
       </View>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#E9EFF7'
   },
   categoryScrollView: {
     padding: 10,
@@ -108,8 +159,12 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 2, 
     margin: 20, // Add some right margin to separate it from other header content
-    marginTop: 30
+
+    marginTop: 30,
   },
+  articleListContainer: {
+    flex: 1, // Expand to fill available space
+  }
 });
 
 export default Home;

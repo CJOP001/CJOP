@@ -1,4 +1,6 @@
+
 export const dummyFriends = [
+
   {
     id: 1,
     name: "Test1",
@@ -6,6 +8,7 @@ export const dummyFriends = [
     following: "FALSE",
     followed: "FALSE",
     imagePath: require("../assets/avatar.png"),
+
   },
   {
     id: 2,
@@ -14,6 +17,7 @@ export const dummyFriends = [
     following: "TRUE",
     followed: "TRUE",
     imagePath: require("../assets/avatar.png"),
+
   },
   {
     id: 3,
@@ -30,6 +34,7 @@ export const dummyFriends = [
     following: "TRUE",
     followed: "FALSE",
     imagePath: require("../assets/avatar.png"),
+
   },
   {
     id: 5,
@@ -38,8 +43,10 @@ export const dummyFriends = [
     following: "FALSE",
     followed: "TRUE",
     imagePath: require("../assets/avatar.png"),
+
   },
   // Add more articles with their respective data
 ];
 
 export default dummyFriends;
+

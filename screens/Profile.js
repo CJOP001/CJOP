@@ -16,20 +16,16 @@ import { categories } from "../components/categories";
 import { dummyArticles } from "../components/articles";
 import ArticleCard from "../components/ArticleCard";
 import "react-native-url-polyfill/auto";
-import { createClient } from "@supabase/supabase-js";
-import { launchImageLibrary } from "react-native-image-picker";
 
-const supabase = createClient(
-  "https://imbrgdnynoeyqyotpxaq.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYnJnZG55bm9leXF5b3RweGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTIyNDI2NzEsImV4cCI6MjAwNzgxODY3MX0.fQ62JtlzvH-HM3tEXrp-rqcAXjb4jwUo1xzlhXw_cjE"
-);
+import supabase from "../supabase/supabase";
 
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
+
 const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
 
-const SelfProfile = () => {
+const SelfProfile = ({navigation}) => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
@@ -110,7 +106,8 @@ const SelfProfile = () => {
                 />
               )} /*Edit Profile button*/
               right={(props) => (
-                <Pressable style={styles.button}>
+
+                <Pressable style={styles.button} onPress={() => navigation.navigate("EditProfile")}>
                   <Text style={styles.buttonText}>Edit Profile</Text>
                 </Pressable>
               )}

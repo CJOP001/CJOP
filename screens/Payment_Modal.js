@@ -1,12 +1,84 @@
+
+//Payment_Modal.js
 import React, { useState } from 'react';
 import { View, Modal, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-paper';
+import supabase from '../supabase/supabase';
 
 const reloadOptions = [10, 15, 20, 50, 100, 500];
 
-const PaymentModal = ({ visible, onClose }) => {
-  const [selectedAmount, setSelectedAmount] = useState(null);
 
+const PaymentModal = ({ visible, onClose, creditTransactions, currentUserID }) => {
+  const [selectedAmount, setSelectedAmount] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+const handleUpdateCreditAmount = async (selectedAmount) => {
+  try {
+    // Retrieve the user's current credit balance from data source
+    const { data, error } = await supabase
+      .from('credits')
+      .select('credit_amount')
+      .eq('user_id', currentUserID);
+
+    if (error) {
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      // Calculate the new credit balance
+      const currentCreditAmount = data[0].credit_amount;
+      const newCreditAmount = currentCreditAmount + selectedAmount;
+
+      // Update the user's credit balance in the data source
+      const { error: updateError } = await supabase
+        .from('credits')
+        .update({ credit_amount: newCreditAmount })
+        .eq('user_id', currentUserID);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      onClose(selectedAmount);
+      setSelectedAmount(null);
+    } else {
+      console.error('No balance data found.');
+    }
+  } catch (error) {
+    console.error('Error updating credit amount:', error);
+  }
+};
+
+const handleInsertCreditTransaction = async (selectedAmount) => {
+  try {
+    const transactionTime = new Date();
+
+    // Insert a record in the credit_transaction table
+    const { error: insertError, data: insertedTransaction } = await supabase
+      .from('credit_transactions')
+      .insert([
+        {
+          user_id: currentUserID,
+          transaction_type: 'Reload',
+          amount: selectedAmount,
+          date: transactionTime.toISOString(),
+        },
+      ]);
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    if (insertedTransaction && insertedTransaction.length > 0) {
+      // Log the inserted transaction
+      console.log('Inserted Transaction:', insertedTransaction[0]);
+    } 
+  } catch (error) {
+    console.error('Error inserting credit transaction:', error);
+  }
+};
+  
+  
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.modalContainer}>
@@ -37,12 +109,21 @@ const PaymentModal = ({ visible, onClose }) => {
             {/* Add the Confirm Reload and Cancel buttons to the grid */}
             <Button
               mode="contained"
-              onPress={() => {
-                onClose(selectedAmount);
-                setSelectedAmount(null);
+              onPress={async () => {
+                setIsLoading(true);
+                try {
+                  await handleUpdateCreditAmount(selectedAmount);
+                  await handleInsertCreditTransaction(selectedAmount);
+                  setIsLoading(false);
+                  onClose(selectedAmount);
+                  setSelectedAmount(null);
+                } catch (error){
+                  console.error('Error:', error);
+                }
               }}
               style={[styles.modalButton, styles.confirmButton]}
               disabled={selectedAmount === null}
+              loading={isLoading}
             >
               Confirm Reload
             </Button>

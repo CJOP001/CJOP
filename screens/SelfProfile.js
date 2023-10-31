@@ -217,4 +217,5 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     color: "#72E6FF",
   },
+
 });

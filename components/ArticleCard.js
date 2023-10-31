@@ -7,15 +7,16 @@ import likeIcon from '../assets/like.png';
 import commentIcon from '../assets/comments.png';
 import shareIcon from '../assets/share.png'; // Import your share icon
 
-const ArticleCard = ({
-  title,
-  status,
-  timestamp,
-  imagePath,
-  content,
-  likes,
-  comments,
-}) => {
+const ArticleCard = React.memo(
+  ({
+    username,
+    status,
+    timestamp,
+    imagePath,
+    content,
+    likes,
+    comments,
+  }) => {
   const [likePressed, setLikePressed] = useState(false);
   const [commentPressed, setCommentPressed] = useState(false);
   const [sharePressed, setSharePressed] = useState(false); // State for the share icon
@@ -35,7 +36,7 @@ const ArticleCard = ({
   return (
     <Card style={styles.articleCard}>
       <Card.Title
-        title={title}
+        title={username}
         subtitle={`Status: ${status} | ${timestamp}`}
         left={(props) => (
           <Avatar.Image
@@ -44,22 +45,27 @@ const ArticleCard = ({
           />
         )}
       />
-      {imagePath ? (
-        <Card.Cover source={require('../assets/image.png')} style={styles.articleImage} />
-      ) : null}
       <Card.Content>
         <Text style={styles.articleText}>{content}</Text>
       </Card.Content>
+      {imagePath ? (
+        <Card.Cover
+          source={{ uri: imagePath }}
+          style={styles.articleImage}
+          resizeMode="cover" // Set resizeMode to 'contain'
+        />
+      ) : null}
+      
       <Card.Actions style={styles.iconContainer}>
         <View style={styles.iconContainerLeft}>
           <TouchableOpacity onPress={handleLikePress}>
-            <View style={[styles.iconWrapper, likePressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, likePressed && { tintColor: '#72E6FF' }]}>
               <Image source={likeIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
           <Text>{likes}</Text>
           <TouchableOpacity onPress={handleCommentPress}>
-            <View style={[styles.iconWrapper, commentPressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, commentPressed && { tintColor: '#72E6FF' }]}>
               <Image source={commentIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
@@ -67,7 +73,7 @@ const ArticleCard = ({
         </View>
         <View style={styles.iconContainerRight}>
           <TouchableOpacity onPress={handleSharePress}>
-            <View style={[styles.iconWrapper, sharePressed && { backgroundColor: '#72E6FF' }]}>
+            <View style={[styles.iconWrapper, sharePressed && { tintColor: '#72E6FF' }]}>
               <Image source={shareIcon} style={styles.icon} />
             </View>
           </TouchableOpacity>
@@ -75,14 +81,15 @@ const ArticleCard = ({
       </Card.Actions>
     </Card>
   );
-};
+});
 
 export default ArticleCard;
 
 const styles = StyleSheet.create({
   articleCard: {
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 20,
+    backgroundColor: '#ffffff'
   },
   iconContainer: {
     flexDirection: 'row',
@@ -106,5 +113,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 'auto', // Pushes the right icon to the right
   },
+  articleImage: {
+    //aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
+    margin: 10,
+  },
   // ... other styles
 });
+

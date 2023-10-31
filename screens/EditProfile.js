@@ -10,17 +10,12 @@ import {
   BackHandler,
   Pressable,
   TextInput,
+  ImageComponent,
 } from "react-native";
 import { Appbar, Avatar, Card } from "react-native-paper";
-import "react-native-url-polyfill/auto";
-import { createClient } from "@supabase/supabase-js";
 import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
-
-const supabase = createClient(
-  "https://imbrgdnynoeyqyotpxaq.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYnJnZG55bm9leXF5b3RweGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTIyNDI2NzEsImV4cCI6MjAwNzgxODY3MX0.fQ62JtlzvH-HM3tEXrp-rqcAXjb4jwUo1xzlhXw_cjE"
-);
+import supabase from "../supabase/supabase";
 
 //change USERID to obtain itself from the previous page
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
