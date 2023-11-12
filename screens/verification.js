@@ -1,4 +1,5 @@
 import React, {useState, useRef, useEffect} from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components';
 import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from "react-native";
@@ -7,8 +8,8 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import supabase from "../supabase/supabase";
 
 
-
 const Verification = ({navigation, route}) => {
+    var tempPhone = route.params.phone 
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 6;
@@ -16,6 +17,8 @@ const Verification = ({navigation, route}) => {
     const textInputRef = useRef(null);
 
     const [inputContainerIsFocused, setInputContainerIsFocused] = useState(false);
+
+
 
     const handleOnPress = () => {
         setInputContainerIsFocused(true);
@@ -72,7 +75,37 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
+
+
+
+    const retrieveUID = async() => {
+        console.log(tempPhone);
+        try {
+            const {data, error} = await supabase
+            .from('app_users')
+            .select('id')
+            .eq(`phone_no`, tempPhone);
+    
+            if(data)
+            {
+                console.log(data);
+                AsyncStorage.setItem('uid', JSON.stringify(data));
+                navigation.navigate("AppSplash");
+
+
+            }
+            else{
+                throw(error);
+            }
+        }
+        catch(error) {
+            console.log(error, "what the hell");
+        }
+    }
+
+
     const VerifyOtp = async () => {
+        console.log(route.params.phone);
         if(pinReady)
         {
             try {
@@ -86,8 +119,8 @@ const Verification = ({navigation, route}) => {
                     throw(error)
                 }
                 else{
-               
-                navigation.navigate("AppSplash");
+                    retrieveUID();
+
                 }
             } catch (error)
             {

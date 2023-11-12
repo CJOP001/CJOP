@@ -1,11 +1,17 @@
-import {React,useState} from "react";
+import {React, useEffect, useState} from "react";
 import { ImageBackground, StyleSheet, View, Text, Image, StatusBar, TouchableOpacity } from "react-native";
 import { Colors } from "../components/styles";
 import supabase from "../supabase/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const AppSplash = ({navigation}) => {
-    const [exit, setExit] = useState(true);
+
+
+
+    const [userID, setUserID] = useState();
+    const [nameID, setNameID] = useState();
+
     const SignOut = async () =>{
         try {
             const { error} = await supabase.auth.signOut();
@@ -24,6 +30,51 @@ const AppSplash = ({navigation}) => {
         }
           
     }
+    
+    useEffect(() => {
+        
+            retrieve();
+            retrieveName();
+
+            console.log(userID);
+    }, [userID, nameID]);
+
+    const retrieve = () => {
+        AsyncStorage.getItem('uid').then(
+         (value) =>
+        setUserID(value),
+        );
+    }; 
+
+    
+    const retrieveName = async() =>
+    {
+        let temp1 = userID.replace("[", "");
+        let temp2 = temp1.replace("]", "");
+        let temp3 = temp2.replace("\"id\":\"", "");
+        let temp4 = temp3.replace("\"", "");
+        try {
+            const {data, error} = await supabase
+            .from("app_users")
+            .select("nameid")
+            .eq("id", temp4);
+            if(data)
+            {
+                console.log(data);
+            }
+            else{
+                throw(error);
+            }
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+    };
+    
+
+
+       
     return (
     
         <View style={styles.AppSplashContainer}>
@@ -38,6 +89,11 @@ const AppSplash = ({navigation}) => {
             <TouchableOpacity style={styles.StyledButton} onPress={SignOut}>
                 <Text style={styles.ButtonText}>
                     Sign Out
+                </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.StyledButton}>
+                <Text style={styles.ButtonText}>
+                   {nameID}
                 </Text>
             </TouchableOpacity>
             

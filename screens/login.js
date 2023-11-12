@@ -9,17 +9,15 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 const Login = ({navigation}) => {
 
-
+    var updatePhone = "";
     
-    const [fetchError, setFetchError] = useState(null)
-    const [phoneNumber, setPhoneNumber] = useState(null)
 
-    var fetchPN = "";
-    
         const fetchPhoneNumber = async () =>{
+
+            
             try {
                 const {data, error} = await supabase.auth.signInWithOtp({
-                    phone: phoneNumber,
+                    phone: updatePhone,
                 })
                 if(error)
                 {
@@ -27,7 +25,7 @@ const Login = ({navigation}) => {
                 }
                 else if(data)
                 {
-                    navigation.navigate('Verification', {phone: phoneNumber,})
+                    navigation.navigate('Verification', {phone: updatePhone,})
                 }
             }
             catch (error)
@@ -36,6 +34,7 @@ const Login = ({navigation}) => {
             }
               
         }
+        
         
     
     return (
@@ -52,7 +51,7 @@ const Login = ({navigation}) => {
                 <Formik 
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
-                        setPhoneNumber(values.phone_number);
+                        updatePhone  = values.phone_number;
                         fetchPhoneNumber();
                     }}
                     >

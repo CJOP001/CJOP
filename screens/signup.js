@@ -73,6 +73,7 @@ const AddNewUser= async() =>
                             .insert({'fullname':  tempUser,
                                     'phone_no': tempPhone,
                                     'nameid': tempId,
+                                    //user_id: 
                                     'status': 'Active'})
                         if(error)
                         {
@@ -133,7 +134,7 @@ const SendOTP = async() =>
         </View>
         <View style={styles.LowerSignUpContainer}>
         <Text style={styles.SignUpTitle}>Welcome to CJOP</Text>
-        <Text style={styles.SignUpInfo}>Become a journalist in your own right. Sign up below to begin your journalist's journey.</Text>
+        <Text style={styles.SignUpInfo}>Sign up below to begin your journalist's journey.</Text>
         
                 <Formik 
                 initialValues={{phone_number: '', username: '', name_id: ''}}
@@ -159,7 +160,7 @@ const SendOTP = async() =>
                                 />
                                 
                                 <UsernameInput 
-                                label="tempUser"
+                                label="Fullname"
                                 placeholder="eg. Titanfall#456"
                                 placeholderTextColor={darkLight}
                                 onChangeText={handleChange('username')}
