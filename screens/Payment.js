@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
-import { Appbar, Button, Card } from 'react-native-paper';
+import { Appbar, Button, Card, Menu } from 'react-native-paper';
 import { Tab, TabView } from '@rneui/themed';
 import supabase from '../supabase/supabase';
 import PaymentModal from './Payment_Modal';
@@ -15,6 +15,8 @@ const Payment = ({ navigation }) => {
   const [index, setIndex] = useState(0);
   const [creditTransactions, setCreditTransactions] = useState([]);
   const [isRefreshing, setRefreshing] = useState(false);
+  const [isMenuVisible, setMenuVisible] = useState(false); // State for the menu
+
 
   // Constants
   const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
@@ -114,6 +116,23 @@ const handleConfirmReload = (amount) => {
   }
 };*/
 
+// Function to handle menu icon press
+const handleMenuPress = () => {
+  setMenuVisible(true);
+};
+
+// Function to handle menu close
+const handleMenuClose = () => {
+  setMenuVisible(false);
+};
+
+// Function to handle menu item press
+const handleMenuOptionPress = (option) => {
+  // Add your logic for the menu item press here
+  // For example, navigate to a corresponding screen based on the option
+  // navigation.navigate(option);
+  handleMenuClose();
+};
 
   const renderContent = () => {
     return (
@@ -129,9 +148,9 @@ const handleConfirmReload = (amount) => {
                   />
                   <View style={styles.infoContainer}>
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
-                    <Text style={styles.amountText}> {new Date(item.date).toLocaleDateString()}</Text>
+                    <Text style={styles.dateText}> {new Date(item.date).toLocaleDateString()}</Text>
                   </View>
-                  <Text style={styles.dateText}> {item.amount} credits</Text>
+                  <Text style={styles.amountText}> {item.amount} credits</Text>
                   
                   
                 </Card.Content>
@@ -168,6 +187,17 @@ const handleConfirmReload = (amount) => {
         <View style={styles.appbarTitleContainer}>
           <Text style={styles.appbarTitle}>Wallet</Text>
         </View>
+        {/* Three-dot menu icon */}
+        <Menu
+          visible={isMenuVisible}
+          onDismiss={handleMenuClose}
+          anchor={
+            <Appbar.Action icon="dots-vertical" color="#ffffff" onPress={handleMenuPress} />
+          }
+        >
+          <Menu.Item onPress={() => handleMenuOptionPress("Transfer")} title="Transfer" />
+          <Menu.Item onPress={() => handleMenuOptionPress("Withdraw")} title="Withdraw" />
+        </Menu>
       </Appbar.Header>
 
       <View style={{ flex: 1, padding: 15 }}>
