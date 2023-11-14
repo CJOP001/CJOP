@@ -35,7 +35,7 @@ const AppSplash = ({navigation}) => {
         
             retrieve();
             retrieveName();
-            console.log(userID);
+            console.log(userID); //outputs the id retrieved and stored
     }, [userID]);
 
     const retrieve = () => {
@@ -62,7 +62,7 @@ const AppSplash = ({navigation}) => {
             if(data)
             {
                 
-                console.log(data);
+                console.log(data); //outputs the nameid retrieved
             }
             else{
                 throw(error);

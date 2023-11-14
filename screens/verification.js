@@ -79,7 +79,7 @@ const Verification = ({navigation, route}) => {
 
 
     const retrieveUID = async() => {
-        console.log(tempPhone);
+        console.log(tempPhone); //shows the number used for id retrieval
         try {
             const {data, error} = await supabase
             .from('app_users')
@@ -88,7 +88,7 @@ const Verification = ({navigation, route}) => {
     
             if(data)
             {
-                console.log(data);
+                console.log(data); //shows the id retrieved
                 AsyncStorage.setItem('uid', JSON.stringify(data));
                 navigation.navigate("AppSplash");
 
@@ -105,7 +105,7 @@ const Verification = ({navigation, route}) => {
 
 
     const VerifyOtp = async () => {
-        console.log(route.params.phone);
+        console.log(route.params.phone); //shows the data taken from signup/login
         if(pinReady)
         {
             try {
