@@ -88,8 +88,8 @@ const Verification = ({navigation, route}) => {
     
             if(data)
             {
-                console.log(data); //shows the id retrieved
-                AsyncStorage.setItem('uid', JSON.stringify(data));
+                console.log(data[0].id); //shows the id retrieved
+                AsyncStorage.setItem('uid', JSON.stringify(data[0].id));
                 navigation.navigate("AppSplash");
 
 

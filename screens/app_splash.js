@@ -9,7 +9,7 @@ const AppSplash = ({navigation}) => {
 
 
 
-    const [userID, setUserID] = useState("");
+    const [userID, setUserID] = useState([]);
     
 
     const SignOut = async () =>{
@@ -39,30 +39,34 @@ const AppSplash = ({navigation}) => {
     }, [userID]);
 
     const retrieve = () => {
+        try{
         AsyncStorage.getItem('uid').then(
          (value) =>
         setUserID(value),
         );
-    }; //retrieves the id in [{"id": "####"}] format
+        
+        }
+        catch(error)
+{
 
-    //experimental, cannot store the value in usestate
+}
+    }; 
+
     const retrieveName = async() =>
     {
-        let temp1 = userID.replace("[{", "");
-        let temp2 = temp1.replace("}]", "");
-        let temp3 = temp2.replace("\"id\":\"", "");
-        let temp4 = temp3.replace("\"", ""); //until here, it will remove the [{"id": ""}] part before insert for query
-        console.log(temp4);
+        console.log(userID);
         try {
+            let temp = userID.replace("\"", "");
+            let temp2 = temp.replace("\"", ""); //copy until here
             const {data, error} = await supabase
             .from("app_users")
             .select("nameid")
-            .eq("id", temp4);
+            .eq("id", temp2);
             
             if(data)
             {
                 
-                console.log(data); //outputs the nameid retrieved
+                console.log(data[0].nameid); //outputs the nameid retrieved
             }
             else{
                 throw(error);
