@@ -9,8 +9,8 @@ const AppSplash = ({navigation}) => {
 
 
 
-    const [userID, setUserID] = useState();
-    const [nameID, setNameID] = useState();
+    const [userID, setUserID] = useState("");
+    
 
     const SignOut = async () =>{
         try {
@@ -35,9 +35,8 @@ const AppSplash = ({navigation}) => {
         
             retrieve();
             retrieveName();
-
             console.log(userID);
-    }, [userID, nameID]);
+    }, [userID]);
 
     const retrieve = () => {
         AsyncStorage.getItem('uid').then(
@@ -49,17 +48,20 @@ const AppSplash = ({navigation}) => {
     
     const retrieveName = async() =>
     {
-        let temp1 = userID.replace("[", "");
-        let temp2 = temp1.replace("]", "");
+        let temp1 = userID.replace("[{", "");
+        let temp2 = temp1.replace("}]", "");
         let temp3 = temp2.replace("\"id\":\"", "");
         let temp4 = temp3.replace("\"", "");
+        console.log(temp4);
         try {
             const {data, error} = await supabase
             .from("app_users")
             .select("nameid")
             .eq("id", temp4);
+            
             if(data)
             {
+                
                 console.log(data);
             }
             else{
@@ -91,12 +93,7 @@ const AppSplash = ({navigation}) => {
                     Sign Out
                 </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.StyledButton}>
-                <Text style={styles.ButtonText}>
-                   {nameID}
-                </Text>
-            </TouchableOpacity>
-            
+                       
         </View>
 
     );
