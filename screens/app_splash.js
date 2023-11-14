@@ -43,15 +43,15 @@ const AppSplash = ({navigation}) => {
          (value) =>
         setUserID(value),
         );
-    }; 
+    }; //retrieves the id in [{"id": "####"}] format
 
-    
+    //experimental, cannot store the value in usestate
     const retrieveName = async() =>
     {
         let temp1 = userID.replace("[{", "");
         let temp2 = temp1.replace("}]", "");
         let temp3 = temp2.replace("\"id\":\"", "");
-        let temp4 = temp3.replace("\"", "");
+        let temp4 = temp3.replace("\"", ""); //until here, it will remove the [{"id": ""}] part before insert for query
         console.log(temp4);
         try {
             const {data, error} = await supabase
