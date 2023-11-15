@@ -16,7 +16,6 @@ import { categories } from "../components/categories";
 import { dummyArticles } from "../components/articles";
 import ArticleCard from "../components/ArticleCard";
 import "react-native-url-polyfill/auto";
-
 import supabase from "../supabase/supabase";
 
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
@@ -25,7 +24,7 @@ const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
 
-const SelfProfile = ({navigation}) => {
+const SelfProfile = ({ navigation }) => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
@@ -106,8 +105,12 @@ const SelfProfile = ({navigation}) => {
                 />
               )} /*Edit Profile button*/
               right={(props) => (
-
-                <Pressable style={styles.button} onPress={() => navigation.navigate("EditProfile")}>
+                <Pressable
+                  style={styles.button}
+                  onPress={() =>
+                    navigation.navigate("EditProfile", { id: userdata.id })
+                  }
+                >
                   <Text style={styles.buttonText}>Edit Profile</Text>
                 </Pressable>
               )}

@@ -15,50 +15,88 @@ import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
 import { ListItem } from "react-native-elements";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
+import { isString } from "formik";
 
 const supabase = createClient(
   "https://imbrgdnynoeyqyotpxaq.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYnJnZG55bm9leXF5b3RweGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTIyNDI2NzEsImV4cCI6MjAwNzgxODY3MX0.fQ62JtlzvH-HM3tEXrp-rqcAXjb4jwUo1xzlhXw_cjE"
 );
 
+//hardcoded user id. TODO: Update to automatically retrieve id from previous parts.
 var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
 
-const FriendsList = ({navigation}) => {
+const FriendsList = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
-
+  var query = "";
   const onChangeSearch = (query) => {
     // Update the search query state
     setSearchQuery(query);
+    query = "*" + query + "*";
+    //console.log("Now searching: " + query);
+    sortPeople(query);
   };
 
   //initial fake data because react will load this data regardless of if the data has been obtained yet
   const [people, SetPeople] = useState([{ fullname: "" }]);
 
-  const sortPeople = async () => {
-    console.log("Start sorting all people");
+  const sortPeople = async (query) => {
     //query for everyone that does not have the current user id
-    const { data, error } = await supabase
-      .from("app_users")
-      .select(
-        `
+    if (!isString(query)) {
+      //console.log("Sorting no query");
+      const { data, error } = await supabase
+        .from("app_users")
+        .select(
+          `
         id, 
         nameid,
         fullname,
         user_image
         `
-      )
-      .neq("id", userID);
-    SetPeople(data);
+        )
+        .neq("id", userID);
+      SetPeople(data);
+    } else {
+      //console.log("Sorting with query");
+      //console.log(query);
+      const { data, error } = await supabase
+        .from("app_users")
+        .select(
+          `
+      id, 
+      nameid,
+      fullname,
+      user_image
+      `
+        )
+        .neq("id", userID)
+        .textSearch("nameid", query);
+      // currently this query system only takes in strict values and not wildcards. This does not use a regex format so wildcards (*) do not work.
+      // to utilize regex, the query lookup needs to be converted to full posgres which i do not have time for.
+      console.log(data);
+      //if the dataset is empty, don't render anything.
+      if (data.length > 0) {
+        SetPeople(data);
+      }
+    }
   };
 
   const sortFollowing = async () => {
     console.log("Started sorting following.");
     //query for every friend_id and their associated app_users data when the user_id is equal to the current session's user_id
-    //this one is objectively correct but fails due to not recognizing the correct foreign key
+    //query for everyone that does not have the current user id
     const { data, error, count } = await supabase
       .from("friends")
-      .select(`friend_id, app_users( user_image, fullname, nameid)`)
+      .select(`friend_id, user:friend_id(id, user_image, fullname, nameid)`)
       .eq("user_id", userID);
+    if (data.length > 0) {
+      SetPeople(data);
+    }
+
+    //this one is objectively correct but fails due to not recognizing the correct foreign key
+    // const { data, error, count } = await supabase
+    //   .from("friends")
+    //   .select(`friend_id, app_users( user_image, fullname, nameid)`)
+    //   .eq("user_id", userID);
 
     //a reversed query of the above. Somehow the id field is left empty and the sort doesnt work.
     // const { data, error } = await supabase
@@ -66,32 +104,39 @@ const FriendsList = ({navigation}) => {
     //   .select(`friends(user_id), user_image, fullname, nameid`)
     //   .eq("friends.user_id", userID);
 
-    console.log(data);
-    SetPeople(data);
+    //honestly, gg. spent roughly 24 hours across several weeks just working out this part.
+    //console.log(data);
   };
 
   const sortFollowers = async () => {
     console.log("Started sorted followers.");
     //query for the user_id and their associated app_users data when the friend_id is equal to the current session's user_id
+    //query for everyone that does not have the current user id
     const { data, error, count } = await supabase
       .from("friends")
-      .select(`user_id, app_users( user_image, fullname, nameid)`)
+      .select(`user_id, user:user_id(id, user_image, fullname, nameid)`)
       .eq("friend_id", userID);
-    console.log(data);
-    SetPeople(data);
+    if (data.length > 0) {
+      SetPeople(data);
+    }
   };
-
   function renderList() {
     //render the elements based on the data obtained as the data obtained comes in slightly different formats
     if (typeof people[0].fullname !== "undefined") {
-      console.log("sorting by 2d array");
       //this returns the elements suitable for a two dimensional json array
       return (
         <FlatList
           data={people}
           keyExtractor={(item) => item.user_id}
           renderItem={({ item }) => (
-            <ListItem>
+            <ListItem
+              onPress={() => {
+                navigation.navigate("OtherProfile", {
+                  id: item.id,
+                  user_id: userID,
+                });
+              }}
+            >
               <Avatar.Image
                 rounded
                 source={{
@@ -105,22 +150,29 @@ const FriendsList = ({navigation}) => {
         />
       );
     } else {
-      console.log("sorting by 3d array");
       // this returns the elements suitable for a three dimensional json array
       return (
         <FlatList
           data={people}
           keyExtractor={(item) => item.user_id}
           renderItem={({ item }) => (
-            <ListItem>
+            <ListItem
+              onPress={() => {
+                console.log(item.user_id);
+                navigation.navigate("OtherProfile", {
+                  id: item.user.id,
+                  user_id: userID,
+                });
+              }}
+            >
               <Avatar.Image
                 rounded
                 source={{
-                  uri: item.app_users.user_image,
+                  uri: item.user.user_image,
                 }}
               />
-              <ListItem.Title>{item.app_users.fullname}</ListItem.Title>
-              <ListItem.Subtitle>@{item.app_users.nameid}</ListItem.Subtitle>
+              <ListItem.Title>{item.user.fullname}</ListItem.Title>
+              <ListItem.Subtitle>@{item.user.nameid}</ListItem.Subtitle>
             </ListItem>
           )}
         />
@@ -145,7 +197,7 @@ const FriendsList = ({navigation}) => {
           />
         </View>
         {/*Header*/}
-        <Appbar.Content title="Manage Friendss" style={styles.appContent} />
+        <Appbar.Content title="Manage Friends" style={styles.appContent} />
       </Appbar.Header>
       <View>
         {/*Search Bar */}
@@ -188,7 +240,6 @@ const FriendsList = ({navigation}) => {
     </View>
   );
 };
-
 export default FriendsList;
 
 const styles = StyleSheet.create({

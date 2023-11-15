@@ -17,10 +17,10 @@ import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
 import supabase from "../supabase/supabase";
 
-//change USERID to obtain itself from the previous page
-var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
+const EditProfile = (navigation) => {
+  //change USERID to obtain itself from the previous page
+  var userID = navigation.route.params.id;
 
-const EditProfile = () => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
