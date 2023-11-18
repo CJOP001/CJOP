@@ -4,12 +4,12 @@ import { Colors } from "../components/styles";
 import supabase from "../supabase/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
 const AppSplash = ({navigation}) => {
 
 
 
     const [userID, setUserID] = useState([]);
+    const [temp, setTemp] = useState();
     
 
     const SignOut = async () =>{
@@ -34,34 +34,39 @@ const AppSplash = ({navigation}) => {
     useEffect(() => {
         
             retrieve();
-            retrieveName();
+            
             console.log(userID); //outputs the id retrieved and stored
-    }, [userID]);
+    }, [userID, temp]);
 
     const retrieve = () => {
-        try{
+        
+        
         AsyncStorage.getItem('uid').then(
          (value) =>
-        setUserID(value),
+       setTemp(value),
         );
-        
+
+        try{
+        let temp1 = temp.replace("\"", "");
+        let temp2 = temp1.replace("\"", "");
+        setUserID(temp2);
         }
         catch(error)
 {
 
 }
+retrieveName();
     }; 
 
     const retrieveName = async() =>
     {
-        console.log(userID);
         try {
-            let temp = userID.replace("\"", "");
-            let temp2 = temp.replace("\"", ""); //copy until here
+           // let temp = userID.replace("\"", "");
+            //let temp2 = temp.replace("\"", ""); //copy until here
             const {data, error} = await supabase
             .from("app_users")
             .select("nameid")
-            .eq("id", temp2);
+            .eq("id", userID);
             
             if(data)
             {
