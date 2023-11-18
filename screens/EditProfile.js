@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   StyleSheet,
@@ -18,7 +19,7 @@ import { decode } from "base64-arraybuffer";
 import supabase from "../supabase/supabase";
 
 //change USERID to obtain itself from the previous page
-var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
+//var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
 
 const EditProfile = () => {
   const [userdata, SetUser] = useState([]);
@@ -30,7 +31,7 @@ const EditProfile = () => {
   const [newdesc, changeDesc] = useState();
   const [newproflink, changeProfLink] = useState();
   const [newbacklink, changeBackLink] = useState();
-
+  const [userID, setUserID] = useState([]);
   const uploadAvatar = async () => {
     //launch the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -170,11 +171,25 @@ const EditProfile = () => {
     SetFollowers(data.length);
   };
 
+  const retrieve = () => {
+    try{
+    AsyncStorage.getItem('uid').then(
+     (value) =>
+    setUserID(value),
+    );
+    
+    }
+    catch(error)
+{
+
+}
+}; 
   useEffect(() => {
+    retrieve();
     getData();
     getFollowers();
     getFollowing();
-  }, []);
+  }, [userID]);
 
   return (
     <View>

@@ -1,11 +1,17 @@
-import {React,useState} from "react";
+import {React, useEffect, useState} from "react";
 import { ImageBackground, StyleSheet, View, Text, Image, StatusBar, TouchableOpacity } from "react-native";
 import { Colors } from "../components/styles";
 import supabase from "../supabase/supabase";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AppSplash = ({navigation}) => {
-    const [exit, setExit] = useState(true);
+
+
+
+    const [userID, setUserID] = useState([]);
+    const [temp, setTemp] = useState();
+    
+
     const SignOut = async () =>{
         try {
             const { error} = await supabase.auth.signOut();
@@ -24,6 +30,62 @@ const AppSplash = ({navigation}) => {
         }
           
     }
+    
+    useEffect(() => {
+        
+            retrieve();
+            
+            console.log(userID); //outputs the id retrieved and stored
+    }, [userID, temp]);
+
+    const retrieve = () => {
+        
+        
+        AsyncStorage.getItem('uid').then(
+         (value) =>
+       setTemp(value),
+        );
+
+        try{
+        let temp1 = temp.replace("\"", "");
+        let temp2 = temp1.replace("\"", "");
+        setUserID(temp2);
+        }
+        catch(error)
+{
+
+}
+retrieveName();
+    }; 
+
+    const retrieveName = async() =>
+    {
+        try {
+           // let temp = userID.replace("\"", "");
+            //let temp2 = temp.replace("\"", ""); //copy until here
+            const {data, error} = await supabase
+            .from("app_users")
+            .select("nameid")
+            .eq("id", userID);
+            
+            if(data)
+            {
+                
+                console.log(data[0].nameid); //outputs the nameid retrieved
+            }
+            else{
+                throw(error);
+            }
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+    };
+    
+
+
+       
     return (
     
         <View style={styles.AppSplashContainer}>
@@ -40,7 +102,7 @@ const AppSplash = ({navigation}) => {
                     Sign Out
                 </Text>
             </TouchableOpacity>
-            
+                       
         </View>
 
     );

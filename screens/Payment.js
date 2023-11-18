@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
 import { Appbar, Button, Card, Menu } from 'react-native-paper';
 import { Tab, TabView } from '@rneui/themed';
@@ -16,10 +17,11 @@ const Payment = ({ navigation }) => {
   const [creditTransactions, setCreditTransactions] = useState([]);
   const [isRefreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false); // State for the menu
-
+  const [currentUserID, setCurrentUserID] = useState([]);
+  const [temp, setTemp] = useState();
 
   // Constants
-  const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
+  //const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
 
   // Constants for transaction types
   const TRANSACTION_RELOAD = 'reload';
@@ -29,7 +31,7 @@ const Payment = ({ navigation }) => {
 // Function to fetch balance
 const fetchBalance = async () => {
   try {
-    const { data, error } = await supabase
+      const { data, error } = await supabase
       .from('credits')
       .select('credit_amount')
       .eq('user_id', currentUserID);
@@ -50,7 +52,7 @@ const fetchBalance = async () => {
 // Function to fetch user's credit transactions
 const fetchCreditTransactions = async () => {
   try {
-    const { data, error } = await supabase
+       const { data, error } = await supabase
       .from('credit_transactions')
       .select('*')
       .eq('user_id', currentUserID)
@@ -80,9 +82,27 @@ const handleRefresh = async () => {
 };
 
   useEffect(() => {
+    retrieve();
     fetchBalance();
     fetchCreditTransactions();
-  }, []);
+  }, [currentUserID, temp]);
+
+  const retrieve = () => {
+        
+        
+    AsyncStorage.getItem('uid').then(
+     (value) =>
+   setTemp(value),
+    );
+
+    try{
+    let temp1 = temp.replace("\"", "");
+    let temp2 = temp1.replace("\"", "");
+    setCurrentUserID(temp2);
+    }
+    catch(error)
+{}
+}; 
 
   // Function to toggle the modal
   const toggleModal = () => {
