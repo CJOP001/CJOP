@@ -206,7 +206,7 @@ const handleMenuOptionPress = (option) => {
           visible={isMenuVisible}
           onDismiss={handleMenuClose}
           anchor={
-            <Appbar.Action icon="dots-vertical" color="#ffffff" onPress={handleMenuPress} />
+            <Appbar.Action icon="dots-vertical" color="#000000" onPress={handleMenuPress} />
           }
         >
           <Menu.Item onPress={() => handleMenuOptionPress("Transfer")} title="Transfer" />
@@ -314,7 +314,6 @@ const styles = StyleSheet.create({
   },
   appbarTitleContainer: {
     flex: 1,
-    marginRight: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },

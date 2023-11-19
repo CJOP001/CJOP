@@ -1,7 +1,7 @@
 // WithdrawModal.js
 import React, { useState } from 'react';
-import { Modal, View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Button, RadioButton } from 'react-native-paper';
+import { Modal, View, Text, StyleSheet} from 'react-native';
+import { Button } from 'react-native-paper';
 import supabase from '../../supabase/supabase';
 
 const reloadOptions = [10, 15, 20, 50, 100, 500];
@@ -13,41 +13,44 @@ const WithdrawModal = ({ visible, onClose, balance, onUpdateBalance }) => {
   const [loading, setLoading] = useState(false);
 
 
-  const handleWithdrawal = async () => {
-    setLoading(true);
+const handleWithdrawal = async () => {
+  setLoading(true);
+  
+  try {
+    console.log('Current balance:', balance);
+    console.log('Selected amount:', selectedAmount);
     
-    try {
-      console.log('Current balance:', balance);
-      console.log('Selected amount:', selectedAmount);
+    if (balance >= selectedAmount) {
+      console.log(`Withdrawal confirmed with amount: $${selectedAmount}`);
+      const newBalance = balance - selectedAmount;
       
-      if (balance >= selectedAmount) {
-        console.log(`Withdrawal confirmed with amount: $${selectedAmount}`);
-        const newBalance = balance - selectedAmount;
-        
-        // Simulate an asynchronous database update
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // Update the user's balance in the database
-        await onUpdateBalance(newBalance);
-        
-        onClose(); // Close the modal after withdrawal
-      } else {
-        console.log('Insufficient balance for withdrawal');
-        // Show an alert or any UI indication for insufficient balance
-      }
-    } catch (error) {
-      console.error('Error handling withdrawal:', error);
-      // Handle the error, show an error message to the user, or retry the operation
-    } finally {
-      setLoading(false);
+      // Simulate an asynchronous database update
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Update the user's balance in the database
+      await onUpdateBalance(newBalance);
+      
+      onClose(); // Close the modal after withdrawal
+    } else {
+      console.log('Insufficient balance for withdrawal');
+      // Show an alert or any UI indication for insufficient balance
     }
-  };
+  } catch (error) {
+    console.error('Error handling withdrawal:', error);
+    // Handle the error, show an error message to the user, or retry the operation
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Withdrawal</Text>
+          <Text style={styles.modalTitle}>Withdraw Credits</Text>
+            <Text style={styles.modalDescription}>
+              Select the amount you want to withdraw from your account.
+            </Text>
           <View style={styles.buttonGrid}>
             {reloadOptions.map((amount) => (
               <Button
@@ -70,6 +73,29 @@ const WithdrawModal = ({ visible, onClose, balance, onUpdateBalance }) => {
                 {amount}
               </Button>
             ))}
+
+          <Button
+            mode="contained"
+            onPress={handleWithdrawal}
+            style={styles.modalButton}
+            contentStyle={styles.buttonContent}
+            disabled={selectedAmount === null}
+            loading={loading}
+          >
+              Withdraw
+          </Button>
+          
+          <Button
+            mode="contained"
+            onPress={() => {
+              setSelectedAmount(null);
+              onClose(); 
+            }}
+            style={styles.modalButton}
+            contentStyle={styles.buttonContent}
+          >
+            Cancel
+          </Button>
           </View>
 
           {/*<ScrollView>
@@ -85,28 +111,7 @@ const WithdrawModal = ({ visible, onClose, balance, onUpdateBalance }) => {
             ))}
             </ScrollView>*/}
 
-          <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleWithdrawal}
-            style={styles.modalButton}
-            contentStyle={styles.buttonContent}
-            disabled={loading}
-            loading={loading}
-          >
-              Withdraw
-          </Button>
           
-          <Button
-            mode="contained"
-            onPress={onClose}
-            style={styles.modalButton}
-            contentStyle={styles.buttonContent}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          </View>
 
         </View>
       </View>
@@ -128,29 +133,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
+  modalDescription: {
+    marginBottom: 10,
+    color: '#7C82A1',
+  },
   modalContent: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
     width: '80%',
-    height: '40%',
     alignItems: 'left',
+    maxWidth: 500,
+    height: '50%',
+    maxHeight: 400 ,
   },
   buttonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 10,
+    marginTop: 10,
   },
   amountText: {
     color: 'black',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
   },
   modalButton: {
     marginTop: 10,
