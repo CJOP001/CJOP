@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { View, Modal, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-paper';
-import supabase from '../supabase/supabase';
+import supabase from '../../supabase/supabase';
 
 const reloadOptions = [10, 15, 20, 50, 100, 500];
 
 
-const PaymentModal = ({ visible, onClose, creditTransactions, currentUserID }) => {
+const PaymentModal = ({ visible, onClose, currentUserID }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
 import { Appbar, Button, Card, Menu } from 'react-native-paper';
 import { Tab, TabView } from '@rneui/themed';
-import supabase from '../supabase/supabase';
+import supabase from '../../supabase/supabase';
 import PaymentModal from './Payment_Modal';
+import TransferModal from './TransferModal';
+import WithdrawModal from './WithdrawModal';
 
 const Payment = ({ navigation }) => {
   // State variables
@@ -16,15 +18,17 @@ const Payment = ({ navigation }) => {
   const [creditTransactions, setCreditTransactions] = useState([]);
   const [isRefreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false); // State for the menu
+  const [isTransferModalVisible, setTransferModalVisible] = useState(false);
+  const [isWithdrawModalVisible, setWithdrawModalVisible] = useState(false);
 
 
   // Constants
-  const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
+  const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39'; //lwk
 
   // Constants for transaction types
-  const TRANSACTION_RELOAD = 'reload';
-  const TRANSACTION_RECEIVED = 'received';
-  const TRANSACTION_POST = 'post';
+  const TRANSACTION_RELOAD = 'Reload';
+  const TRANSACTION_RECEIVED = 'Received';
+  const TRANSACTION_POST = 'Post';
 
 // Function to fetch balance
 const fetchBalance = async () => {
@@ -128,11 +132,21 @@ const handleMenuClose = () => {
 
 // Function to handle menu item press
 const handleMenuOptionPress = (option) => {
-  // Add your logic for the menu item press here
-  // For example, navigate to a corresponding screen based on the option
-  // navigation.navigate(option);
+  switch (option) {
+    case "Transfer":
+      setTransferModalVisible(true);
+      break;
+    case "Withdraw":
+      setWithdrawModalVisible(true);
+      break;
+    default:
+      // Handle other options if needed
+  }
+
   handleMenuClose();
 };
+
+
 
   const renderContent = () => {
     return (
@@ -143,16 +157,16 @@ const handleMenuOptionPress = (option) => {
               <Card key={index} style={{ marginVertical: 10 }}>
                 <Card.Content style={styles.cardContainer}>
                   <Image
-                    source={require('../assets/credit-card.png')}
+                    source={require('../../assets/credit-card.png')}
                     style={styles.icon}
                   />
                   <View style={styles.infoContainer}>
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
-                    <Text style={styles.dateText}> {new Date(item.date).toLocaleDateString()}</Text>
+                    <Text style={styles.dateText}> {new Date(item.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                   </View>
-                  <Text style={styles.amountText}> {item.amount} credits</Text>
-                  
-                  
+                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
+                    {item.amount} credits
+                  </Text>
                 </Card.Content>
               </Card>
             ))}
@@ -221,6 +235,17 @@ const handleMenuOptionPress = (option) => {
           creditTransactions={creditTransactions}
           currentUserID={currentUserID}
         />
+
+        {/* Transfer Modal */}
+      <TransferModal visible={isTransferModalVisible} onClose={() => setTransferModalVisible(false)} />
+
+        {/* Withdraw Modal */}
+      <WithdrawModal
+        visible={isWithdrawModalVisible}
+        onClose={() => setWithdrawModalVisible(false)}
+        balance={balance}  // Pass the balance as a prop to WithdrawModal
+        onUpdateBalance={(newBalance) => setBalance(newBalance)}  // Pass a function to update the balance
+      />
 
         <Text style={{ textAlign: 'center', color: '#72E6FF', padding: 10, fontSize: 25, fontWeight: 'bold' }}>
           Learn About Credits
@@ -297,7 +322,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 24,
     fontWeight: '500',
-    color: '#ffffff'
   },
   cardContainer:{
     flexDirection: 'row', 
@@ -325,6 +349,7 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontSize: 16,
-    marginLeft: 20, 
+    marginLeft: 20,
+    fontWeight: 'bold', 
   },
 });
