@@ -8,7 +8,7 @@ import supabase from '../supabase/supabase';
 
 
 import TabNavigator from './TabNavigator';
-import Payment from '../screens/Payment';
+import Payment from '../screens/Payment/Payment';
 import Profile from '../screens/Profile';
 import FriendsList from '../screens/FriendList';
 import Home from '../screens/Home';

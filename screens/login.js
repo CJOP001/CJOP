@@ -9,21 +9,15 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 
 const Login = ({navigation}) => {
 
-
+    var updatePhone = "";
     
-    const [fetchError, setFetchError] = useState(null)
-    const [phoneNumber, setPhoneNumber] = useState(null)
 
-    const navigateToHomeScreen = () => {
-        navigation.navigate('TabNavigator');
-      };
-
-    var fetchPN = "";
-    
         const fetchPhoneNumber = async () =>{
+
+            
             try {
                 const {data, error} = await supabase.auth.signInWithOtp({
-                    phone: phoneNumber,
+                    phone: updatePhone,
                 })
                 if(error)
                 {
@@ -31,7 +25,7 @@ const Login = ({navigation}) => {
                 }
                 else if(data)
                 {
-                    navigation.navigate('Verification', {phone: phoneNumber,})
+                    navigation.navigate('Verification', {phone: updatePhone,})
                 }
             }
             catch (error)
@@ -40,6 +34,7 @@ const Login = ({navigation}) => {
             }
               
         }
+        
         
     
     return (
@@ -52,11 +47,11 @@ const Login = ({navigation}) => {
         </View>
         <View style={styles.LowerLoginContainer}>
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
-        <Text style={styles.LoginInfo}>Log in to your account with your phone number.</Text>
+        <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
                 <Formik 
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
-                        setPhoneNumber(values.phone_number);
+                        updatePhone  = values.phone_number;
                         fetchPhoneNumber();
                     }}
                     >
@@ -73,7 +68,7 @@ const Login = ({navigation}) => {
                                     keyboardType="phone-pad"
                                     pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />
-                                <TouchableOpacity style={styles.SignInButton} /*onPress={handleSubmit}*/ onPress={fetchPhoneNumber}>
+                                <TouchableOpacity style={styles.SignInButton} onPress={handleSubmit}>
                 <Text style={styles.SignInText} >
                     Sign In
                 </Text>
