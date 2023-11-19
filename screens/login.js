@@ -52,7 +52,7 @@ const Login = ({navigation}) => {
         </View>
         <View style={styles.LowerLoginContainer}>
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
-        <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
+        <Text style={styles.LoginInfo}>Log in to your account with your phone number.</Text>
                 <Formik 
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
@@ -73,7 +73,7 @@ const Login = ({navigation}) => {
                                     keyboardType="phone-pad"
                                     pattern="^[601]([0-9]{8}|[0-9]{9}$"
                                 />
-                                <TouchableOpacity style={styles.SignInButton} /*onPress={handleSubmit}*/ onPress={navigateToHomeScreen}>
+                                <TouchableOpacity style={styles.SignInButton} /*onPress={handleSubmit}*/ onPress={fetchPhoneNumber}>
                 <Text style={styles.SignInText} >
                     Sign In
                 </Text>

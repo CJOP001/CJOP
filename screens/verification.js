@@ -1,4 +1,5 @@
 import React, {useState, useRef, useEffect} from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components';
 import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from "react-native";
@@ -7,8 +8,8 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import supabase from "../supabase/supabase";
 
 
-
 const Verification = ({navigation, route}) => {
+    var tempPhone = route.params.phone 
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 6;
@@ -16,6 +17,8 @@ const Verification = ({navigation, route}) => {
     const textInputRef = useRef(null);
 
     const [inputContainerIsFocused, setInputContainerIsFocused] = useState(false);
+
+
 
     const handleOnPress = () => {
         setInputContainerIsFocused(true);
@@ -72,7 +75,37 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
+
+
+
+    const retrieveUID = async() => {
+        console.log(tempPhone); //shows the number used for id retrieval
+        try {
+            const {data, error} = await supabase
+            .from('app_users')
+            .select('id')
+            .eq(`phone_no`, tempPhone);
+    
+            if(data)
+            {
+                console.log(data[0].id); //shows the id retrieved
+                AsyncStorage.setItem('uid', JSON.stringify(data[0].id));
+                navigation.navigate("TabNavigator");
+
+
+            }
+            else{
+                throw(error);
+            }
+        }
+        catch(error) {
+            console.log(error, "UID retrieval failed");
+        }
+    }
+
+
     const VerifyOtp = async () => {
+        console.log(route.params.phone); //shows the data taken from signup/login
         if(pinReady)
         {
             try {
@@ -86,8 +119,8 @@ const Verification = ({navigation, route}) => {
                     throw(error)
                 }
                 else{
-               
-                navigation.navigate("TabNavigator");
+                    retrieveUID();
+
                 }
             } catch (error)
             {
@@ -109,7 +142,7 @@ const Verification = ({navigation, route}) => {
             <Text style={styles.VerificationTitle}>
                 Verification Code
             </Text>
-            <Text style={styles.VerificationInfo}>Enter the 6 digit Verification Code we have sent to your email to proceed.</Text>
+            <Text style={styles.VerificationInfo}>Enter the 6-digit One Time Password sent to your phone number via SMS below.</Text>
             <View style={styles.VerificationInput}>
                 < Pressable style={styles.VerificationPressable} onPress={handleOnPress}>
                     {codeDigitsArray.map(toCodeDigitInput)}
@@ -261,4 +294,5 @@ const OTPInputFocused = styled(OTPInput)`
     background-color: #7188FF;
 `;
 export default Verification;
+
 
