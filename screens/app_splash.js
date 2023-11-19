@@ -82,7 +82,20 @@ retrieveName();
             console.log(error);
         }
     };
-    
+    const retrieveSession = async() => {
+        try{
+            const { data, error } = await supabase.auth.getSession();
+            if (data)
+            {
+                console.log(data.session.access_token);
+            }
+            else{
+                throw error;
+            }
+        } catch(error)
+        {}
+    };
+   
 
 
        
@@ -100,6 +113,11 @@ retrieveName();
             <TouchableOpacity style={styles.StyledButton} onPress={SignOut}>
                 <Text style={styles.ButtonText}>
                     Sign Out
+                </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.StyledButton} onPress={retrieveSession}>
+                <Text style={styles.ButtonText}>
+                   Retrive Session
                 </Text>
             </TouchableOpacity>
                        
