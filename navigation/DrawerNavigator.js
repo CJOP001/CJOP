@@ -12,6 +12,7 @@ import Payment from '../screens/Payment';
 import Profile from '../screens/Profile';
 import FriendsList from '../screens/FriendList';
 import Home from '../screens/Home';
+import TermsAndConditions from '../screens/TermsAndConditions';
 import StackNavigator from './StackNavigator';
 
 const Drawer = createDrawerNavigator();
@@ -123,15 +124,14 @@ function CustomDrawerContent(props) {
             </Dialog.Content>
             <Dialog.Actions>
               <TouchableOpacity activeOpacity={1} onPress={props.hideLogoutDialog}>
-                <Button labelStyle={styles.dialogButton}>Cancel</Button>
+                <Button labelStyle={styles.cancelButton}>Cancel</Button>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} onPress={handleLogout}>
-                <Button labelStyle={styles.dialogButton}>Logout</Button>
+                <Button labelStyle={styles.logoutButton}>Logout</Button>
               </TouchableOpacity>
             </Dialog.Actions>
           </Dialog>
         </Portal>
-
 
     </DrawerContentScrollView>
   );
@@ -274,55 +274,58 @@ function DrawerNavigator() {
       );
   }
 
-  const styles = StyleSheet.create({
-    avatarContainer: {
-      padding: 16,
-    },
-    avatarAndInfo: {
-      flexDirection: 'row', 
-      alignItems: 'center', 
-    },
-    avatar: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-    },
-    infoContainer: {
-      marginLeft: 16, 
-      flexDirection: 'column',
-    },
-    username: {
-      fontSize: 18,
-    },
-    alias: {
-      fontSize: 16,
-      color: 'gray',
-    },
-    icon: {
-      width: 24,
-      height: 24,
-      tintColor: 'gray', 
-    },
-    countContainer: {
-      margin: 18,
-    },
-    countRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    countText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginLeft: 8
-    },
-    countLabel: {
-      marginLeft: 8,
-      fontSize: 16,
-      color: 'gray',
-    },
-    dialogButton: {
-      color: '#72E6FF'
-    }
-  });
+const styles = StyleSheet.create({
+  avatarContainer: {
+    padding: 16,
+  },
+  avatarAndInfo: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  infoContainer: {
+    marginLeft: 16, 
+    flexDirection: 'column',
+  },
+  username: {
+    fontSize: 18,
+  },
+  alias: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    tintColor: 'gray', 
+  },
+  countContainer: {
+    margin: 18,
+  },
+  countRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  countText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8
+  },
+  countLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: 'gray',
+  },
+  cancelButton: {
+    color: 'gray',
+  },
+  logoutButton: {
+    color: '#72E6FF', 
+  },
+});
 
 export default DrawerNavigator;
