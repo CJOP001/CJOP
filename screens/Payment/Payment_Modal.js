@@ -77,13 +77,13 @@ const handleInsertCreditTransaction = async (selectedAmount) => {
   }
 };
   
-  
 
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Select Reload Amount</Text>
+          <Text style={styles.modalDescription}>Choose the amount you want to reload into your account.</Text>
           <View style={styles.buttonGrid}>
             {reloadOptions.map((amount) => (
               <Button
@@ -159,13 +159,17 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'left',
     maxWidth: 500,
-    height: '40%',
-    maxHeight: 350 ,
+    height: '50%',
+    maxHeight: 400 ,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  modalDescription: {
+    marginBottom: 10,
+    color: '#7C82A1',
   },
   modalButton: {
     marginTop: 10,
