@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import supabase from '../supabase/supabase';
 
 
-const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInputValue, image}) => {
+const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInputValue, image, selectedCategoryId, userId}) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
 
@@ -65,6 +65,7 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
         // Create a FormData object and append the image
         var formData = new FormData();
         formData.append("files", {
+          user_id: userId,
           uri: imageBase64, // Use the base64 image data
           type: mimeType, // Set the correct MIME type
           name: imageName,
@@ -91,6 +92,7 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
                 description: textInputValue,
                 image_path: imageUrl,
                 created_at: now,
+                nc_id: selectedCategoryId,
               },
             ])
             .select('*');
@@ -99,7 +101,7 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
             console.error('Error sending data to Supabase:', postError);
           } else {
             console.log('Data sent to Supabase:', postData);
-            navigation.navigate('Home');
+            navigation.navigate('TabNavigator');
           }
         }
       }

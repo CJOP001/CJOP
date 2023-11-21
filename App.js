@@ -1,16 +1,13 @@
 import React from 'react';
-import AppNavigator from './components/Navigator';
+import AppNavigator from './navigation/Navigator';
 import 'react-native-gesture-handler';
-
-import { AppRegistry } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
 
 export default function App() {
 
-  AppRegistry.registerComponent('CJOP', () => PaymentModal);
-
   return (
-
+    <PaperProvider>
       <AppNavigator/>
-
+    </PaperProvider>
   );
 }

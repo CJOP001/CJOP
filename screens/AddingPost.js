@@ -10,17 +10,27 @@ const AddingPost = ({ isVisible, onClose }) => {
 
   const handleCreatePostPress = () => {
     setIsCreatePostPressed(true);
-    navigation.navigate('PostingDesc');
+    const currentScreen = navigation.getState().routes[navigation.getState().index];
+    console.log('Current Screen:', currentScreen.name);
+    navigation.navigate('PostStack');
   };
 
   const handleGoLivePress = () => {
     setIsGoLivePressed(true);
+    const currentScreen = navigation.getState().routes[navigation.getState().index];
+    console.log('Current Screen:', currentScreen.name);
+    navigation.navigate('LiveStack');
   };
+
+  if (isVisible) {
+    const currentScreen = navigation.getState().routes[navigation.getState().index];
+    console.log('Current Screen:', currentScreen.name);
+  }
 
   return (
     <Modal
       transparent={true}
-      animationType="slide"
+      animationType="fade"
       visible={isVisible}
       onRequestClose={onClose}
     >
