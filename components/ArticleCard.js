@@ -79,6 +79,17 @@ const ArticleCard = React.memo(
           </TouchableOpacity>
         </View>
       </Card.Actions>
+
+        <View style={styles.readButtonContainer}>
+          <Button
+            mode="contained"
+            onPress={() => console.log('Read button pressed')}
+            style={styles.readButton}
+            labelStyle={styles.readButtonText}
+          >
+            Read
+          </Button>
+        </View>
     </Card>
   );
 });
@@ -117,7 +128,20 @@ const styles = StyleSheet.create({
     //aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
     margin: 10,
   },
-  // ... other styles
+  readButtonContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  readButton: {
+    width: '40%',
+    backgroundColor: '#72E6FF',
+    borderRadius: 15,
+  },
+  readButtonText: {
+    fontSize: 20, // Adjust the font size as needed
+    fontWeight: 'bold', // Make the text bold
+  },
 });
 
 
