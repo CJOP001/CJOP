@@ -6,6 +6,8 @@ import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, Touchabl
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import supabase from "../supabase/supabase";
+import StackNavigator from "../navigation/StackNavigator";
+import { SignedIn } from "../navigation/StackNavigator";
 
 
 const Verification = ({navigation, route}) => {
@@ -75,8 +77,19 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
-
-
+    const retrieveToken = async() =>{
+        try{
+            const{data} = await supabase.auth.getSession();
+            if(data)
+            {
+                let userToken = data.session.access_token;
+                console.log(userToken);
+                SignedIn(userToken);
+            }
+        }
+        catch(e)
+        {}
+    }
 
     const retrieveUID = async() => {
         console.log(tempPhone); //shows the number used for id retrieval
@@ -90,8 +103,7 @@ const Verification = ({navigation, route}) => {
             {
                 console.log(data[0].id); //shows the id retrieved
                 AsyncStorage.setItem('uid', JSON.stringify(data[0].id));
-                navigation.navigate("TabNavigator");
-
+                retrieveToken();
 
             }
             else{

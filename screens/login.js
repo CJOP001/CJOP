@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {View, Image, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from "../components/styles";
 import { Formik } from "formik";
 import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { SignedIn } from "../navigation/StackNavigator";
 
 
 const Login = ({navigation}) => {
@@ -14,8 +17,9 @@ const Login = ({navigation}) => {
 
         const fetchPhoneNumber = async () =>{
 
-            
-            try {
+            AsyncStorage.setItem('token', JSON.stringify('abcdefg'));
+            SignedIn();
+            /*try {
                 const {data, error} = await supabase.auth.signInWithOtp({
                     phone: updatePhone,
                 })
@@ -25,13 +29,14 @@ const Login = ({navigation}) => {
                 }
                 else if(data)
                 {
+                    
                     navigation.navigate('Verification', {phone: updatePhone,})
                 }
             }
             catch (error)
             {
                 console.log(error);
-            }
+            }*/
               
         }
         

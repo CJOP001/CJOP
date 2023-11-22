@@ -1,5 +1,5 @@
 // StackNavigator.js
-import {React, useEffect, useReducer, useState, useMemo, createContext} from 'react';
+import {React, useEffect, useReducer, useState, useMemo, createContext, useContext} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
@@ -20,8 +20,55 @@ import Login from '../screens/login';
 import Verification from '../screens/verification';
 import AppSplash from '../screens/app_splash';
 import SignUp from '../screens/signup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
+const AuthContext = createContext();
+
+export async function SignedIn()
+{
+  const { signIn } = useContext(AuthContext);
+
+  console.log("im here in signed in");
+  const getToken = () =>
+  {
+    let userToken;
+    try{
+      AsyncStorage.getItem('token').then(
+      (value) => 
+      userToken = value,
+      );
+    console.log(userToken);
+  }
+  catch(e)
+  {}
+}
+  getToken();
+  () => signIn({userToken});
+
+}
+export async function SignedOut()
+{
+  const {signOut} = useContext(AuthContext);
+  signOut;
+
+
+  /*try {
+    const { error} = await supabase.auth.signOut();
+    if(error)
+    {
+        throw error;
+    }
+    else 
+    {
+        signOut;
+    }
+}
+catch (error)
+{
+    console.log(error);
+}*/
+}
 
 function StackNavigator() {
   const [token, setToken] = useState([]); //start of user session input
@@ -41,12 +88,13 @@ function StackNavigator() {
             isSignout: false,
             userToken: action.token,
           };
-        case 'SIGN_OUT':
+          case 'SIGN_UP':
           return {
             ...prevState,
-            isSignout: true,
-            userToken: null,
+            isSignout: false,
+            userToken: action.token,
           };
+        
       }
     },
     {
@@ -62,7 +110,9 @@ function StackNavigator() {
       let userToken;
 
       try {
-        const {data, error} = await supabase.auth.getSession();
+        const{data} = await AsyncStorage.getItem('token');
+        console.log(data);
+        //const {data, error} = await supabase.auth.getSession();
         if(data== "" || data == null)
         {
           userToken = null;
@@ -70,12 +120,13 @@ function StackNavigator() {
 
         }
         else{
-          console.log(data.session.access_token);
-          userToken = data.session.access_token;
+          //console.log(data.session.access_token);
+          //userToken = data.session.access_token;
+          userToken = data;
           setToken(userToken);
         }
       } catch (e) {
-        // Restoring token failed
+       
       }
 
       // After restoring token, we may need to validate it in production apps
@@ -88,7 +139,7 @@ function StackNavigator() {
     bootstrapAsync();
   }, [token]);
 
-/*
+
   const authContext = useMemo(
     () => ({
       signIn: async (data) => {
@@ -96,24 +147,37 @@ function StackNavigator() {
         // We will also need to handle errors if sign in failed
         // After getting token, we need to persist the token using `SecureStore`
         // In the example, we'll use a dummy token
+        let userToken;
 
-        dispatch({ type: 'SIGN_IN', token: "token" });
+        try {
+          const{data} = AsyncStorage.getItem('token');
+          //const {data, error} = await supabase.auth.getSession();
+          if(data== "" || data == null)
+          {
+            userToken = null;
+            setToken(userToken);
+  
+          }
+          else{
+            //console.log(data.session.access_token);
+            //userToken = data.session.access_token;
+            userToken = data;
+            setToken(userToken);
+          }
+        } catch (e) {
+          // Restoring token failed
+        }
+
+        dispatch({ type: 'SIGN_IN', token: userToken });
       },
       signOut: () => dispatch({ type: 'SIGN_OUT' }),
-      signUp: async (data) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `SecureStore`
-        // In the example, we'll use a dummy token
-
-        dispatch({ type: 'SIGN_IN', token: "token" });
-      },
-    }),
+      }),
     []
   );
-  */  //end of user session input
+  //end of user session input
   return (
       //use this when testing the user session
+      <AuthContext.Provider value={authContext}>
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='LoginStack'>
       {state.userToken == null ? (
         <>
@@ -122,8 +186,8 @@ function StackNavigator() {
       </>
       ) : (
         <>
-      <Stack.Screen name='EditProfile' component={EditProfile} />
       <Stack.Screen name='TabNavigator' component={TabNavigator} />
+      <Stack.Screen name='EditProfile' component={EditProfile} />
       <Stack.Screen name='AddingPostStack' component={AddingPostStack} />
       <Stack.Screen name='PostStack' component={PostStack} />
       <Stack.Screen name='LiveStack' component={LiveStack} />
@@ -131,6 +195,7 @@ function StackNavigator() {
       </>
       )} 
     </Stack.Navigator>
+    </AuthContext.Provider>
     
  
     //remove this when switch between no user session and have user session
