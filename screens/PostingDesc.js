@@ -55,7 +55,7 @@ class PostingDesc extends Component {
     // Define the handleSelect function
     handleSelect = (selectedItem) => {
       // Update the selected value in the state
-       this.setState({ selectedValue: selectedItem.type, selectedCategoryId: selectedItem.nc_id });
+       this.setState({ selectedValue: selectedItem.type, selectedCategoryId: selectedItem.id });
 
       // Close the dropdown
       this.toggleDropdown();
@@ -66,10 +66,31 @@ class PostingDesc extends Component {
     this.setState((prevState) => ({ isDropdownVisible: !prevState.isDropdownVisible }));
   };
 
-  // Toggle the modal visibility
-  toggleModal = () => {
-    this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
-  };
+ // Toggle the modal visibility with image check
+   toggleModal = () => {
+     const { image, textInputValue, selectedValue, selectedCategoryId } = this.state;
+
+         // Check if the selectedValue is empty
+         if (!selectedValue) {
+           // Show a warning
+           alert('Please select a category before sending.');
+
+           // Do not open the overlay sheet modal
+           return;
+         }
+
+     // Check if the image is null or empty
+     if (!image) {
+       // Show a warning
+       alert('Please select or capture an image before sending.');
+
+       // Do not open the overlay sheet modal
+       return;
+     }
+
+     // Open the overlay sheet modal
+     this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
+   };
 
   // Function to handle retaking the image
   retakeImage = () => {
@@ -134,8 +155,9 @@ toggleCamera = async () => {
     } = this.state;
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
-      // Constants
-      const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
+
+     // Constants
+        const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
 
     return (
       <ScrollView style={styles.container}>
@@ -173,7 +195,7 @@ toggleCamera = async () => {
                         <View style={{ ...styles.dropdownList, width: screenWidth * 0.9 }}>
                           <FlatList
                             data={items}
-                            keyExtractor={(item) => item.nc_id.toString()}
+                            keyExtractor={(item) => item.nc_id}
                             initialNumToRender={5}
                             renderItem={({ item }) => (
                               <TouchableOpacity
@@ -235,7 +257,7 @@ toggleCamera = async () => {
         </View>
 
         {/* Overlay modal for the modal text */}
-        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId} userId={currentUserID} />
+        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId} userId = {currentUserID}/>
 
         {/* Conditional rendering of Camera modal */}
         <CameraModal isVisible={cameraVisible} onClose={this.toggleCamera} onPictureTaken={this.handlePictureTaken} />

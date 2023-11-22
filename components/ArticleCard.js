@@ -33,55 +33,70 @@ const ArticleCard = React.memo(
     setSharePressed(!sharePressed); // Toggle the share icon state
   };
 
-  return (
-    <Card style={styles.articleCard}>
-      <Card.Title
-        title={username}
-        subtitle={`Status: ${status} | ${timestamp}`}
-        left={(props) => (
-          <Avatar.Image
-            source={require('../assets/avatar.png')}
-            size={40}
-          />
-        )}
-      />
-      <Card.Content>
-        <Text style={styles.articleText}>{content}</Text>
-      </Card.Content>
-      {imagePath ? (
-        <Card.Cover
-          source={{ uri: imagePath }}
-          style={styles.articleImage}
-          resizeMode="cover" // Set resizeMode to 'contain'
+  const handleReadMorePress = () => {
+        // Handle the "Read More" button press
+        // Add your logic here...
+      };
+
+    return (
+      <Card style={styles.articleCard}>
+        <Card.Title
+          title={username}
+          subtitle={`Status: ${status} | ${timestamp}`}
+          left={(props) => (
+            <Avatar.Image
+              source={require('../assets/avatar.png')}
+              size={40}
+            />
+          )}
         />
-      ) : null}
-      
-      <Card.Actions style={styles.iconContainer}>
-        <View style={styles.iconContainerLeft}>
-          <TouchableOpacity onPress={handleLikePress}>
-            <View style={[styles.iconWrapper, likePressed && { tintColor: '#72E6FF' }]}>
-              <Image source={likeIcon} style={styles.icon} />
+        <Card.Content>
+          <Text style={styles.articleText}>{content}</Text>
+        </Card.Content>
+        {imagePath ? (
+          <Card.Cover
+            source={{ uri: imagePath }}
+            style={styles.articleImage}
+            resizeMode="cover" // Set resizeMode to 'contain'
+          />
+        ) : null}
+
+        <Card.Actions style={styles.iconContainer}>
+          <View style={styles.iconContainerLeft}>
+            <TouchableOpacity onPress={handleLikePress}>
+              <View style={[styles.iconWrapper, likePressed && { tintColor: '#72E6FF' }]}>
+                <Image source={likeIcon} style={styles.icon} />
+              </View>
+            </TouchableOpacity>
+            <Text>{likes}</Text>
+            <TouchableOpacity onPress={handleCommentPress}>
+              <View style={[styles.iconWrapper, commentPressed && { tintColor: '#72E6FF' }]}>
+                <Image source={commentIcon} style={styles.icon} />
+              </View>
+            </TouchableOpacity>
+            <Text>{comments}</Text>
+          </View>
+          <View style={styles.iconContainerRight}>
+            <TouchableOpacity onPress={handleSharePress}>
+              <View style={[styles.iconWrapper, sharePressed && { tintColor: '#72E6FF' }]}>
+                <Image source={shareIcon} style={styles.icon} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </Card.Actions>
+
+        {/* Read More button */}
+        <Card.Actions>
+          <TouchableOpacity onPress={handleReadMorePress}>
+            <View style={styles.readMoreButton}>
+              <Text style={styles.readMoreButtonText}>Read More</Text>
             </View>
           </TouchableOpacity>
-          <Text>{likes}</Text>
-          <TouchableOpacity onPress={handleCommentPress}>
-            <View style={[styles.iconWrapper, commentPressed && { tintColor: '#72E6FF' }]}>
-              <Image source={commentIcon} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-          <Text>{comments}</Text>
-        </View>
-        <View style={styles.iconContainerRight}>
-          <TouchableOpacity onPress={handleSharePress}>
-            <View style={[styles.iconWrapper, sharePressed && { tintColor: '#72E6FF' }]}>
-              <Image source={shareIcon} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </Card.Actions>
-    </Card>
-  );
-});
+        </Card.Actions>
+      </Card>
+    );
+  }
+);
 
 export default ArticleCard;
 
@@ -117,7 +132,16 @@ const styles = StyleSheet.create({
     //aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
     margin: 10,
   },
-  // ... other styles
+  readMoreButton: {
+      backgroundColor: '#72E6FF',
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 10,
+      alignItems: 'center',
+    },
+    readMoreButtonText: {
+      color: 'white',
+    },
 });
 
 

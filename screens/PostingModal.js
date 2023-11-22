@@ -5,8 +5,16 @@ import { useNavigation } from '@react-navigation/native';
 
 import supabase from '../supabase/supabase';
 
-
-const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInputValue, image, selectedCategoryId, userId}) => {
+const PostingModal = ({
+  isVisible,
+  headerText,
+  subText1,
+  onCancel,
+  textInputValue,
+  image,
+  selectedCategoryId,
+  userId,
+}) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
 
@@ -25,7 +33,7 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
     const imageName = `image/${timestamp}`;
 
     const currentDate = new Date();
-    const now = currentDate.toISOString();
+    const currentTime = currentDate.toISOString();
 
     try {
       if (image) {
@@ -41,16 +49,11 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
             mimeType = 'image/png';
             break;
           default:
-          if (!mimeType) {
-              console.error('Invalid MIME type for the image');
-              return;
-            }
+            console.error('Invalid MIME type for the image');
+            return;
         }
 
-          // Log the image URL
-                console.log('Image URL:', image);
-
- // Convert the image data to base64
+        // Convert the image data to base64
         const imageBase64 = await fetch(image).then((res) => res.blob()).then((blob) => {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -65,7 +68,6 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
         // Create a FormData object and append the image
         var formData = new FormData();
         formData.append("files", {
-          user_id: userId,
           uri: imageBase64, // Use the base64 image data
           type: mimeType, // Set the correct MIME type
           name: imageName,
@@ -82,7 +84,7 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
         if (fileError) {
           console.error('Error uploading image:', fileError);
         } else {
-            const imageUrl = `https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/Testing/${imageName}`;
+          const imageUrl = `https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/Testing/${imageName}`;
 
           // Store the imageUrl and text input in your database
           const { data: postData, error: postError } = await supabase
@@ -91,8 +93,11 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
               {
                 description: textInputValue,
                 image_path: imageUrl,
-                created_at: now,
+                created_at: currentTime,
                 nc_id: selectedCategoryId,
+                user_id: userId,
+                updated_at: currentTime,
+                status: 'pending',
               },
             ])
             .select('*');
@@ -101,7 +106,25 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
             console.error('Error sending data to Supabase:', postError);
           } else {
             console.log('Data sent to Supabase:', postData);
-            navigation.navigate('TabNavigator');
+
+            // Deduct 10 credits from the user
+            const { data: transactionData, error: transactionError } = await supabase
+              .from('credit_transactions')
+              .insert([
+                {
+                  user_id: userId,
+                  amount: 10,
+                  transaction_type: 'Post',
+                },
+              ])
+              .select('*');
+
+            if (transactionError) {
+              console.error('Error deducting credits:', transactionError);
+            } else {
+              console.log('Credits deducted:', transactionData);
+              navigation.navigate('TabNavigator');
+            }
           }
         }
       }
@@ -109,8 +132,6 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
       console.error('Error sending data to Supabase:', error);
     }
   };
-
-
   const styles = StyleSheet.create({
     modalContainer: {
       flex: 1,
@@ -167,25 +188,22 @@ const PostingModal = ({ isVisible, headerText, subText1, onCancel, text, textInp
   });
 
   return (
-    <Modal isVisible={isVisible} backdropOpacity={0.7} animationIn="slideInUp" animationOut="slideOutDown">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-            <Image
-              source={require('../assets/cross_button.png')}
-              style={styles.closeIcon}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Posting</Text>
-          <Text style={styles.subText1}>10 Credits will be deducted</Text>
-          <Text style={styles.modalText}>Current Balance: credits</Text>
-          <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
-            <Text style={styles.confirmButtonText}>Confirm</Text>
-          </TouchableOpacity>
+      <Modal isVisible={isVisible} backdropOpacity={0.7} animationType="fade" >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
+              <Image source={require('../assets/cross_button.png')} style={styles.closeIcon} />
+            </TouchableOpacity>
+            <Text style={styles.headerText}>Posting</Text>
+            <Text style={styles.subText1}> 10 Credits will be pending</Text>
+            <Text style={styles.modalText}>Current Balance: credits</Text>
+            <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>Confirm</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </Modal>
-  );
-};
+      </Modal>
+    );
+  };
 
 export default PostingModal;
