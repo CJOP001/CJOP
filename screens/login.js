@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import {View, Image, StyleSheet, Text, TouchableOpacity, TextInput } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from "../components/styles";
 import { Formik } from "formik";
 import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import { SignedIn } from "../navigation/StackNavigator";
+
 
 
 const Login = ({navigation}) => {
@@ -17,9 +15,7 @@ const Login = ({navigation}) => {
 
         const fetchPhoneNumber = async () =>{
 
-            AsyncStorage.setItem('token', JSON.stringify('abcdefg'));
-            SignedIn();
-            /*try {
+           try {
                 const {data, error} = await supabase.auth.signInWithOtp({
                     phone: updatePhone,
                 })
@@ -36,7 +32,7 @@ const Login = ({navigation}) => {
             catch (error)
             {
                 console.log(error);
-            }*/
+            }
               
         }
         
@@ -52,7 +48,7 @@ const Login = ({navigation}) => {
         </View>
         <View style={styles.LowerLoginContainer}>
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
-        <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
+        <Text style={styles.LoginInfo}>Log in to your account with your phone number.</Text>
                 <Formik 
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);

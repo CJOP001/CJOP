@@ -6,8 +6,6 @@ import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, Touchabl
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import supabase from "../supabase/supabase";
-import StackNavigator from "../navigation/StackNavigator";
-import { SignedIn } from "../navigation/StackNavigator";
 
 
 const Verification = ({navigation, route}) => {
@@ -77,22 +75,30 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
-    const retrieveToken = async() =>{
+    /*const retrieveToken = async() =>{
+        let userToken;
         try{
-            const{data} = await supabase.auth.getSession();
+            const{data, error} = await supabase.auth.getSession();
             if(data)
             {
-                let userToken = data.session.access_token;
-                console.log(userToken);
-                SignedIn(userToken);
+                console.log(data.session.access_token);
+                userToken = data.session.access_token;
+                AsyncStorage.setItem('token', userToken);
+                navigation.navigate('App');
+            }
+            else{
+                throw(error);
             }
         }
         catch(e)
-        {}
-    }
+        {
+            console.log(e);
+        }
+    }*/
 
     const retrieveUID = async() => {
         console.log(tempPhone); //shows the number used for id retrieval
+        let userID;
         try {
             const {data, error} = await supabase
             .from('app_users')
@@ -102,9 +108,9 @@ const Verification = ({navigation, route}) => {
             if(data)
             {
                 console.log(data[0].id); //shows the id retrieved
-                AsyncStorage.setItem('uid', JSON.stringify(data[0].id));
-                retrieveToken();
-
+                userID = data[0].id;
+                AsyncStorage.setItem('uid', userID);
+                navigation.navigate('App');
             }
             else{
                 throw(error);
@@ -130,10 +136,6 @@ const Verification = ({navigation, route}) => {
                 {
                     throw(error)
                 }
-                else{
-                    retrieveUID();
-
-                }
             } catch (error)
             {
                 console.log(error);
@@ -142,6 +144,12 @@ const Verification = ({navigation, route}) => {
         else{
             console.log("Pin not ready.");
         }
+    }
+
+    const handleVerify = () =>
+    {
+        VerifyOtp();
+        retrieveUID();
     }
 
     return (
@@ -180,7 +188,7 @@ const Verification = ({navigation, route}) => {
                     height: 60,
                     width: "50%",
                     }}
-                    onPress={VerifyOtp}
+                    onPress={handleVerify}
                 >
                 <Text
                     style={{

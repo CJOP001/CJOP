@@ -1,9 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ImageBackground, StyleSheet, View, Text, TouchableOpacity, Image, StatusBar } from "react-native";
 import { Colors } from "../components/styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const Welcome = ({navigation}) => {
+
+   
+        const authNavigate = async() =>
+        {
+            let userID;
+            try{
+                userID = await AsyncStorage.getItem('uid');
+                console.log(userID);
+            }
+            catch(e)
+            {
+                console.log(e);
+            }
+           navigation.navigate(userID ? 'App' : 'Auth');
+
+        }
+
     return (
     
         <View style={styles.WelcomeContainer}>
@@ -16,7 +34,7 @@ const Welcome = ({navigation}) => {
             </View>
             <Text style={styles.PageTitle}>Take Down Anything You See</Text>
 
-            <TouchableOpacity style={styles.StyledButton} onPress={() => navigation.navigate("Login")}>
+            <TouchableOpacity style={styles.StyledButton} onPress={authNavigate}>
                 <Text style={styles.ButtonText}>
                     Get Started
                 </Text>

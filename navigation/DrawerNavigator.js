@@ -5,6 +5,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Portal, Dialog, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import supabase from '../supabase/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import TabNavigator from './TabNavigator';
@@ -13,7 +14,6 @@ import Profile from '../screens/Profile';
 import FriendsList from '../screens/FriendList';
 import Home from '../screens/Home';
 import TermsAndConditions from '../screens/TermsAndConditions';
-import StackNavigator from './StackNavigator';
 
 const Drawer = createDrawerNavigator();
 
@@ -30,7 +30,9 @@ function CustomDrawerContent(props) {
     // Implement your logout logic here
     // For example, you can clear the user session and navigate to the login screen
     // After successful logout, hide the dialog
-    props.navigation.navigate('LoginStack');
+
+    AsyncStorage.removeItem('uid');
+    props.navigation.navigate('Auth');
     props.hideLogoutDialog();
   };
 

@@ -7,8 +7,7 @@ import Subscribe from '../screens/Subscribe';
 import AddingPost from '../screens/AddingPost';
 import { Image, TouchableOpacity, View } from 'react-native';
 import DrawerNavigator from './DrawerNavigator';
-import AddingPostStack from './StackNavigator';
-import ProfileStack from './StackNavigator';
+import AddingPostStack from './AppStack';
 import Profile from '../screens/Profile';
 
 
