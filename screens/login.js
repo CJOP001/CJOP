@@ -5,6 +5,7 @@ import { Colors } from "../components/styles";
 import { Formik } from "formik";
 import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { Alert } from "react-native";
 
 
 
@@ -16,18 +17,41 @@ const Login = ({navigation}) => {
         const fetchPhoneNumber = async () =>{
 
            try {
-                const {data, error} = await supabase.auth.signInWithOtp({
-                    phone: updatePhone,
-                })
-                if(error)
+                const {data,error} = await supabase 
+                                    .from('app_users')
+                                    .select('phone_no')
+                                    .eq('phone_no', updatePhone);
+                if(data == updatePhone)
                 {
-                    throw error;
+                    try
+                    {
+                        const {data, error} = await supabase.auth.signInWithOtp({
+                            phone: updatePhone,
+                        })
+                        if(error)
+                        {
+                            throw error;
+                        }
+                        else if(data)
+                        {
+                            
+                            navigation.navigate('Verification', {phone: updatePhone,})
+                        }
+                    }
+                    catch(e)
+                    {
+                        console.log(e);
+                    }
                 }
-                else if(data)
-                {
-                    
-                    navigation.navigate('Verification', {phone: updatePhone,})
+                else{
+                    console.log("No phone number registered. Sign up first before logging in.");
+                    Alert.alert(
+                        'Login error',
+                        'Invalid phone number. Sign up first before logging in. For new users, please wait while your phone number is being verified.',
+                        [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+                    );
                 }
+                
             }
             catch (error)
             {

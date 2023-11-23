@@ -5,6 +5,7 @@ import { Colors} from "../components/styles";
 import { Formik } from "formik";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "react-native";
+import { Alert } from "react-native";
 
 
 const {darkLight} = Colors;
@@ -28,7 +29,7 @@ const SignUp = ({navigation}) => {
                     .select('nameid')
                     .eq('nameid', tempId);
 
-                    if(data == "")
+                    if(data == "" || data == null)
                     {   
                         console.log("adding new user.....")
                         tempError = false;
@@ -40,11 +41,21 @@ const SignUp = ({navigation}) => {
                     {
                         tempError = true;
                         console.log(data);
-                        console.log("duplicate profile name found, pls start again");
+                        console.log("Profile name already registered, pls start again");
+                        Alert.alert(
+                            'Sign Up Error',
+                            'Profile name already registered, please use another name',
+                            [{text: 'Back', style: 'cancel'},],{cancelable: true,}
+
+                        );
                     }
                     else if(error)
                     {
                         console.log(error);
+                    }
+                    else
+                    {
+                        
                     }
           }
     catch (error)
@@ -77,6 +88,12 @@ const AddNewUser= async() =>
                         if(error)
                         {
                             console.log(error, "unsuccessful insert");
+                            Alert.alert(
+                                'Sign Up Error',
+                                'Adding new user failed. Please try again.',
+                                [{text: 'Back', style: 'cancel'},],{cancelable: true,}
+                        
+                            );
                         }
                          else{              
                             console.log("successful insert");
@@ -106,6 +123,12 @@ const SignUpUser = async() =>
     catch(error)
 {
     console.log(error, "unsuccessful signup");
+    Alert.alert(
+        'Sign Up Error',
+        'This phone number is already registered, please use another number',
+        [{text: 'Back', style: 'cancel'},],{cancelable: true,}
+
+    );
 
 }
 }
@@ -117,7 +140,12 @@ const SendOTP = async() =>
         })
             if(error)
             {
-                console.log(error, "No such number register with Twilio")
+                console.log(error);
+                Alert.alert(
+                    'Sign Up Error',
+                    'Please hold while your number is being verified.',
+                    [{text: 'Back to Login', onPress: () => navigation.navigate('Login'), style: 'cancel'},],{cancelable: false,}
+                );
             }
             else if(data)
             {

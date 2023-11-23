@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { Alert } from "react-native";
 import supabase from "../supabase/supabase";
 
 
@@ -75,27 +76,7 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
-    /*const retrieveToken = async() =>{
-        let userToken;
-        try{
-            const{data, error} = await supabase.auth.getSession();
-            if(data)
-            {
-                console.log(data.session.access_token);
-                userToken = data.session.access_token;
-                AsyncStorage.setItem('token', userToken);
-                navigation.navigate('App');
-            }
-            else{
-                throw(error);
-            }
-        }
-        catch(e)
-        {
-            console.log(e);
-        }
-    }*/
-
+    
     const retrieveUID = async() => {
         console.log(tempPhone); //shows the number used for id retrieval
         let userID;
@@ -139,6 +120,11 @@ const Verification = ({navigation, route}) => {
             } catch (error)
             {
                 console.log(error);
+                Alert.alert(
+                    'Verification error',
+                    'SMS OTP is invalid or has expired. Resend the SMS OTP.',
+                    [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+                );
             }
         }
         else{
