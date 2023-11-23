@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, ActivityIndicator } from 'react-native';
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 
@@ -26,35 +26,40 @@ const PostingModal = ({
 
   const navigation = useNavigation();
 
-  const handleConfirm = async () => {
-    console.log('Text Input:', textInputValue);
+   const [loading, setLoading] = useState(false);
 
-    const timestamp = Date.now();
-    const imageName = `image/${timestamp}`;
+const handleConfirm = async () => {
+  console.log('Text Input:', textInputValue);
+  setLoading(true); // Show loader when confirming
 
-    const currentDate = new Date();
-    const currentTime = currentDate.toISOString();
+  const timestamp = Date.now();
+  const imageName = `image/${timestamp}`;
 
-    try {
-      if (image) {
-        // Determine the MIME type based on the file extension
-        let mimeType;
-        const fileExtension = image.split('.').pop().toLowerCase();
-        switch (fileExtension) {
-          case 'jpeg':
-          case 'jpg':
-            mimeType = 'image/jpeg';
-            break;
-          case 'png':
-            mimeType = 'image/png';
-            break;
-          default:
-            console.error('Invalid MIME type for the image');
-            return;
-        }
+  const currentDate = new Date();
+  const currentTime = currentDate.toISOString();
 
-        // Convert the image data to base64
-        const imageBase64 = await fetch(image).then((res) => res.blob()).then((blob) => {
+  try {
+    if (image) {
+      // Determine the MIME type based on the file extension
+      let mimeType;
+      const fileExtension = image.split('.').pop().toLowerCase();
+      switch (fileExtension) {
+        case 'jpeg':
+        case 'jpg':
+          mimeType = 'image/jpeg';
+          break;
+        case 'png':
+          mimeType = 'image/png';
+          break;
+        default:
+          console.error('Invalid MIME type for the image');
+          return;
+      }
+
+      // Convert the image data to base64
+      const imageBase64 = await fetch(image)
+        .then((res) => res.blob())
+        .then((blob) => {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onerror = reject;
@@ -65,73 +70,76 @@ const PostingModal = ({
           });
         });
 
-        // Create a FormData object and append the image
-        var formData = new FormData();
-        formData.append("files", {
-          uri: imageBase64, // Use the base64 image data
-          type: mimeType, // Set the correct MIME type
-          name: imageName,
-        });
+      // Create a FormData object and append the image
+      var formData = new FormData();
+      formData.append('files', {
+        uri: imageBase64, // Use the base64 image data
+        type: mimeType, // Set the correct MIME type
+        name: imageName,
+      });
 
-        // Store the image in the Supabase bucket
-        const { data: fileData, error: fileError } = await supabase.storage
-          .from('Testing')
-          .upload(imageName, formData);
+      // Store the image in the Supabase bucket
+      const { data: fileData, error: fileError } = await supabase.storage
+        .from('Testing')
+        .upload(imageName, formData);
 
-        console.log('Image:', imageName);
-        console.log('Image Data:', fileData); // Log the image data
+      console.log('Image:', imageName);
+      console.log('Image Data:', fileData); // Log the image data
 
-        if (fileError) {
-          console.error('Error uploading image:', fileError);
+      if (fileError) {
+        console.error('Error uploading image:', fileError);
+      } else {
+        const imageUrl = `https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/Testing/${imageName}`;
+
+        // Store the imageUrl and text input in your database
+        const { data: postData, error: postError } = await supabase
+          .from('news_management')
+          .insert([
+            {
+              description: textInputValue,
+              image_path: imageUrl,
+              created_at: currentTime,
+              nc_id: selectedCategoryId,
+              user_id: userId,
+              updated_at: currentTime,
+              status: 'pending',
+            },
+          ])
+          .select('*');
+
+        if (postError) {
+          console.error('Error sending data to Supabase:', postError);
         } else {
-          const imageUrl = `https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/Testing/${imageName}`;
+          console.log('Data sent to Supabase:', postData);
 
-          // Store the imageUrl and text input in your database
-          const { data: postData, error: postError } = await supabase
-            .from('news_management')
+          // Deduct 10 credits from the user
+          const { data: transactionData, error: transactionError } = await supabase
+            .from('credit_transactions')
             .insert([
               {
-                description: textInputValue,
-                image_path: imageUrl,
-                created_at: currentTime,
-                nc_id: selectedCategoryId,
                 user_id: userId,
-                updated_at: currentTime,
-                status: 'pending',
+                amount: 10,
+                transaction_type: 'Post',
               },
             ])
             .select('*');
 
-          if (postError) {
-            console.error('Error sending data to Supabase:', postError);
+          if (transactionError) {
+            console.error('Error deducting credits:', transactionError);
           } else {
-            console.log('Data sent to Supabase:', postData);
-
-            // Deduct 10 credits from the user
-            const { data: transactionData, error: transactionError } = await supabase
-              .from('credit_transactions')
-              .insert([
-                {
-                  user_id: userId,
-                  amount: 10,
-                  transaction_type: 'Post',
-                },
-              ])
-              .select('*');
-
-            if (transactionError) {
-              console.error('Error deducting credits:', transactionError);
-            } else {
-              console.log('Credits deducted:', transactionData);
-              navigation.navigate('TabNavigator');
-            }
+            console.log('Credits deducted:', transactionData);
+            navigation.navigate('TabNavigator');
           }
         }
       }
-    } catch (error) {
-      console.error('Error sending data to Supabase:', error);
     }
-  };
+  } catch (error) {
+    console.error('Error sending data to Supabase:', error);
+  } finally {
+    setLoading(false); // Hide loader after the process is complete
+  }
+};
+
   const styles = StyleSheet.create({
     modalContainer: {
       flex: 1,
@@ -185,10 +193,17 @@ const PostingModal = ({
       fontSize: modalContainerWidth * 0.04,
       fontWeight: 'bold',
     },
+
+    loaderContainer: {
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
   });
 
-  return (
-      <Modal isVisible={isVisible} backdropOpacity={0.7} animationType="fade" >
+   return (
+      <Modal isVisible={isVisible} backdropOpacity={0.7} animationType="fade">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
@@ -200,10 +215,17 @@ const PostingModal = ({
             <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
               <Text style={styles.confirmButtonText}>Confirm</Text>
             </TouchableOpacity>
+
+            {loading && (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#72E6FF" />
+              </View>
+            )}
           </View>
         </View>
       </Modal>
     );
   };
+
 
 export default PostingModal;

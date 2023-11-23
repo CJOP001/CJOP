@@ -145,7 +145,7 @@ const FriendsList = ({navigation}) => {
           />
         </View>
         {/*Header*/}
-        <Appbar.Content title="Manage Friendss" style={styles.appContent} />
+        <Appbar.Content title="Manage Friends" style={styles.appContent} />
       </Appbar.Header>
       <View>
         {/*Search Bar */}

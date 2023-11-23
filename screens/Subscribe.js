@@ -1,7 +1,8 @@
 // Import necessary modules and components
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 'react-native';
 import { Appbar, Card } from 'react-native-paper';
+import { fetchSupabaseData } from '../components/ArticlesData';
 
 // Import custom components and data
 import dummyArticles from '../components/articles';
@@ -11,19 +12,27 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 const Subscribe = ({ navigation }) => {
   // State management
-  const [articles] = useState(dummyArticles);
+  const [articles, setArticles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   // Handler for pull-to-refresh
-  const handleRefresh = () => {
-    setRefreshing(true);
+  const handleRefresh = async () => {
+     setRefreshing(true);
 
-    // Simulate data fetching or perform data updates here
-    // For example, you can fetch new articles or update the existing ones
+     try {
+       const data = await fetchSupabaseData();
+       setArticles(data);
+     } catch (error) {
+       console.error('Error fetching articles:', error);
+     } finally {
+       setRefreshing(false);
+     }
+   };
 
-    // After fetching/updating data, set refreshing to false
-    setRefreshing(false);
-  };
+   useEffect(() => {
+     // Fetch articles when the component mounts
+     handleRefresh();
+   }, []);
 
   // Calculate screen dimensions
   const screenHeight = Dimensions.get('window').height;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Avatar, Button, Text } from 'react-native-paper';
+import { Card, Avatar, Text, Button } from 'react-native-paper';
 import { Image, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 // Import your custom icons
 import likeIcon from '../assets/like.png';
@@ -17,26 +18,35 @@ const ArticleCard = React.memo(
     likes,
     comments,
   }) => {
-  const [likePressed, setLikePressed] = useState(false);
-  const [commentPressed, setCommentPressed] = useState(false);
-  const [sharePressed, setSharePressed] = useState(false); // State for the share icon
+    const [likePressed, setLikePressed] = useState(false);
+    const [commentPressed, setCommentPressed] = useState(false);
+    const [sharePressed, setSharePressed] = useState(false); // State for the share icon
 
-  const handleLikePress = () => {
-    setLikePressed(!likePressed);
-  };
+    const navigation = useNavigation();
 
-  const handleCommentPress = () => {
-    setCommentPressed(!commentPressed);
-  };
 
-  const handleSharePress = () => {
-    setSharePressed(!sharePressed); // Toggle the share icon state
-  };
+    const handleLikePress = () => {
+      setLikePressed(!likePressed);
+    };
 
-  const handleReadMorePress = () => {
-        // Handle the "Read More" button press
-        // Add your logic here...
-      };
+    const handleCommentPress = () => {
+      setCommentPressed(!commentPressed);
+    };
+
+    const handleSharePress = () => {
+      setSharePressed(!sharePressed); // Toggle the share icon state
+    };
+
+const handleReadMorePress = () => {
+  navigation.navigate('ArticlesDetails', { article: { username, status, timestamp, imagePath, content, likes, comments } });
+};
+
+ // Function to limit the content to 5 words
+    const limitContent = (text) => {
+      const words = text.split(' ');
+      const limitedContent = words.slice(0, 5).join(' ');
+      return limitedContent + (words.length > 5 ? ' .................' : '');
+    };
 
     return (
       <Card style={styles.articleCard}>
@@ -51,7 +61,7 @@ const ArticleCard = React.memo(
           )}
         />
         <Card.Content>
-          <Text style={styles.articleText}>{content}</Text>
+          <Text style={styles.articleText}>{limitContent(content)}</Text>
         </Card.Content>
         {imagePath ? (
           <Card.Cover
@@ -86,29 +96,28 @@ const ArticleCard = React.memo(
         </Card.Actions>
 
         {/* Read More button */}
-        <Card.Actions>
+        <View style={styles.readButtonContainer}>
           <TouchableOpacity onPress={handleReadMorePress}>
-            <View style={styles.readMoreButton}>
-              <Text style={styles.readMoreButtonText}>Read More</Text>
+            <View style={styles.readButton}>
+              <Text style={styles.readButtonText}>Read More</Text>
             </View>
           </TouchableOpacity>
-        </Card.Actions>
+        </View>
       </Card>
     );
   }
 );
 
-export default ArticleCard;
-
 const styles = StyleSheet.create({
   articleCard: {
     width: '100%',
     marginBottom: 20,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
   },
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', // Align icons to the ends
   },
   iconWrapper: {
     borderRadius: 20,
@@ -121,28 +130,27 @@ const styles = StyleSheet.create({
   iconContainerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 'auto', // Pushes the left icons to the left
   },
   iconContainerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 'auto', // Pushes the right icon to the right
   },
   articleImage: {
-    //aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
     margin: 10,
   },
-  readMoreButton: {
-      backgroundColor: '#72E6FF',
-      padding: 10,
-      borderRadius: 5,
-      marginTop: 10,
-      alignItems: 'center',
-    },
-    readMoreButtonText: {
-      color: 'white',
-    },
+  readButtonContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  readButton: {
+    backgroundColor: '#72E6FF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  readButtonText: {
+    color: 'white',
+  },
 });
 
-
-
+export default ArticleCard;
