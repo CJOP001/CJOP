@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home';
-import Payment from '../screens/Payment';
+import Payment from '../screens/Payment/Payment';
 import Subscribe from '../screens/Subscribe';
 
 import AddingPost from '../screens/AddingPost';

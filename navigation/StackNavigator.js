@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
 import Home from '../screens/Home';
 import PostingDesc from '../screens/PostingDesc';
-import PaymentModal from '../screens/Payment_Modal';
+import PaymentModal from '../screens/Payment/Payment_Modal';
 import PostingModal from '../screens/PostingModal';
 import DrawerNavigator from './DrawerNavigator';
 import AddingPost from '../screens/AddingPost';
