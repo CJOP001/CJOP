@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
 import Home from '../screens/Home';
 import PostingDesc from '../screens/PostingDesc';
-import PaymentModal from '../screens/Payment_Modal';
+import PaymentModal from '../screens/Payment/Payment_Modal';
 import PostingModal from '../screens/PostingModal';
 import DrawerNavigator from './DrawerNavigator';
 import AddingPost from '../screens/AddingPost';
@@ -13,6 +13,7 @@ import LiveStream from '../screens/LiveStream';
 import TermsAndConditions from '../screens/TermsAndConditions';
 import Profile from '../screens/Profile';
 import EditProfile from '../screens/EditProfile';
+import ArticlesDetails from '../screens/ArticlesDetails'
 
 import Welcome from '../screens/welcome';
 import Login from '../screens/login';
@@ -33,6 +34,7 @@ function StackNavigator() {
       <Stack.Screen name='LoginStack' component={LoginStack} />
       <Stack.Screen name='Login' component={Login} />
       <Stack.Screen name='EditProfile' component={EditProfile} />
+      <Stack.Screen name='ArticlesDetails' component={ArticlesDetails} />
     </Stack.Navigator>
   );
 }
