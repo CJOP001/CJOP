@@ -6,6 +6,7 @@ import { Formik } from "formik";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "react-native";
 import { Alert } from "react-native";
+import { retrieveUserByPhone, getUserData, retrieveUserData } from '../components/UserInfo';
 
 
 const {darkLight} = Colors;
@@ -17,6 +18,8 @@ const SignUp = ({navigation}) => {
     var tempUser = "";
     var tempId = "";
     var tempError = false;
+
+    const currentDate = new Date();
 
         const CheckExistingProfile = async () => {
         
@@ -76,31 +79,66 @@ const ToLowerCase = (tempId) =>
     return lowerCaseText;
 }
 
-const AddNewUser= async() =>
-{
+const AddNewUser = async () => {
     console.log(tempError);
-                        const {reply, error} = await supabase
-                            .from('app_users')
-                            .insert({'fullname':  tempUser,
-                                    'phone_no': tempPhone,
-                                    'nameid': tempId,
-                                    'status': 'Active'})
-                        if(error)
-                        {
-                            console.log(error, "unsuccessful insert");
-                            Alert.alert(
-                                'Sign Up Error',
-                                'Adding new user failed. Please try again.',
-                                [{text: 'Back', style: 'cancel'},],{cancelable: true,}
-                        
-                            );
-                        }
-                         else{              
-                            console.log("successful insert");
-                            SendOTP();
-                            
-                    }
-}
+    try {
+        // Add user to app_users table
+        const { data: user, error: userError } = await supabase
+            .from('app_users')
+            .insert({
+                'fullname': tempUser,
+                'phone_no': tempPhone,
+                'nameid': tempId,
+                'status': 'Active',
+            });
+
+        if (userError) {
+            console.log(userError, "unsuccessful insert");
+            Alert.alert(
+                'Sign Up Error',
+                'Adding new user failed. Please try again.',
+                [{ text: 'Back', style: 'cancel' }],
+                { cancelable: true }
+            );
+        } else {
+            console.log("successful user insert");
+            const userData = await retrieveUserByPhone(tempPhone);
+                
+                console.log('User Data:', userData);
+                const userId = userData.id;
+                console.log('User ID:', userId);
+                AddNewUserWallet(userId);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+
+const AddNewUserWallet = async (user) => {
+    try {
+        // Add credit wallet for the new user
+        const { data: wallet, error: walletError } = await supabase
+            .from('credits')
+            .insert({
+                'user_id': user, // Use the user_id parameter
+                'credit_amount': 0,
+                'date': currentDate,
+                'status': 'active',
+            });
+
+        if (walletError) {
+            console.log(walletError, "unsuccessful wallet insert");
+            // Handle the error appropriately
+        } else {
+            console.log("successful wallet insert");
+            SendOTP();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 const SignUpUser = async() =>
 {
@@ -117,7 +155,6 @@ const SignUpUser = async() =>
     {
         console.log("successful signup, sending OTP......")
         AddNewUser();
-        
     }
 }
     catch(error)
@@ -129,7 +166,6 @@ const SignUpUser = async() =>
         [{text: 'Back', style: 'cancel'},],{cancelable: true,}
 
     );
-
 }
 }
 
