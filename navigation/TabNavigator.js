@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home';
 import Payment from '../screens/Payment/Payment';
-import Subscribe from '../screens/Subscribe';
+import Subscribe from '../screens/Subscribe/Subscribe';
 
 import AddingPost from '../screens/AddingPost';
 import { Image, TouchableOpacity, View } from 'react-native';
@@ -10,6 +10,8 @@ import DrawerNavigator from './DrawerNavigator';
 import AddingPostStack from './StackNavigator';
 import ProfileStack from './StackNavigator';
 import Profile from '../screens/Profile';
+import StackNavigator from './StackNavigator';
+
 
 
 const Tab = createBottomTabNavigator();
@@ -20,6 +22,8 @@ function TabNavigator({ navigation }) {
   const handleAddingPostPress = () => {
     setAddingPostVisible(!isAddingPostVisible); // Toggle visibility
   };
+
+  const Placeholder = () => <View />
 
   return (
     <View style={{ flex: 1 }}>
@@ -102,7 +106,7 @@ function TabNavigator({ navigation }) {
       >
         <Tab.Screen name="TabHome" component={DrawerNavigator} />
         <Tab.Screen name="Payment" component={Payment} />
-        <Tab.Screen name="AddingPost" component={AddingPostStack}/>
+        <Tab.Screen name="AddingPost" component={Placeholder}/>
         <Tab.Screen name="Subscribe" component={Subscribe} />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
