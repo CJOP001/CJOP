@@ -5,34 +5,53 @@ import { Colors } from "../components/styles";
 import { Formik } from "formik";
 import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { Alert } from "react-native";
+
 
 
 const Login = ({navigation}) => {
 
-
+    var updatePhone = "";
     
-    const [fetchError, setFetchError] = useState(null)
-    const [phoneNumber, setPhoneNumber] = useState(null)
 
-    const navigateToHomeScreen = () => {
-        navigation.navigate('TabNavigator');
-      };
-
-    var fetchPN = "";
-    
         const fetchPhoneNumber = async () =>{
-            try {
-                const {data, error} = await supabase.auth.signInWithOtp({
-                    phone: phoneNumber,
-                })
-                if(error)
+
+           try {
+                const {data,error} = await supabase 
+                                    .from('app_users')
+                                    .select('phone_no')
+                                    .eq('phone_no', updatePhone);
+                if(data.length > 0) 
                 {
-                    throw error;
+                    try
+                    {
+                        const {data, error} = await supabase.auth.signInWithOtp({
+                            phone: updatePhone,
+                        })
+                        if(error)
+                        {
+                            throw error;
+                        }
+                        else if(data)
+                        {
+                            
+                            navigation.navigate('Verification', {phone: updatePhone,})
+                        }
+                    }
+                    catch(e)
+                    {
+                        console.log(e);
+                    }
                 }
-                else if(data)
-                {
-                    navigation.navigate('Verification', {phone: phoneNumber,})
+                else{
+                    console.log("No phone number registered. Sign up first before logging in.");
+                    Alert.alert(
+                        'Login error',
+                        'Invalid phone number. Sign up first before logging in. For new users, please wait while your phone number is being verified.',
+                        [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+                    );
                 }
+                
             }
             catch (error)
             {
@@ -41,6 +60,10 @@ const Login = ({navigation}) => {
               
         }
         
+
+const navigateToHomeScreen = () => {
+    navigation.navigate('TabNavigator');
+};
     
     return (
     
@@ -52,11 +75,11 @@ const Login = ({navigation}) => {
         </View>
         <View style={styles.LowerLoginContainer}>
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
-        <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
+        <Text style={styles.LoginInfo}>Log in to your account with your phone number.</Text>
                 <Formik 
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
-                        setPhoneNumber(values.phone_number);
+                        updatePhone  = values.phone_number;
                         fetchPhoneNumber();
                     }}
                     >
