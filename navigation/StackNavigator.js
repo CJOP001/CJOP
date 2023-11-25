@@ -4,12 +4,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import TabNavigator from './TabNavigator';
 import Home from '../screens/Home';
-import PostingDesc from '../screens/PostingDesc';
+import PostingDesc from '../screens/NewsCreation/PostingDesc';
 import PaymentModal from '../screens/Payment/Payment_Modal';
-import PostingModal from '../screens/PostingModal';
+import PostingModal from '../screens/NewsCreation/PostingModal';
 import DrawerNavigator from './DrawerNavigator';
 import AddingPost from '../screens/AddingPost';
-import LiveStream from '../screens/LiveStream';
+import LiveStream from '../screens/LiveStream/LiveStream';
 import TermsAndConditions from '../screens/TermsAndConditions';
 import Profile from '../screens/Profile';
 import EditProfile from '../screens/EditProfile';
@@ -19,6 +19,11 @@ import Login from '../screens/login';
 import Verification from '../screens/verification';
 import AppSplash from '../screens/app_splash';
 import SignUp from '../screens/signup';
+import Payment from '../screens/Payment/Payment';
+import TransferModal from '../screens/Payment/TransferModal';
+import WithdrawModal from '../screens/Payment/WithdrawModal';
+import ArticlesDetails from '../screens/NewsDetails/ArticlesDetails';
+//import HostPage from '../screens/LiveStream/HostPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +38,8 @@ function StackNavigator() {
       <Stack.Screen name='LoginStack' component={LoginStack} />
       <Stack.Screen name='Login' component={Login} />
       <Stack.Screen name='EditProfile' component={EditProfile} />
+      <Stack.Screen name='PaymentStack' component={PaymentStack} />
+      <Stack.Screen name='ArticlesDetails' component={ArticlesDetails} />
     </Stack.Navigator>
   );
 }
@@ -59,6 +66,7 @@ function LiveStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='LiveStream' component={LiveStream} />
+     {/*<Stack.Screen name='HostPage' component={HostPage} />*/}
     </Stack.Navigator>
   );
 }
@@ -72,6 +80,17 @@ function LoginStack() {
       <Stack.Screen name="SignUp" component={SignUp}/>
       <Stack.Screen name="Verification" component={Verification}/>
       <Stack.Screen name="AppSplash" component={AppSplash}/>
+    </Stack.Navigator>
+  );
+}
+
+function PaymentStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: true}}>
+      <Stack.Screen name='Payment' component={Payment} />
+      <Stack.Screen name='PaymentModal' component={PaymentModal} />
+      <Stack.Screen name='TransferModal' component={TransferModal} />
+      <Stack.Screen name='WithdrawModal' component={WithdrawModal} />
     </Stack.Navigator>
   );
 }
