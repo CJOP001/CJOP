@@ -96,8 +96,8 @@ const handleRefresh = async () => {
 
   // Function to handle confirming the reload
 const handleConfirmReload = (amount) => {
-  console.log(`Reload confirmed with amount: $${amount}`);
   toggleModal();
+  console.log(`Reload confirmed with amount: $${amount}`);
 };
 
 // Function to handle menu icon press
@@ -133,6 +133,7 @@ const LearnAboutCredits = () => {
       titleStyle={{ fontSize: 25, fontWeight: 'bold', color: isLearnAboutCreditsExpanded ? '#72E6FF' : '#000' }}
       expanded={isLearnAboutCreditsExpanded}
       onPress={() => setLearnAboutCreditsExpanded(!isLearnAboutCreditsExpanded)}
+      style={{ backgroundColor: '#ffffff' }}
     >
       <List.Item title="Credit Value Guide" titleStyle={{ fontSize: 18 }} />
       <List.Item title="1 credit = RM0.01" />
