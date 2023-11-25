@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView, Image, RefreshControl, SafeAreaView } from 'react-native';
 import { Appbar, Button, Card, Menu, List } from 'react-native-paper';
-import { Tab, TabView } from '@rneui/themed';
+import { Tab } from '@rneui/themed';
 import supabase from '../../supabase/supabase';
 import PaymentModal from './Payment_Modal';
 import TransferModal from './TransferModal';
 import WithdrawModal from './WithdrawModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Payment = ({ navigation }) => {
   // State variables
   const { width } = Dimensions.get('window');
-  const buttonWidth = width * 0.3;
+  const buttonWidth = width * 0.5;
   const [balance, setBalance] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -32,7 +33,7 @@ const Payment = ({ navigation }) => {
   const TRANSACTION_WITHDRAW = 'Withdraw';
 
 // Function to fetch balance
-const fetchBalance = async () => {
+const fetchBalance = async (currentUserID) => {
   try {
     const { data, error } = await supabase
       .from('credits')
@@ -53,7 +54,7 @@ const fetchBalance = async () => {
 };
 
 // Function to fetch user's credit transactions
-const fetchCreditTransactions = async () => {
+const fetchCreditTransactions = async (currentUserID) => {
   try {
     const { data, error } = await supabase
       .from('credit_transactions')
@@ -84,10 +85,40 @@ const handleRefresh = async () => {
   }
 };
 
-  useEffect(() => {
-    fetchBalance();
-    fetchCreditTransactions();
-  }, []);
+// Function to fetch user ID from async storage
+const fetchUserID = async () => {
+  try {
+    const storedUserID = await AsyncStorage.getItem('uid');
+    if (storedUserID) {
+      console.log('UserWalletID:',storedUserID);
+      return storedUserID;
+    } else {
+      console.error('User ID not found in async storage.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching user ID from async storage:', error);
+    return null;
+  }
+};
+
+useEffect(() => {
+  const initializeData = async () => {
+    // Fetch user ID from async storage
+    const userID = await fetchUserID();
+
+    if (userID) {
+      // Use the retrieved user ID for subsequent operations
+      fetchBalance(userID);
+      fetchCreditTransactions(userID);
+    } else {
+      console.error('User ID not available.');
+    }
+  };
+
+  // Initialize data when the component mounts
+  initializeData();
+}, []);
 
   // Function to toggle the modal
   const toggleModal = () => {
