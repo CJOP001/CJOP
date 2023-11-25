@@ -5,7 +5,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Portal, Dialog, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import supabase from '../supabase/supabase';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import TabNavigator from './TabNavigator';
 import Payment from '../screens/Payment/Payment';
@@ -17,12 +17,33 @@ import StackNavigator from './StackNavigator';
 
 const Drawer = createDrawerNavigator();
 
-const userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
+
 
 function CustomDrawerContent(props) {
 
-  const followersCount = 100;
-  const followingCount = 200;
+  const [followersCount, SetFollowers] = useState([]);
+  const [followingCount, SetFollowing] = useState([]);
+
+  const getFollowing = async () => {
+    const { data, error, count } = await supabase
+      .from("friends")
+      .select(`user_id`, `friend_id`, { count: "exact", head: true })
+      .eq("user_id", props.userID);
+    SetFollowing(data.length);
+  };
+
+  const getFollowers = async () => {
+    const { data, error, count } = await supabase
+      .from("friends")
+      .select(`user_id`, `friend_id`, { count: "exact", head: true })
+      .eq("friend_id", props.userID);
+    SetFollowers(data.length);
+  };
+
+  useEffect(() => {
+    getFollowing();
+    getFollowers();
+  }, []);
 
   const { color, userFullName } = props;
 
@@ -148,15 +169,19 @@ function DrawerNavigator() {
   const showLogoutDialog = () => setLogoutDialogVisible(true);
   const hideLogoutDialog = () => setLogoutDialogVisible(false);
   const [userFullName, setUserFullName] = useState('');
-  const [followers, SetFollowers] = useState([]);
-  const [following, SetFollowing] = useState([]);
+  const [userID, setUserID] = useState(null);
 
+  useEffect(() => {
+    getData();
+  }, []);
 
   const getData = async () => {
+    const storedUserID = await AsyncStorage.getItem('userID');
+    setUserID(storedUserID); // Set the retrieved userID
     const { data, error, count } = await supabase
       .from('app_users')
       .select('fullname')
-      .eq('id', userID);
+      .eq('id', storedUserID);
 
     if (data.length > 0) {
       // Check if data is available
@@ -164,28 +189,6 @@ function DrawerNavigator() {
       console.log(data[0].fullname);
     }
   };
-
-  const getFollowing = async () => {
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`user_id`, `friend_id`, { count: "exact", head: true })
-      .eq("user_id", userID);
-    SetFollowing(data.length);
-  };
-
-  const getFollowers = async () => {
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`user_id`, `friend_id`, { count: "exact", head: true })
-      .eq("friend_id", userID);
-    SetFollowers(data.length);
-  };
-
-  useEffect(() => {
-    getData();
-    getFollowers();
-    getFollowing();
-  }, []);
 
 
       return (
