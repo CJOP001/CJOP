@@ -148,6 +148,8 @@ function DrawerNavigator() {
   const showLogoutDialog = () => setLogoutDialogVisible(true);
   const hideLogoutDialog = () => setLogoutDialogVisible(false);
   const [userFullName, setUserFullName] = useState('');
+  const [followers, SetFollowers] = useState([]);
+  const [following, SetFollowing] = useState([]);
 
 
   const getData = async () => {
@@ -158,12 +160,31 @@ function DrawerNavigator() {
 
     if (data.length > 0) {
       // Check if data is available
-      setUserFullName(data[0].fullname); // Update userFullName with the fetched full name
+      setUserFullName(data[0].fullname); // Update userFullName with the fetched full name //data[0].fullname
+      console.log(data[0].fullname);
     }
+  };
+
+  const getFollowing = async () => {
+    const { data, error, count } = await supabase
+      .from("friends")
+      .select(`user_id`, `friend_id`, { count: "exact", head: true })
+      .eq("user_id", userID);
+    SetFollowing(data.length);
+  };
+
+  const getFollowers = async () => {
+    const { data, error, count } = await supabase
+      .from("friends")
+      .select(`user_id`, `friend_id`, { count: "exact", head: true })
+      .eq("friend_id", userID);
+    SetFollowers(data.length);
   };
 
   useEffect(() => {
     getData();
+    getFollowers();
+    getFollowing();
   }, []);
 
 
