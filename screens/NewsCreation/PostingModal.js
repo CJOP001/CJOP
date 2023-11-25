@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
-
+import { getUserData } from '../../components/UserInfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import supabase from '../../supabase/supabase';
 
 const PostingModal = ({
@@ -12,8 +13,8 @@ const PostingModal = ({
   onCancel,
   textInputValue,
   image,
-  selectedCategoryId,
   userId,
+  selectedCategoryId,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
@@ -32,11 +33,57 @@ const handleConfirm = async () => {
   console.log('Text Input:', textInputValue);
   setLoading(true); // Show loader when confirming
 
+  const userData = await getUserData();
+
+  if (!userData) {
+    setLoading(false); // Hide loader after the process is complete
+    console.error('User data is not available.');
+    return;
+  }
+
   const timestamp = Date.now();
   const imageName = `image/${timestamp}`;
 
   const currentDate = new Date();
   const currentTime = currentDate.toISOString();
+
+  try {
+    // Check if user data is available
+    if (userData) {
+      userId = userData.id;
+
+      // Check if user balance is lower than 10 credits
+    const { data: userCredits, error: creditsError } = await supabase
+    .from('credits')
+    .select('credit_amount')
+    .eq('user_id', userId)
+    .single();
+
+  if (creditsError) {
+    console.error('Error fetching user credits:', creditsError);
+    setLoading(false);
+    return;
+  }
+
+  const userBalance = userCredits.credit_amount;
+
+  if (userBalance < 10) {
+    Alert.alert(
+      'Insufficient Credits',
+      'You do not have enough credits to make this post. Please recharge your account.',
+      [{ text: 'OK', onPress: () => setLoading(false) }]
+    );
+    return;
+  }
+
+    } else {
+      console.error('User data is not available.');
+    };
+  } catch (error) {
+    console.error('Error retrieving user data:', error);
+    setLoading(false); // Hide loader after the process is complete
+    return; // Stop further execution to avoid errors
+  }
 
   try {
     if (image) {
