@@ -7,9 +7,7 @@ import DrawerNavigator from './DrawerNavigator';
 function AppNavigator() {
   return (
     <NavigationContainer>
-      <StackNavigator>
-        <DrawerNavigator/>              
-      </StackNavigator>
+      <StackNavigator/>
     </NavigationContainer>
   );
 }
