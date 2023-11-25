@@ -4,14 +4,14 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 're
 import { Appbar, Card } from 'react-native-paper';
 
 // Import custom components and data
-import dummyArticles from '../../components/articles';
+import subscribedArticles from '../../components/subscribed_article';
 import ArticleCard from '../../components/ArticleCard';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 
 const Subscribe = ({ navigation }) => {
   // State management
-  const [articles] = useState(dummyArticles);
+  const [articles] = useState(subscribedArticles());
   const [isRefreshing, setRefreshing] = useState(false);
 
   // Handler for pull-to-refresh
