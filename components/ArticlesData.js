@@ -59,6 +59,7 @@ export async function fetchSupabaseData() {
           content: item.description,
           timestamp: formattedTimestamp,
           imagePath: item.image_path,
+          userId:item.user_id,
           categoryID: item.nc_id,
           category: type, // Include type
         };

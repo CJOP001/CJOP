@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
   FlatList
 } from 'react-native';
 import { Appbar, List } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import OverlaySheetModal from './PostingModal';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
@@ -21,6 +22,7 @@ import CameraModal from './CameraModal';
 import * as Permissions from 'expo-permissions';
 import { categories } from '../components/categories';
 import {fetchCategories} from '../components/Categories_supabase';
+import { retrieveUserByPhone, getUserData } from '../components/UserInfo';
 
 class PostingDesc extends Component {
   constructor(props) {
@@ -37,10 +39,26 @@ class PostingDesc extends Component {
     };
   }
 
-  // Fetch categories when the component mounts
+   // Fetch user data when the component mounts
     componentDidMount() {
+       this.retrieveUserData();
       this.fetchCategories();
     }
+
+ retrieveUserData = async () => {
+   try {
+     const userData = await getUserData();
+
+     if (userData) {
+       this.setState({ user: userData });
+     } else {
+       console.error('User data is not available.');
+     }
+   } catch (error) {
+     console.error('Error retrieving user data:', error);
+   }
+ };
+
 
     // Fetch categories from Supabase
     fetchCategories = async () => {
@@ -67,30 +85,29 @@ class PostingDesc extends Component {
   };
 
  // Toggle the modal visibility with image check
-   toggleModal = () => {
-     const { image, textInputValue, selectedValue, selectedCategoryId } = this.state;
+ toggleModal = () => {
+   const { image, textInputValue, selectedValue, selectedCategoryId,} = this.state;
 
-         // Check if the selectedValue is empty
-         if (!selectedValue) {
-           // Show a warning
-           alert('Please select a category before sending.');
+   // Check if the selectedValue is empty
+   if (!selectedValue) {
+     // Show a warning
+     alert('Please select a category before sending.');
 
-           // Do not open the overlay sheet modal
-           return;
-         }
+     // Do not open the overlay sheet modal
+     return;
+   }
 
-     // Check if the image is null or empty
-     if (!image) {
-       // Show a warning
-       alert('Please select or capture an image before sending.');
+   // Check if the image is null or empty
+   if (!image) {
+     // Show a warning
+     alert('Please select or capture an image before sending.');
 
-       // Do not open the overlay sheet modal
-       return;
-     }
-
-     // Open the overlay sheet modal
+     // Do not open the overlay sheet modal
+     return;
+   }
      this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
-   };
+
+ };
 
   // Function to handle retaking the image
   retakeImage = () => {
@@ -150,14 +167,13 @@ toggleCamera = async () => {
       textInputValue,
       items,
       image,
+      user,
       cameraVisible,
       toggleCamera,
     } = this.state;
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
 
-     // Constants
-        const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
 
     return (
       <ScrollView style={styles.container}>
@@ -213,14 +229,13 @@ toggleCamera = async () => {
                   )}
                 </View>
 
-        {/* Image and Text */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../assets/userProfile.png')}
-            style={styles.profile_image}
-          />
-          <Text style={styles.imageText}>lwk1334</Text>
-        </View>
+         {/* User information display */}
+                        {user && (
+                          <View style={styles.userContainer}>
+                            <Image source={{ uri: user.user_image }} style={styles.profile_image} />
+                            <Text style={styles.imageText}>{user.fullname}</Text>
+                          </View>
+                        )}
 
         {/* Text Input */}
         <TextInput
@@ -257,7 +272,7 @@ toggleCamera = async () => {
         </View>
 
         {/* Overlay modal for the modal text */}
-        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId} userId = {currentUserID}/>
+        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId}  />
 
         {/* Conditional rendering of Camera modal */}
         <CameraModal isVisible={cameraVisible} onClose={this.toggleCamera} onPictureTaken={this.handlePictureTaken} />

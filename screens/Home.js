@@ -44,9 +44,16 @@ const Home = () => {
     );
   };
 
-  const renderItem = ({ item }) => {
-    return <ArticleCard {...item} />;
-  };
+ // Inside the FlatList renderItem function in Home.js
+ const renderItem = ({ item }) => {
+
+   return (
+     <ArticleCard
+       {...item}
+     />
+   );
+ };
+
 
   const imageUrl =
     'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg';

@@ -5,65 +5,74 @@ import { Colors } from "../components/styles";
 import { Formik } from "formik";
 import supabase from "../supabase/supabase";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { Alert } from "react-native";
+
 
 
 const Login = ({navigation}) => {
 
+    var updatePhone = "";
 
-    
-    const [fetchError, setFetchError] = useState(null)
-    const [phoneNumber, setPhoneNumber] = useState(null)
 
-    const navigateToHomeScreen = () => {
-        navigation.navigate('TabNavigator');
-      };
+ const fetchPhoneNumber = async () => {
+   try {
+     const { data, error } = await supabase
+       .from('app_users')
+       .select('phone_no')
+       .eq('phone_no', updatePhone);
 
-    var fetchPN = "";
-    
-        const fetchPhoneNumber = async () =>{
-            try {
-                const {data, error} = await supabase.auth.signInWithOtp({
-                    phone: phoneNumber,
-                })
-                if(error)
-                {
-                    throw error;
-                }
-                else if(data)
-                {
-                    navigation.navigate('Verification', {phone: phoneNumber,})
-                }
-            }
-            catch (error)
-            {
-                console.log(error);
-            }
-              
-        }
-        
-    
+     if (data.length > 0) {
+       try {
+         const { data, error } = await supabase.auth.signInWithOtp({
+           phone: updatePhone,
+         });
+
+         if (error) {
+           throw error;
+         } else if (data) {
+           navigation.navigate('Verification', { phone: updatePhone });
+         }
+       } catch (e) {
+         console.log(e);
+       }
+     } else {
+       console.log(
+         'No phone number registered. Sign up first before logging in.'
+       );
+       Alert.alert(
+         'Login error',
+         'Invalid phone number. Sign up first before logging in. For new users, please wait while your phone number is being verified.',
+         [{ text: 'Return', style: 'cancel' }],
+         { cancelable: true }
+       );
+     }
+   } catch (error) {
+     console.log(error);
+   }
+ };
+
     return (
-    
+
         <KeyboardAvoidingWrapper>
             <StatusBar style="dark"/>
         <View style ={styles.UpperLoginContainer}>
-        <Image style={styles.LoginLogo} resizeMode="cover" source={require('../assets/login_splashart.png')}/>  
-       
+        <Image style={styles.LoginLogo} resizeMode="cover" source={require('../assets/login_splashart.png')}/>
+
         </View>
         <View style={styles.LowerLoginContainer}>
         <Text style={styles.LoginTitle}>Welcome Back!</Text>
-        <Text style={styles.LoginInfo}>I am happy to see you again. You can continue where you left off by logging in</Text>
-                <Formik 
+        <Text style={styles.LoginInfo}>Log in to your account with your phone number.</Text>
+                <Formik
                 initialValues={{phone_number: ''}}
                     onSubmit={(values) => { console.log(values);
-                        setPhoneNumber(values.phone_number);
+                        updatePhone  = values.phone_number;
                         fetchPhoneNumber();
                     }}
                     >
-                        {({handleChange, handleBlur, handleSubmit, values}) => 
+                        {({handleChange, handleBlur, handleSubmit, values}) =>
                             (
                             <View style={styles.StyledFormArea}>
-                                <PhoneInput 
+                                <PhoneInput
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
                                     placeholderTextColor={Colors.darkLight}
@@ -71,14 +80,14 @@ const Login = ({navigation}) => {
                                     onBlur={handleBlur('phone_number')}
                                     value={values.phone_number}
                                     keyboardType="phone-pad"
-                                    pattern="^[601]([0-9]{8}|[0-9]{9}$"
+                                    pattern="^[601]([0-9]{8}|[0-9]{9})$"
                                 />
-                                <TouchableOpacity style={styles.SignInButton} /*onPress={handleSubmit}*/ onPress={navigateToHomeScreen}>
+                                <TouchableOpacity style={styles.SignInButton} onPress={handleSubmit}>
                 <Text style={styles.SignInText} >
                     Sign In
                 </Text>
             </TouchableOpacity>
-            
+
                             </View>
                             )}
                     </Formik>
@@ -88,7 +97,7 @@ const Login = ({navigation}) => {
                     <Text style={styles.TextLinkContent} > Sign Up</Text>
                 </TouchableOpacity>
             </View>
-            
+
         </View>
         </KeyboardAvoidingWrapper>
 
@@ -156,7 +165,7 @@ SignInText: {
     height: 30,
     justifyContent: "center",
     paddingTop: 2,
-    paddingBottom: 5, 
+    paddingBottom: 5,
     paddingRight: 1,
     textAlign: "center",
     fontFamily: 'Roboto',

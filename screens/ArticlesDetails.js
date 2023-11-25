@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Appbar, Card, Avatar, Text, Button, Divider } from 'react-native-paper';
 import { Image, View, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -11,17 +11,38 @@ import likeIcon from '../assets/like.png';
 import commentIcon from '../assets/comments.png';
 import shareIcon from '../assets/share.png'; // Import your share icon
 
+import { retrieveUserData } from '../components/UserInfo';
+
 const ArticlesDetails = ({ route }) => {
   const navigation = useNavigation();
+  const [userInfo, setUserInfo] = useState(null);
   const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
   const [isCommentModalVisible, setCommentModalVisible] = useState(false); // State for the CommentModal
 
   // Get the entire article object from the route params
   const { article } = route.params;
+  // Destructure the article object, including the new ID
+  const { id, username, timestamp, imagePath, content, likes, comments, userId } = article;
 
-  // Destructure the article object
-  const { username, status, timestamp, imagePath, content, likes, comments } = article;
+ useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          // Ensure userId is defined before making the request
+          if (userId) {
+            const userDetails = await retrieveUserData(userId);
+            console.log('User Details:', userDetails);
+            setUserInfo(userDetails);
+          } else {
+            console.error('User ID is undefined.');
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+
+      fetchUserData();
+    }, [userId]);
 
   const handleLikePress = () => {
     // Handle like button press
@@ -67,10 +88,37 @@ const ArticlesDetails = ({ route }) => {
     setCommentModalVisible(false);
   };
 
-  const handleCommentSubmit = (comment) => {
+ const handleCommentSubmit = async () => {
     // Handle the submitted comment
-    console.log('Submitted Comment:', comment);
-    // You can add your logic for handling the submitted comment here
+    try {
+      // Check if the comment text is not empty
+      if (comment.trim() !== '') {
+        // Insert the comment into the Supabase database
+        const { data, error } = await supabase
+          .from('comments')
+          .upsert([
+            {
+              user_id: userId,
+              news_id: id,
+              comment_text: comment,
+            },
+          ]);
+
+        if (error) {
+          console.error('Error submitting comment:', error);
+        } else {
+          console.log('Comment submitted successfully:', data);
+          // Refresh the comments after submitting
+          // You may want to fetch the updated comments from the database
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      // Reset the comment text and hide the CommentModal
+      setCommentText('');
+      setCommentModalVisible(false);
+    }
   };
 
   return (
@@ -88,12 +136,14 @@ const ArticlesDetails = ({ route }) => {
           </TouchableOpacity>
 
           <Card.Title
-            title={username}
-            subtitle={`${timestamp}`}
+            title={userInfo ? userInfo.fullname : 'Loading...'}
+            subtitle={timestamp}
             left={(props) => (
               <Avatar.Image
-                source={require('../assets/avatar.png')}
-                size={40}
+                 source={{
+                 uri: userInfo && userId === userInfo.id ? userInfo.user_image : 'https://example.com/default-avatar.jpg',
+                 }}
+                 size={40}
               />
             )}
           />

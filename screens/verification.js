@@ -1,14 +1,17 @@
 import React, {useState, useRef, useEffect} from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components';
 import { Keyboard, Pressable, StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { Alert } from "react-native";
 import supabase from "../supabase/supabase";
-
+import { retrieveUserByPhone } from '../components/UserInfo';
 
 
 const Verification = ({navigation, route}) => {
+    var tempPhone = route.params.phone
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 6;
@@ -16,6 +19,8 @@ const Verification = ({navigation, route}) => {
     const textInputRef = useRef(null);
 
     const [inputContainerIsFocused, setInputContainerIsFocused] = useState(false);
+
+
 
     const handleOnPress = () => {
         setInputContainerIsFocused(true);
@@ -41,10 +46,10 @@ const Verification = ({navigation, route}) => {
 
         const isDigitFocused = IsCurrentDigit || (isLastDigit && isCodeFull);
 
-        const StyledOTPInput = 
-        inputContainerIsFocused && isDigitFocused ? OTPInputFocused : 
+        const StyledOTPInput =
+        inputContainerIsFocused && isDigitFocused ? OTPInputFocused :
         OTPInput;
-        
+
         return (
             <StyledOTPInput key={index}>
                 <Text style={styles.VerificationText}>{digit}</Text>
@@ -72,7 +77,24 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
+
+     const retrieveUID = async () => {
+        console.log(tempPhone);
+
+        try {
+          const user = await retrieveUserByPhone(tempPhone);
+
+          console.log('User data:', user);
+
+          AsyncStorage.setItem('uid', user.id);
+          navigation.navigate('TabNavigator');
+        } catch (error) {
+          console.log('Error retrieving user data:', error);
+        }
+      };
+
     const VerifyOtp = async () => {
+        console.log(route.params.phone); //shows the data taken from signup/login
         if(pinReady)
         {
             try {
@@ -85,18 +107,25 @@ const Verification = ({navigation, route}) => {
                 {
                     throw(error)
                 }
-                else{
-               
-                navigation.navigate("TabNavigator");
-                }
             } catch (error)
             {
                 console.log(error);
+                Alert.alert(
+                    'Verification error',
+                    'SMS OTP is invalid or has expired. Resend the SMS OTP.',
+                    [{text: 'Return', style: 'cancel'},],{cancelable: true,}
+                );
             }
         }
         else{
             console.log("Pin not ready.");
         }
+    }
+
+    const handleVerify = () =>
+    {
+        VerifyOtp();
+        retrieveUID();
     }
 
     return (
@@ -109,7 +138,7 @@ const Verification = ({navigation, route}) => {
             <Text style={styles.VerificationTitle}>
                 Verification Code
             </Text>
-            <Text style={styles.VerificationInfo}>Enter the 6 digit Verification Code we have sent to your email to proceed.</Text>
+            <Text style={styles.VerificationInfo}>Enter the 6-digit One Time Password sent to your phone number via SMS below.</Text>
             <View style={styles.VerificationInput}>
                 < Pressable style={styles.VerificationPressable} onPress={handleOnPress}>
                     {codeDigitsArray.map(toCodeDigitInput)}
@@ -126,7 +155,7 @@ const Verification = ({navigation, route}) => {
                 />
             </View>
             <TouchableOpacity disabled={!pinReady}
-                    style={{ backgroundColor: !pinReady ? "#7188FF": "#72E6FF", 
+                    style={{ backgroundColor: !pinReady ? "#7188FF": "#72E6FF",
                     padding: 15,
                     justifyContent: "center",
                     alignItems: 'center',
@@ -135,7 +164,7 @@ const Verification = ({navigation, route}) => {
                     height: 60,
                     width: "50%",
                     }}
-                    onPress={VerifyOtp}
+                    onPress={handleVerify}
                 >
                 <Text
                     style={{
@@ -144,7 +173,7 @@ const Verification = ({navigation, route}) => {
                         margin: "auto",
                         color: !pinReady ? Colors.darkLight : "#FFFFFF",
                     }}
-                >   
+                >
                     Verify Pin
                 </Text>
             </TouchableOpacity>
@@ -155,7 +184,7 @@ const Verification = ({navigation, route}) => {
                 </TouchableOpacity>
             </View>
             </Pressable>
-            
+
         </KeyboardAvoidingWrapper>
     );
 };
@@ -176,13 +205,13 @@ UpperVerificationContainer: {
     flex: 2,
     paddingTop: 20,
     width: "100%",
-    alignItems: "center"   
+    alignItems: "center"
 },
 LowerVerificationContainer: {
     flex: 3,
     width: "100%",
     paddingTop: 0,
-    alignItems: "center",  
+    alignItems: "center",
     paddingBottom: 40
 },
 VerificationLogo: {
@@ -204,7 +233,7 @@ VerificationInfo: {
     textAlign: "left",
     paddingLeft: 20,
     paddingRight: 20,
-    color: "#7C82A1"    
+    color: "#7C82A1"
 },
 VerificationInput: {
 
@@ -214,7 +243,7 @@ VerificationInput: {
 VerificationPressable: {
     width: "90%",
     flexDirection: "row",
-    justifyContent: "space-around"   
+    justifyContent: "space-around"
 },
 HiddenTextInput: {
     position: "absolute",
@@ -261,4 +290,3 @@ const OTPInputFocused = styled(OTPInput)`
     background-color: #7188FF;
 `;
 export default Verification;
-

@@ -3,7 +3,9 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, ActivityIn
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import supabase from '../supabase/supabase';
+import { getUserData } from '../components/UserInfo';
 
 const PostingModal = ({
   isVisible,
@@ -12,8 +14,8 @@ const PostingModal = ({
   onCancel,
   textInputValue,
   image,
-  selectedCategoryId,
   userId,
+  selectedCategoryId,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
@@ -32,11 +34,33 @@ const handleConfirm = async () => {
   console.log('Text Input:', textInputValue);
   setLoading(true); // Show loader when confirming
 
+const userData = await getUserData();
+
+  if (!userData) {
+    setLoading(false); // Hide loader after the process is complete
+    console.error('User data is not available.');
+    return;
+  }
   const timestamp = Date.now();
   const imageName = `image/${timestamp}`;
 
   const currentDate = new Date();
   const currentTime = currentDate.toISOString();
+
+    try {
+      // Check if user data is available
+      if (userData) {
+        userId = userData.id;
+
+      } else {
+        console.error('User data is not available.');
+      };
+    } catch (error) {
+      console.error('Error retrieving user data:', error);
+      setLoading(false); // Hide loader after the process is complete
+      return; // Stop further execution to avoid errors
+    }
+
 
   try {
     if (image) {
