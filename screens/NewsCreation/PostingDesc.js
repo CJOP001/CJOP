@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,9 +17,10 @@ import OverlaySheetModal from './PostingModal';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
-import CameraModal from '../CameraModal';
+import CameraModal from '../NewsCreation/CameraModal';
 import * as Permissions from 'expo-permissions';
 import categories from '../../components/categories';
+import { retrieveUserByPhone, getUserData } from '../../components/UserInfo';
 
 class PostingDesc extends Component {
   constructor(props) {
@@ -39,7 +40,22 @@ class PostingDesc extends Component {
   // Fetch categories when the component mounts
     componentDidMount() {
       this.fetchCategories();
+      this.retrieveUserData();
     }
+
+    retrieveUserData = async () => {
+      try {
+        const userData = await getUserData();
+   
+        if (userData) {
+          this.setState({ user: userData });
+        } else {
+          console.error('User data is not available.');
+        }
+      } catch (error) {
+        console.error('Error retrieving user data:', error);
+      }
+    };
 
     // Fetch categories from Supabase
     fetchCategories = async () => {
@@ -149,14 +165,12 @@ toggleCamera = async () => {
       textInputValue,
       items,
       image,
+      user,
       cameraVisible,
       toggleCamera,
     } = this.state;
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
-
-     // Constants
-        const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
 
     return (
       <ScrollView style={styles.container}>
@@ -212,14 +226,13 @@ toggleCamera = async () => {
                   )}
                 </View>
 
-        {/* Image and Text */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../../assets/userProfile.png')}
-            style={styles.profile_image}
-          />
-          <Text style={styles.imageText}>lwk1334</Text>
-        </View>
+         {/* User information display */}
+         {user && (
+                          <View style={styles.userContainer}>
+                            <Image source={{ uri: user.user_image }} style={styles.profile_image} />
+                            <Text style={styles.imageText}>{user.fullname}</Text>
+                          </View>
+                        )}
 
         {/* Text Input */}
         <TextInput
@@ -256,8 +269,7 @@ toggleCamera = async () => {
         </View>
 
         {/* Overlay modal for the modal text */}
-        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId} userId = {currentUserID}/>
-
+        <OverlaySheetModal isVisible={this.state.isModalVisible} onCancel={this.toggleModal} textInputValue={textInputValue} image={this.state.image} selectedCategoryId={this.state.selectedCategoryId}  />
         {/* Conditional rendering of Camera modal */}
         <CameraModal isVisible={cameraVisible} onClose={this.toggleCamera} onPictureTaken={this.handlePictureTaken} />
 
@@ -389,6 +401,12 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+  userContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: '5%',
+    marginTop: '3%',
+  }
 
 });
 
