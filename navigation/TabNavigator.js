@@ -14,6 +14,8 @@ import StackNavigator from './StackNavigator';
 
 
 
+
+
 const Tab = createBottomTabNavigator();
 
 function TabNavigator({ navigation }) {
@@ -36,6 +38,8 @@ function TabNavigator({ navigation }) {
             backgroundColor: '#ffffff',
             height: 60,
             borderTopWidth: 0,
+            borderTopLeftRadius: 15,
+            borderTopRightRadius: 15,
           },
           tabBarLabelStyle: {
             fontSize: 12,
