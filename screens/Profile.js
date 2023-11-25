@@ -24,7 +24,7 @@ const renderItem = ({ item }) => {
   return <ArticleCard {...item} />;
 };
 
-const SelfProfile = ({navigation}) => {
+const SelfProfile = ({ navigation }) => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
@@ -105,7 +105,12 @@ const SelfProfile = ({navigation}) => {
                 />
               )} /*Edit Profile button*/
               right={(props) => (
-                <Pressable style={styles.button} onPress={() => navigation.navigate("EditProfile")}>
+                <Pressable
+                  style={styles.button}
+                  onPress={() =>
+                    navigation.navigate("EditProfile", { id: userdata.id })
+                  }
+                >
                   <Text style={styles.buttonText}>Edit Profile</Text>
                 </Pressable>
               )}
