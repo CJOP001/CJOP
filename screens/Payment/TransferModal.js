@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, StyleSheet, KeyboardAvoidingView} from 'react-native';
 import { Button, TextInput, HelperText } from 'react-native-paper';
-import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
 
-const TransferModal = ({ visible, onClose, onTransfer, currentUserID  }) => {
+const TransferModal = ({ visible, onClose, onTransfer, currentUserID }) => {
   // State for input values and error messages
   const [recipientID, setRecipientID] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
@@ -135,10 +134,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '85%',
     alignItems: 'left',
     maxWidth: 500,
-    minHeight: 300,
+    minHeight: 350,
     height: '40%',
     //maxHeight: 400 ,
   },

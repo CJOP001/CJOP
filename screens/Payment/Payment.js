@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Payment = ({ navigation }) => {
   // State variables
   const { width } = Dimensions.get('window');
-  const buttonWidth = width * 0.5;
+  const buttonWidth = width * 0.4;
   const [balance, setBalance] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -414,15 +414,14 @@ const LearnAboutCredits = () => {
           onTransfer={(recipientID, transferAmount) =>
             handleTransfer(recipientID, transferAmount)
           }
-          currentUserID={currentUserID}
         />
 
         {/* Withdraw Modal */}
       <WithdrawModal
         visible={isWithdrawModalVisible}
         onClose={() => setWithdrawModalVisible(false)}
-        balance={balance}  
-        onUpdateBalance={(newBalance) => setBalance(newBalance)}  
+        balance={balance}  // Pass the balance as a prop to WithdrawModal
+        onUpdateBalance={(newBalance) => setBalance(newBalance)}
         currentUserID={currentUserID}
       />
 
@@ -441,7 +440,7 @@ const LearnAboutCredits = () => {
             <Tab.Item
               title="Spent"
               titleStyle={{ fontSize: 16, color: '#7C82A1' }}
-              style={{ flex: 1, alignItems: 'center' }}
+              style={{ flex: 1, alignItems: 'center'}}
             />
             <Tab.Item
               title="Received"
@@ -487,7 +486,8 @@ const styles = StyleSheet.create({
     fontSize: 40,
     textAlign: 'center',
     padding: 15,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: '#000'
   },
   customBackAction: {
     marginLeft: -10,

@@ -97,7 +97,10 @@ const handleWithdrawal = async () => {
                 </Button>
               ))}
 
-            <Button
+            
+          </View>
+          <View style={{flexDirection: "row", justifyContent:"space-around", width: '100%'}}>
+          <Button
               mode="contained"
               onPress={handleWithdrawal}
               style={styles.modalButton}
@@ -120,7 +123,6 @@ const handleWithdrawal = async () => {
               Cancel
             </Button>
           </View>
-
         </View>
       </View>
     </Modal>
@@ -149,9 +151,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '85%',
     alignItems: 'left',
-    maxWidth: 500,
+    maxWidth: 600,
     minHeight: 400,
     height: '40%',
     //maxHeight: 400 ,
