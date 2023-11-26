@@ -25,7 +25,7 @@ const Payment = ({ navigation }) => {
   const [userID, setUserID] = useState(null);
 
   // Constants
-  const currentUserID = userID //lwk
+  const currentUserID = userID;
 
   // Constants for transaction types
   const TRANSACTION_RELOAD = 'Reload';
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   learnText: {
     fontSize: 16,
     textAlign: 'left',
-    color: '#333', // Adjust the color as needed
+    color: '#333', 
     lineHeight: 24,
   },
 });

@@ -152,8 +152,9 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'left',
     maxWidth: 500,
-    height: '50%',
-    maxHeight: 400 ,
+    minHeight: 400,
+    height: '40%',
+    //maxHeight: 400 ,
   },
   buttonGrid: {
     flexDirection: 'row',
