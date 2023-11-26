@@ -83,7 +83,7 @@ useEffect(() => {
   ? articles.filter(article => article.nc_id === parseInt(selectedCategory, 10))
   : articles;
 
-  const imageUrl = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg'
+  const imageUrl = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage/Avatars/default'
 
   const openDrawer = () => {
     navigation.openDrawer();
