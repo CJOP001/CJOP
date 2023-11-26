@@ -59,7 +59,7 @@ const ArticleCard = React.memo(
   };
 
   const handleReadMorePress = () => {
-    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments } });
+    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
     hideModal();
   };
 
@@ -151,8 +151,7 @@ const ArticleCard = React.memo(
 
         <Portal>
           <Modal visible={isModalVisible} onDismiss={hideModal}>
-            <View style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
-              <Text>{description}</Text>
+            <View style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 , justifyContent: 'center', alignItems: 'center'}}>
               <Button
                 mode="contained"
                 onPress={handleReadMorePress}
@@ -219,6 +218,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // Make the text bold
   },
 });
-
-
-
