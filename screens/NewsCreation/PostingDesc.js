@@ -46,6 +46,7 @@ class PostingDesc extends Component {
     retrieveUserData = async () => {
       try {
         const userData = await getUserData();
+        console.log('User Data:', userData);
    
         if (userData) {
           this.setState({ user: userData });
@@ -208,8 +209,7 @@ toggleCamera = async () => {
                         <View style={{ ...styles.dropdownList, width: screenWidth * 0.9 }}>
                           <FlatList
                             data={items}
-                            keyExtractor={(item) => item.nc_id}
-                            initialNumToRender={5}
+                            keyExtractor={(item, index) => (item && item.nc_id ? item.nc_id.toString() : index.toString())}
                             renderItem={({ item }) => (
                               <TouchableOpacity
                                 style={styles.dropdownItem}
@@ -218,7 +218,7 @@ toggleCamera = async () => {
                                 <Text>{item.type}</Text>
                               </TouchableOpacity>
                             )}
-                              style={{ height: screenHeight * 0.25 }}
+                            style={{ height: screenHeight * 0.25 }}  
                           />
                         </View>
                       </TouchableOpacity>
