@@ -47,12 +47,20 @@ function CustomDrawerContent(props) {
 
   const { color, userFullName } = props;
 
-  const handleLogout = () => {
-    // Implement your logout logic here
-    // For example, you can clear the user session and navigate to the login screen
-    // After successful logout, hide the dialog
-    props.navigation.navigate('LoginStack');
-    props.hideLogoutDialog();
+  const handleLogout = async () => {
+    try {
+      // Clear user session (assuming you're using AsyncStorage)
+      await AsyncStorage.clear();
+  
+      // Navigate to the login screen (assuming 'LoginStack' is the correct stack name)
+      props.navigation.navigate('LoginStack');
+  
+      // Hide the logout dialog
+      props.hideLogoutDialog();
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // Handle any errors that occurred during the logout process
+    }
   };
 
   return (
