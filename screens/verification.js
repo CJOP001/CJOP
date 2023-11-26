@@ -7,11 +7,10 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { Alert } from "react-native";
 import supabase from "../supabase/supabase";
-import { retrieveUserByPhone } from '../components/UserInfo';
 
 
 const Verification = ({navigation, route}) => {
-    var tempPhone = route.params.phone
+    var tempPhone = route.params.phone 
     const  [code, setCode] = useState("");
     const [pinReady, setPinReady] = useState("false");
     const pinLength = 6;
@@ -46,10 +45,10 @@ const Verification = ({navigation, route}) => {
 
         const isDigitFocused = IsCurrentDigit || (isLastDigit && isCodeFull);
 
-        const StyledOTPInput =
-        inputContainerIsFocused && isDigitFocused ? OTPInputFocused :
+        const StyledOTPInput = 
+        inputContainerIsFocused && isDigitFocused ? OTPInputFocused : 
         OTPInput;
-
+        
         return (
             <StyledOTPInput key={index}>
                 <Text style={styles.VerificationText}>{digit}</Text>
@@ -77,21 +76,32 @@ const Verification = ({navigation, route}) => {
 
     const codeDigitsArray = new Array(pinLength).fill(0);
 
-
-     const retrieveUID = async () => {
-        console.log(tempPhone);
-
+    
+    const retrieveUID = async() => {
+        console.log(tempPhone); //shows the number used for id retrieval
+        let userID;
         try {
-          const user = await retrieveUserByPhone(tempPhone);
-
-          console.log('User data:', user);
-
-          AsyncStorage.setItem('uid', user.id);
-          navigation.navigate('TabNavigator');
-        } catch (error) {
-          console.log('Error retrieving user data:', error);
+            const {data, error} = await supabase
+            .from('app_users')
+            .select('id')
+            .eq(`phone_no`, tempPhone);
+    
+            if(data)
+            {
+                console.log(data[0].id); //shows the id retrieved
+                userID = data[0].id;
+                AsyncStorage.setItem('uid', userID);
+                navigation.navigate('TabNavigator');
+            }
+            else{
+                throw(error);
+            }
         }
-      };
+        catch(error) {
+            console.log(error, "UID retrieval failed");
+        }
+    }
+
 
     const VerifyOtp = async () => {
         console.log(route.params.phone); //shows the data taken from signup/login
@@ -113,7 +123,7 @@ const Verification = ({navigation, route}) => {
                 Alert.alert(
                     'Verification error',
                     'SMS OTP is invalid or has expired. Resend the SMS OTP.',
-                    [{text: 'Return', style: 'cancel'},],{cancelable: true,}
+                    [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
                 );
             }
         }
@@ -155,7 +165,7 @@ const Verification = ({navigation, route}) => {
                 />
             </View>
             <TouchableOpacity disabled={!pinReady}
-                    style={{ backgroundColor: !pinReady ? "#7188FF": "#72E6FF",
+                    style={{ backgroundColor: !pinReady ? "#7188FF": "#72E6FF", 
                     padding: 15,
                     justifyContent: "center",
                     alignItems: 'center',
@@ -173,7 +183,7 @@ const Verification = ({navigation, route}) => {
                         margin: "auto",
                         color: !pinReady ? Colors.darkLight : "#FFFFFF",
                     }}
-                >
+                >   
                     Verify Pin
                 </Text>
             </TouchableOpacity>
@@ -184,7 +194,7 @@ const Verification = ({navigation, route}) => {
                 </TouchableOpacity>
             </View>
             </Pressable>
-
+            
         </KeyboardAvoidingWrapper>
     );
 };
@@ -205,13 +215,13 @@ UpperVerificationContainer: {
     flex: 2,
     paddingTop: 20,
     width: "100%",
-    alignItems: "center"
+    alignItems: "center"   
 },
 LowerVerificationContainer: {
     flex: 3,
     width: "100%",
     paddingTop: 0,
-    alignItems: "center",
+    alignItems: "center",  
     paddingBottom: 40
 },
 VerificationLogo: {
@@ -233,7 +243,7 @@ VerificationInfo: {
     textAlign: "left",
     paddingLeft: 20,
     paddingRight: 20,
-    color: "#7C82A1"
+    color: "#7C82A1"    
 },
 VerificationInput: {
 
@@ -243,7 +253,7 @@ VerificationInput: {
 VerificationPressable: {
     width: "90%",
     flexDirection: "row",
-    justifyContent: "space-around"
+    justifyContent: "space-around"   
 },
 HiddenTextInput: {
     position: "absolute",

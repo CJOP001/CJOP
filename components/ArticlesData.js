@@ -1,4 +1,3 @@
-
 import supabase from '../supabase/supabase';
 
 // Function to get the type based on nc_id from the news_categories table
@@ -51,7 +50,6 @@ export async function fetchSupabaseData() {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',
-          fractionalSecondDigits: 3, // Include milliseconds
         });
 
         return {
@@ -59,7 +57,6 @@ export async function fetchSupabaseData() {
           content: item.description,
           timestamp: formattedTimestamp,
           imagePath: item.image_path,
-          userId:item.user_id,
           categoryID: item.nc_id,
           category: type, // Include type
         };

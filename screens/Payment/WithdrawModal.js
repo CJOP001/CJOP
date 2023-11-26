@@ -1,7 +1,7 @@
 // WithdrawModal.js
 import React, { useState } from 'react';
 import { Modal, View, Text, StyleSheet, Alert} from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, Snackbar } from 'react-native-paper';
 import supabase from '../../supabase/supabase';
 
 const reloadOptions = [10, 15, 20, 50, 100, 500];
@@ -12,6 +12,8 @@ const WithdrawModal = ({ visible, onClose, balance }) => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
 
 const handleWithdrawal = async () => {
@@ -52,7 +54,8 @@ const handleWithdrawal = async () => {
         throw insertError;
       }
       
-      
+      setSnackbarMessage('Withdrawal successful');
+      setSnackbarVisible(true);
       onClose(); // Close the modal after withdrawal
     } else {
       console.log('Insufficient balance for withdrawal');
@@ -123,6 +126,14 @@ const handleWithdrawal = async () => {
             </Button>
           </View>
 
+          {/* Snackbar for showing success or error messages */}
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={3000} // Adjust the duration as needed
+          >
+            {snackbarMessage}
+          </Snackbar>
 
         </View>
       </View>

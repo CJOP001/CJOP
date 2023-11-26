@@ -1,35 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, StatusBar, RefreshControl } from 'react-native';
-import { Appbar, Avatar, Searchbar } from 'react-native-paper';
-import { categories } from '../components/categories';
-
+import { Appbar, Avatar, Searchbar} from 'react-native-paper';
+import categories from '../components/categories';
 import ArticleCard from '../components/ArticleCard';
-import { fetchSupabaseData } from '../components/ArticlesData';
-
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import supabase from '../supabase/supabase';
+
 
 const STYLES = ['default', 'dark-content', 'light-content'];
 const TRANSITIONS = ['fade', 'slide', 'none'];
 
 const Home = () => {
+
   const navigation = useNavigation();
-  const [selectedCategory, setSelectedCategory] = useState('Corporate');
+  const [selectedCategory, setSelectedCategory] = useState('1');
   const [isRefreshing, setRefreshing] = useState(false);
   const [articles, setArticles] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchSupabaseData();
-      setArticles(data);
-    };
-
-    fetchData();
-  }, []);
-
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [categoryData, setCategoryData] = useState([]);
+
+ // Fetch articles from Supabase
+ const fetchArticles = async () => {
+  try {
+    const { data, error } = await supabase.from('news_management').select('*').order('created_at', { ascending: false });
+    //console.log('Fetched articles:', data);
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      setArticles(data);
+    }
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchArticles();
+}, []);
+
+// Fetch categories when the component mounts
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const categoryData = await categories();
+      setCategoryData(categoryData);
+    } catch (error) {
+      console.error('Error fetching categories:', error.message);
+    }
+  };
+
+  fetchCategories();
+}, []);
+
 
   const onChangeSearch = (query) => {
+    // Update the search query state
     setSearchQuery(query);
   };
 
@@ -44,46 +74,33 @@ const Home = () => {
     );
   };
 
- // Inside the FlatList renderItem function in Home.js
- const renderItem = ({ item }) => {
+  const renderItem = ({ item }) => {
+    return <ArticleCard {...item} />;
+  };
 
-   return (
-     <ArticleCard
-       {...item}
-     />
-   );
- };
+  // Filter articles based on the selected category
+  const filteredArticles = selectedCategory
+  ? articles.filter(article => article.nc_id === parseInt(selectedCategory, 10))
+  : articles;
 
-
-  const imageUrl =
-    'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg';
+  const imageUrl = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg'
 
   const openDrawer = () => {
     navigation.openDrawer();
-    console.log(openDrawer);
+    console.log('Drawer opened');
   };
 
   const [hidden, setHidden] = useState(false);
   const [statusBarStyle, setStatusBarStyle] = useState(STYLES[0]);
-  const [statusBarTransition, setStatusBarTransition] = useState(TRANSITIONS[0]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-
-    // Fetch data here
-
-    setRefreshing(false);
-  };
-
-  // Sort articles by timestamp in descending order
-  const sortedArticles = [...articles].sort(
-    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+  const [statusBarTransition, setStatusBarTransition] = useState(
+    TRANSITIONS[0],
   );
 
-  // Filter articles based on the selected category
-  const filteredArticles = selectedCategory
-    ? sortedArticles.filter((article) => article.category === selectedCategory)
-    : sortedArticles;
+  const handleRefresh = async () => {
+    setRefreshing(true); // Start the refresh animation
+    await fetchArticles();
+    setRefreshing(false); // Stop the refresh animation when data is fetched
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,6 +111,16 @@ const Home = () => {
         showHideTransition={statusBarTransition}
         hidden={hidden}
       />
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={['#72E6FF']} 
+          />
+        }
+      >
       <Appbar.Header>
         <TouchableOpacity onPress={openDrawer}>
           <Avatar.Image
@@ -105,56 +132,48 @@ const Home = () => {
         {renderSearchBar()}
       </Appbar.Header>
       <Appbar.Header>
-        {/* Scrollable list of categories */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScrollView}
-        >
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category}
-              style={[
-                styles.categoryButton,
-                category === selectedCategory
-                  ? styles.selectedCategoryButton
-                  : null,
-              ]}
-              onPress={() => setSelectedCategory(category)}
-            >
-              <Text
-                style={[
-                  styles.categoryButtonText,
-                  category === selectedCategory
-                    ? styles.selectedCategoryButtonText
-                    : null,
-                ]}
-              >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      {/* Scrollable list of categories */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
+        {categoryData.map(category => (
+          <TouchableOpacity
+            key={category.id}
+            style={[
+              styles.categoryButton,
+              category.id === selectedCategory ? styles.selectedCategoryButton : null,
+            ]}
+            onPress={() => setSelectedCategory(category.id)}
+          >
+            <Text style={[styles.categoryButtonText, category.id === selectedCategory ? styles.selectedCategoryButtonText : null]}>{category.type}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       </Appbar.Header>
       {/* List of articles */}
       <View style={styles.articleListContainer}>
-        <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
-          <FlatList
-            data={filteredArticles.reverse()} //reverse the articles based on timestamp
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={5}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={handleRefresh}
-                colors={['#72E6FF']} // Customize the color of the refresh spinner
-              />
-            }
-          />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
+      ) : error ? (
+        <Text style={{ color: 'red' }}>{error}</Text>
+      ) : filteredArticles.length === 0 ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 18 }}>
+          There are no news articles in this category.
+        </Text>
+      ) : (
+          <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
+            <FlatList
+              data={filteredArticles}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              initialNumToRender={5}
+              
+            />
+          </View>
+        )}
       </View>
+    </ScrollView>
     </SafeAreaView>
   );
 };
@@ -162,7 +181,7 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E9EFF7',
+    backgroundColor: '#E9EFF7'
   },
   categoryScrollView: {
     padding: 10,
@@ -172,7 +191,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 30,
     marginRight: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0f0f0'
   },
   selectedCategoryButton: {
     backgroundColor: '#72E6FF',
@@ -188,12 +207,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   searchBar: {
-    flex: 2,
+    flex: 2, 
     margin: 20, // Add some right margin to separate it from other header content
     marginTop: 30,
   },
   articleListContainer: {
     flex: 1, // Expand to fill available space
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
   },
 });
 

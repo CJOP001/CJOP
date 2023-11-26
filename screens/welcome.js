@@ -1,22 +1,38 @@
 import React from "react";
 import { ImageBackground, StyleSheet, View, Text, TouchableOpacity, Image, StatusBar } from "react-native";
 import { Colors } from "../components/styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const Welcome = ({navigation}) => {
+
+    const authNavigate = async() =>
+        {
+            let userID;
+            try{
+                userID = await AsyncStorage.getItem('uid');
+                console.log(userID);
+            }
+            catch(e)
+            {
+                console.log(e);
+            }
+           navigation.navigate(userID ? 'TabNavigator' : 'Login');
+
+        }
     return (
-    
+
         <View style={styles.WelcomeContainer}>
-            
+
             <View style={styles.InnerWelcomeContainer}>
             <ImageBackground source={require('../assets/welcome_background.png')} resizeMode="stretch" style={styles.image}>
-            <Image style={styles.PageLogo} resizeMode="cover" source={require('../assets/welcome_splashart.png')}/>  
+            <Image style={styles.PageLogo} resizeMode="cover" source={require('../assets/welcome_splashart.png')}/>
 
             </ImageBackground>
             </View>
             <Text style={styles.PageTitle}>Take Down Anything You See</Text>
 
-            <TouchableOpacity style={styles.StyledButton} onPress={() => navigation.navigate("Login")}>
+            <TouchableOpacity style={styles.StyledButton} onPress={authNavigate}>
                 <Text style={styles.ButtonText}>
                     Get Started
                 </Text>
@@ -28,7 +44,7 @@ const Welcome = ({navigation}) => {
 
 const styles = StyleSheet.create({
     image: {
-    
+
       paddingLeft: 290,
       paddingTop: 130,
       paddingBottom: 30,
@@ -71,7 +87,7 @@ const styles = StyleSheet.create({
     },
     ButtonText: {
         height: 40,
-        paddingBottom: 3, 
+        paddingBottom: 3,
         textAlign: 'center',
         fontFamily: 'Roboto',
         fontStyle: 'normal',

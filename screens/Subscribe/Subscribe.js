@@ -4,15 +4,15 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 're
 import { Appbar, Card } from 'react-native-paper';
 
 // Import custom components and data
-import dummyArticles from '../components/articles';
-import ArticleCard from '../components/ArticleCard';
+import subscribedArticles from '../../components/subscribed_article';
+import ArticleCard from '../../components/ArticleCard';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 
 const Subscribe = ({ navigation }) => {
   // State management
-  const [articles] = useState(dummyArticles);
-  const [refreshing, setRefreshing] = useState(false);
+  const [articles] = useState(subscribedArticles());
+  const [isRefreshing, setRefreshing] = useState(false);
 
   // Handler for pull-to-refresh
   const handleRefresh = () => {
@@ -58,7 +58,12 @@ const Subscribe = ({ navigation }) => {
           renderItem={({ item }) => <ArticleCard {...item} />}
           onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={['#72E6FF']} // Customize the color of the refresh spinner
+            />}
         />
       </View>
     </View>

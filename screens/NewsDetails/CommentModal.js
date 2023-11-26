@@ -1,36 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, Image } from 'react-native';
 
-const CommentModal = ({ isVisible, onDismiss, onSubmit }) => {
-  const [comment, setComment] = useState('');
-
+const CommentModal = ({ isVisible, onDismiss, onSubmit, commentText, setCommentText }) => {
   const handleSendPress = () => {
-    onSubmit(comment);
-    setComment('');
+    onSubmit(commentText);
+    setCommentText('');
+    onDismiss();
+  };
+
+  const handleClosePress = () => {
+    setCommentText(''); // Clear the comment state in ArticlesDetails
     onDismiss();
   };
 
   return (
-    <Modal
-      visible={isVisible}
-      transparent={true}
-      onRequestClose={onDismiss}
-    >
+    <Modal visible={isVisible} transparent={true} onRequestClose={onDismiss}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <TouchableOpacity style={styles.closeButton} onPress={onDismiss}>
-            <Image source={require('../assets/cross_button.png')} style={styles.closeIcon} />
+          <TouchableOpacity style={styles.closeButton} onPress={handleClosePress}>
+            <Image source={require('../../assets/cross_button.png')} style={styles.closeIcon} />
           </TouchableOpacity>
           <Text style={styles.modalTitle}>Write a Comment</Text>
           <TextInput
             style={styles.commentInput}
             multiline={true}
             placeholder="Type your comment here..."
-            value={comment}
-            onChangeText={(text) => setComment(text)}
+            value={commentText}
+            onChangeText={(text) => setCommentText(text)}
             maxLength={1000}
           />
-          <Text style={styles.wordCount}>{`Max: ${1000 - comment.length} words remaining`}</Text>
+          <Text style={styles.wordCount}>{`Max: ${1000 - commentText.length} words remaining`}</Text>
           <TouchableOpacity style={styles.sendButton} onPress={handleSendPress}>
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>

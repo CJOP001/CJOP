@@ -3,9 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, ActivityIn
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import supabase from '../supabase/supabase';
-import { getUserData } from '../components/UserInfo';
+import supabase from '../../supabase/supabase';
 
 const PostingModal = ({
   isVisible,
@@ -14,8 +12,8 @@ const PostingModal = ({
   onCancel,
   textInputValue,
   image,
-  userId,
   selectedCategoryId,
+  userId,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
@@ -34,33 +32,11 @@ const handleConfirm = async () => {
   console.log('Text Input:', textInputValue);
   setLoading(true); // Show loader when confirming
 
-const userData = await getUserData();
-
-  if (!userData) {
-    setLoading(false); // Hide loader after the process is complete
-    console.error('User data is not available.');
-    return;
-  }
   const timestamp = Date.now();
   const imageName = `image/${timestamp}`;
 
   const currentDate = new Date();
   const currentTime = currentDate.toISOString();
-
-    try {
-      // Check if user data is available
-      if (userData) {
-        userId = userData.id;
-
-      } else {
-        console.error('User data is not available.');
-      };
-    } catch (error) {
-      console.error('Error retrieving user data:', error);
-      setLoading(false); // Hide loader after the process is complete
-      return; // Stop further execution to avoid errors
-    }
-
 
   try {
     if (image) {
@@ -114,7 +90,7 @@ const userData = await getUserData();
         console.error('Error uploading image:', fileError);
       } else {
         const imageUrl = `https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/Testing/${imageName}`;
-
+        await deductCredits(userId);
         // Store the imageUrl and text input in your database
         const { data: postData, error: postError } = await supabase
           .from('news_management')
@@ -136,7 +112,7 @@ const userData = await getUserData();
         } else {
           console.log('Data sent to Supabase:', postData);
 
-          // Deduct 10 credits from the user
+          // Insert 10 credits from the user transaction
           const { data: transactionData, error: transactionError } = await supabase
             .from('credit_transactions')
             .insert([
@@ -149,9 +125,10 @@ const userData = await getUserData();
             .select('*');
 
           if (transactionError) {
-            console.error('Error deducting credits:', transactionError);
+            console.error('Error inserting credits transaction:', transactionError);
           } else {
-            console.log('Credits deducted:', transactionData);
+            console.log('Credits trasaction inserted:', transactionData);
+            
             navigation.navigate('TabNavigator');
           }
         }
@@ -163,6 +140,53 @@ const userData = await getUserData();
     setLoading(false); // Hide loader after the process is complete
   }
 };
+
+
+const deductCredits = async (userId) => {
+  try {
+    console.log('Deducting credits for user:', userId);
+    // Retrieve the user's current credit balance
+    const { data: userData, error: userError } = await supabase
+      .from('credits')
+      .select('credit_amount')
+      .eq('user_id', userId)
+      .single();
+
+      console.log('User data:', userData);
+
+    if (userError) {
+      console.error('Error fetching user credits:', userError);
+      // Handle the error as needed
+      return;
+    }
+
+    const currentCredits = userData.credit_amount;
+    console.log('Current credits:', currentCredits);
+
+    // Deduct 10 credits
+    const updatedCredits = currentCredits - 10;
+    console.log('Updated credits:', updatedCredits);
+
+    // Update the user's credit table with the new balance
+    const { data: updateData, error: updateError } = await supabase
+      .from('credits')  // Ensure this matches your actual table name
+      .update({ credit_amount: updatedCredits })
+      .eq('user_id', userId)
+      .single();
+
+    if (updateError) {
+      console.error('Error updating user credits:', updateError);
+      // Handle the error as needed
+      return;
+    }
+
+    console.log('Credits deducted successfully. New balance:', updatedCredits);
+  } catch (error) {
+    console.error('Error deducting credits:', error);
+    // Handle the error as needed
+  }
+};
+
 
   const styles = StyleSheet.create({
     modalContainer: {
@@ -231,7 +255,7 @@ const userData = await getUserData();
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-              <Image source={require('../assets/cross_button.png')} style={styles.closeIcon} />
+              <Image source={require('../../assets/cross_button.png')} style={styles.closeIcon} />
             </TouchableOpacity>
             <Text style={styles.headerText}>Posting</Text>
             <Text style={styles.subText1}> 10 Credits will be pending</Text>

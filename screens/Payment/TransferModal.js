@@ -1,7 +1,8 @@
 // TransferModal.js
 import React, { useState } from 'react';
-import { Modal, View, Text, StyleSheet} from 'react-native';
+import { Modal, View, Text, StyleSheet, KeyboardAvoidingView} from 'react-native';
 import { Button, TextInput, HelperText } from 'react-native-paper';
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
 
 const TransferModal = ({ visible, onClose, onTransfer }) => {
   // State for input values and error messages
@@ -59,13 +60,13 @@ const TransferModal = ({ visible, onClose, onTransfer }) => {
 
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
-      <View style={styles.modalContainer}>
+      <KeyboardAvoidingView style={styles.modalContainer} behavior="height">
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Transfer Credits</Text>
 
           <TextInput
             mode='outlined'
-            label="Recipient ID"
+            label="Phone Number"
             value={recipientID}
             onChangeText={(text) => setRecipientID(text)}
             style={styles.input}
@@ -111,7 +112,7 @@ const TransferModal = ({ visible, onClose, onTransfer }) => {
           </View>
 
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'left',
     maxWidth: 500,
-    height: '60%',
+    height: '40%',
     maxHeight: 400 ,
   },
   modalButton: {

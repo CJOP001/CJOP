@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Modal, Text, TouchableOpacity, TouchableHighlight, StyleSheet, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
-import PostingDesc from '../screens/PostingDesc';
+import PostingDesc from './NewsCreation/PostingDesc';
 
 const AddingPost = ({ isVisible, onClose }) => {
   const navigation = useNavigation();

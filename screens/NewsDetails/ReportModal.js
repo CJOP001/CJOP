@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal as RNModal, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 
 const ReportModal = ({ isVisible, onDismiss, onReport }) => {
@@ -24,7 +24,7 @@ const ReportModal = ({ isVisible, onDismiss, onReport }) => {
   const windowHeight = Dimensions.get('window').height;
 
   return (
-    <RNModal
+    <Modal
       transparent
       animationType="fade"
       visible={isVisible}
@@ -60,7 +60,7 @@ const ReportModal = ({ isVisible, onDismiss, onReport }) => {
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
-    </RNModal>
+    </Modal>
   );
 };
 

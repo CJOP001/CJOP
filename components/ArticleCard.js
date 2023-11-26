@@ -1,42 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Avatar, Text } from 'react-native-paper';
+import { Card, Avatar, Button, Text, Modal, Portal } from 'react-native-paper';
 import { Image, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 import { retrieveUserData } from '../components/UserInfo';
 
 // Import your custom icons
 import likeIcon from '../assets/like.png';
 import commentIcon from '../assets/comments.png';
-import shareIcon from '../assets/share.png';
+import shareIcon from '../assets/share.png'; // Import your share icon
 
-const ArticleCard = ({ id, content, timestamp, imagePath, likes, comments, userId }) => {
-  const [userInfo, setUserInfo] = useState(null);
+const ArticleCard = React.memo(
+  ({
+    id,
+    user_id,
+    created_at,
+    image_path,
+    description,
+    likes,
+    comments,
+    status
+  }) => {
   const [likePressed, setLikePressed] = useState(false);
   const [commentPressed, setCommentPressed] = useState(false);
-  const [sharePressed, setSharePressed] = useState(false);
-
+  const [sharePressed, setSharePressed] = useState(false); // State for the share icon
   const navigation = useNavigation();
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
-
-   useEffect(() => {
-      const fetchUserData = async () => {
-        try {
-          // Ensure userId is defined before making the request
-          if (userId) {
-            const userDetails = await retrieveUserData(userId);
-            console.log('User Details:', userDetails); // Add this line
-            setUserInfo(userDetails);
-          } else {
-            console.error('User ID is undefined.');
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Ensure userId is defined before making the request
+        if (user_id) {
+          const userDetails = await retrieveUserData(user_id);
+          //console.log('User Details:', userDetails);
+          setUserInfo(userDetails);
+        } else {
+          console.error('User ID is undefined.');
         }
-      };
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
-      fetchUserData();
-    }, [userId]);
+    fetchUserData();
+  }, [user_id]);
 
   const handleLikePress = () => {
     setLikePressed(!likePressed);
@@ -47,55 +55,62 @@ const ArticleCard = ({ id, content, timestamp, imagePath, likes, comments, userI
   };
 
   const handleSharePress = () => {
-    setSharePressed(!sharePressed);
+    setSharePressed(!sharePressed); // Toggle the share icon state
   };
 
-  const limitContent = (text) => {
+  const handleReadMorePress = () => {
+    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
+    hideModal();
+  };
+
+  const showModal = () => setModalVisible(true);
+  const hideModal = () => setModalVisible(false);
+
+  // Function to limit the content to 5 words
+  const limitDescription = (text) => {
     if (text) {
       const words = text.split(' ');
       const limitedContent = words.slice(0, 5).join(' ');
       return limitedContent + (words.length > 5 ? ' .................' : '');
-    } else {
-      return '';
     }
+    return '';
   };
 
-  const handleReadMorePress = () => {
-      navigation.navigate('ArticlesDetails', {
-        article: {
-          id,
-          timestamp,
-          imagePath,
-          content,
-          likes,
-          comments,
-          userId,
-        },
-      });
+  const formatDate = (timestamp) => {
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
     };
+
+    return new Date(timestamp).toLocaleString('en-US', options);
+  };
 
   return (
     <Card style={styles.articleCard}>
       <Card.Title
         title={userInfo ? userInfo.fullname : 'Loading...'}
-        subtitle={`${timestamp}`}
+        subtitle={formatDate(created_at)}
         left={(props) => (
           <Avatar.Image
-            source={{
-              uri: userInfo && userId === userInfo.id ? userInfo.user_image : 'https://example.com/default-avatar.jpg',
-            }}
+          source={{
+            uri: userInfo && user_id === userInfo.id ? userInfo.user_image : 'https://example.com/default-avatar.jpg',
+          }}
             size={40}
           />
         )}
       />
       <Card.Content>
-        <Text style={styles.articleText}>{limitContent(content)}</Text>
-      </Card.Content>
-      {imagePath ? (
+          <Text style={styles.articleText}>{limitDescription (description)}</Text>
+        </Card.Content>
+      {image_path ? (
         <Card.Cover
-          source={{ uri: imagePath }}
+          source={{ uri: image_path }}
           style={styles.articleImage}
-          resizeMode="cover"
+          resizeMode="contain" // Set resizeMode to 'contain'
         />
       ) : null}
 
@@ -123,28 +138,49 @@ const ArticleCard = ({ id, content, timestamp, imagePath, likes, comments, userI
         </View>
       </Card.Actions>
 
-      {/* Read More button */}
-      <View style={styles.readButtonContainer}>
-        <TouchableOpacity onPress={handleReadMorePress}>
-          <View style={styles.readButton}>
-            <Text style={styles.readButtonText}>Read More</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.readButtonContainer}>
+          <Button
+            mode="contained"
+            onPress={showModal}
+            style={styles.readButton}
+            labelStyle={styles.readButtonText}
+          >
+            Read
+          </Button>
+        </View>
+
+        <Portal>
+          <Modal visible={isModalVisible} onDismiss={hideModal}>
+            <View style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
+              <Text>{description}</Text>
+              <Button
+                mode="contained"
+                onPress={handleReadMorePress}
+                style={styles.readButton}
+                labelStyle={styles.readButtonText}
+              >
+                Read
+              </Button>
+              {/* Add any other content you want in the modal */}
+              <Button onPress={hideModal}>Close</Button>
+            </View>
+          </Modal>
+        </Portal>
     </Card>
   );
-};
+});
+
+export default ArticleCard;
 
 const styles = StyleSheet.create({
   articleCard: {
     width: '100%',
     marginBottom: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   iconWrapper: {
     borderRadius: 20,
@@ -157,12 +193,15 @@ const styles = StyleSheet.create({
   iconContainerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 'auto', // Pushes the left icons to the left
   },
   iconContainerRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: 'auto', // Pushes the right icon to the right
   },
   articleImage: {
+    aspectRatio: 16 / 9, // Set the aspect ratio you desire (e.g., 16:9)
     margin: 10,
   },
   readButtonContainer: {
@@ -171,17 +210,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   readButton: {
+    width: '40%',
     backgroundColor: '#72E6FF',
-    padding: 10,
-    borderRadius: 5,
+    borderRadius: 15,
   },
   readButtonText: {
-    color: 'white',
-  },
-  articleText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 20, // Adjust the font size as needed
+    fontWeight: 'bold', // Make the text bold
   },
 });
-
-export default ArticleCard;

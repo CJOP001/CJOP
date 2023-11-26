@@ -61,15 +61,12 @@ class CameraModal extends Component {
             <TouchableOpacity style={styles.closeButton} onPress={this.props.onClose}>
               <Image source={require('../assets/cross_button.png')} style={styles.closeButtonImage} />
             </TouchableOpacity>
-            <View style={styles.captureButtonContainer}>
-                          <TouchableOpacity style={styles.captureButton} onPress={() => this.takePicture()} />
-                        </View>
-          <View style={styles.flipButtonContainer}>
-              <TouchableOpacity style={styles.flipButton} onPress={() => this.flipCamera()}>
-                <Image source={require('../assets/camflip_icon.png')} style={styles.flipIcon} />
-              </TouchableOpacity>
+            <View style={styles.flipButtonContainer}>
+            <TouchableOpacity style={styles.flipButton} onPress={() => this.flipCamera()} />
             </View>
-
+            <View style={styles.captureButtonContainer}>
+              <TouchableOpacity style={styles.captureButton} onPress={() => this.takePicture()} />
+            </View>
           </View>
         </View>
       {this.state.processingImage && (
@@ -102,31 +99,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 23,
   },
-  // Add justifyContent: 'space-between' to cameraControls
-  cameraControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between', // Add this line
-    padding: '2%',
-  },
-
-  // Remove marginLeft from captureButton
-  captureButton: {
-    backgroundColor: 'white',
-    width: '30%',
-    aspectRatio: 1,
-    borderRadius: 50,
-  },
-
-// Adjust flipButtonContainer styles
-  flipButtonContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: '2%',
-    marginLeft: '15%',
-    alignItems: 'flex-start', // Change alignItems to 'flex-start'
-
-  },
-
   cameraModal: {
     flex: 1,
     backgroundColor: 'black',
@@ -135,17 +107,34 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-flipIcon: {
-  width: 40,
-  height: 40,
-},
- // Adjust captureButtonContainer styles
+  cameraControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: '2%',
+  },
+  flipButtonContainer: {
+    flex: 1,
+    alignItems: 'right',
+    justifyContent: 'flex-end',
+  },
+  flipButton: {
+     backgroundColor: 'white',
+      width: '30%',
+      aspectRatio: 1,
+      marginLeft: '160%',
+      borderRadius: 50,
+  },
   captureButtonContainer: {
-    flex: 3,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginLeft: '15%', // Add marginRight to adjust the position
-
+  },
+  captureButton: {
+    backgroundColor: 'white',
+    width: '30%',
+    aspectRatio: 1,
+    marginRight: '130%',
+    borderRadius: 50,
   },
   closeButton: {
     justifyContent: 'center',

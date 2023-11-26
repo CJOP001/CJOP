@@ -17,10 +17,9 @@ import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
 import supabase from "../supabase/supabase";
 
-//change USERID to obtain itself from the previous page
-var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
 
-const EditProfile = ({navigation}) => {
+
+const EditProfile = ({route, navigation}) => {
   const [userdata, SetUser] = useState([]);
   const [followers, SetFollowers] = useState([]);
   const [following, SetFollowing] = useState([]);
@@ -30,6 +29,19 @@ const EditProfile = ({navigation}) => {
   const [newdesc, changeDesc] = useState();
   const [newproflink, changeProfLink] = useState();
   const [newbacklink, changeBackLink] = useState();
+  const [selectedBackgroundImage, setSelectedBackgroundImage] = useState();
+   const [clearBackground, setClearBackground] = useState(false);
+
+  //change USERID to obtain itself from the previous page
+   const { userID } = route.params;
+
+
+    useEffect(() => {
+       getData();
+       getFollowers();
+       getFollowing();
+     }, [userID]);
+
 
   const uploadAvatar = async () => {
     //launch the image library
@@ -69,43 +81,40 @@ const EditProfile = ({navigation}) => {
     } else;
   };
 
-  const uploadBackground = async () => {
-    //launch the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      base64: true,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+   const uploadBackground = async () => {
 
-    //if the result is obtained
-    if (result) {
-      setFileB(result.assets[0].base64);
-      console.log("upload atttempt!");
-      //the filename is <userid>-background.jpg
-      const filename = `/Backgrounds/${userID}-background.jpg`;
-      console.log("initialize upload");
-      //supabase does not recognize image bodies, so need a base64 decoder
-      const { data, error } = await supabase.storage
-        .from("UserImage")
-        .upload(filename, decode(fileB), {
-          contentType: "image/png",
-          upsert: true,
-        });
-      if (error) {
-        // Handle error
-        console.log("Something went wrong!");
-      } else {
-        // Handle success
-        console.log("uploaded!");
-        changeBackLink(
-          "https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage" +
-            filename
-        );
-      }
-    } else;
-  };
+       setSelectedBackgroundImage(null);
+       setClearBackground(null);
+
+     // Launch the image library
+     let result = await ImagePicker.launchImageLibraryAsync({
+       base64: true,
+       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+       allowsEditing: true,
+       aspect: [4, 3],
+       quality: 1,
+     });
+
+     // If the result is obtained
+     if (result) {
+       const filename = `/Backgrounds/${userID}-background.jpg`;
+       const { data, error } = await supabase.storage
+         .from("UserImage")
+         .upload(filename, decode(result.assets[0].base64), {
+           contentType: "image/png",
+           upsert: true,
+         });
+       if (error) {
+         console.log("Something went wrong!");
+       } else {
+         console.log("Uploaded!");
+         const imageURL =
+           "https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage" +
+           filename;
+         setSelectedBackgroundImage(imageURL);
+       }
+     }
+   };
 
   const submit = async () => {
     console.log("updating data now!");
@@ -136,7 +145,7 @@ const EditProfile = ({navigation}) => {
         `
     user_image,
     fullname,
-    id, 
+    id,
     created_at,
     description,
     background_image,
@@ -174,11 +183,10 @@ const EditProfile = ({navigation}) => {
     getData();
     getFollowers();
     getFollowing();
-  }, []);
+  }, [userID]);
 
   return (
-    <View>
-      {/*Header Section*/}
+    <View style={styles.container}>
       <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
         <View style={styles.customBackAction}>
           <Appbar.BackAction
@@ -188,90 +196,70 @@ const EditProfile = ({navigation}) => {
             }}
           />
         </View>
-        {/*Title Bar*/}
         <Appbar.Content title="Edit Profile" style={styles.appContent} />
       </Appbar.Header>
       {userdata.map((userdata) => (
-        <View key={userdata.id}>
-          {/*Profile Background*/}
+        <View key={userdata.id} style={styles.mainContainer}>
           <Card mode="outlined" style={styles.profile}>
             <Card.Cover
-              source={{ uri: userdata.background_image }}
-              style={{ height: 125, minWidth: "100%" }}
+              source={{ uri: selectedBackgroundImage || userdata[0]?.background_image }}
+              style={styles.coverImage}
               onTouchStart={uploadBackground}
+              //onTouchStart={uploadBackground() => setClearBackground(true)}
             />
-            {/*Profile Image*/}
-            <Card.Title
-              left={(props) => (
-                <Avatar.Image
-                  source={{
-                    uri: userdata.user_image,
-                  }}
-                  size={150}
-                  style={styles.profileimage}
-                  onTouchStart={uploadAvatar}
-                />
-              )}
-            />
-            <Card.Content
-              style={{
-                margin: 5,
-                alignItems: "center",
-                marginTop: 60,
-                marginBottom: 80,
-              }}
-            >
-              <TextInput
-                editable
-                style={styles.username}
-                onChangeText={changeName}
-                defaultValue={userdata.fullname}
-                keyboardType="default"
+            <View style={styles.avatarContainer}>
+              <Avatar.Image
+                source={{ uri: userdata.user_image }}
+                size={150}
+                style={styles.profileimage}
+                onTouchStart={uploadAvatar}
               />
-              <Text style={{ marginBottom: 10 }}>@{userdata.nameid}</Text>
-
-              <TextInput
-                editable
-                style={styles.description}
-                onChangeText={changeDesc}
-                defaultValue={userdata.description}
-                keyboardType="default"
-                multiline
-                numberOfLines={4}
-              />
-            </Card.Content>
-            <Card.Content
-              style={{
-                alignItems: "center",
-              }}
-            >
-              <View style={styles.container}>
-                <Image
-                  source={require("../assets/calendar-icon.png")}
-                  style={styles.icon}
+            </View>
+            <View style={styles.textContainer}>
+              <Card.Content style={styles.cardContent}>
+                <TextInput
+                  editable
+                  style={styles.username}
+                  onChangeText={changeName}
+                  defaultValue={userdata.fullname}
+                  keyboardType="default"
                 />
-                <Text>
-                  Joined:{" "}
-                  {userdata.created_at.length >= 10
-                    ? userdata.created_at.slice(0, 10)
-                    : userdata.created_at}{" "}
+                <Text style={styles.handle}>@{userdata.nameid}</Text>
+                <TextInput
+                  editable
+                  style={styles.description}
+                  onChangeText={changeDesc}
+                  defaultValue={userdata.description}
+                  keyboardType="default"
+                  multiline
+                  numberOfLines={4}
+                />
+              </Card.Content>
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.containerCalander}>
+                  <Image
+                    source={require("../assets/calendar-icon.png")}
+                    style={styles.icon}
+                  />
+                  <Text>
+                    Joined:{" "}
+                    {userdata.created_at.length >= 10
+                      ? userdata.created_at.slice(0, 10)
+                      : userdata.created_at}{" "}
+                  </Text>
+                </View>
+              </Card.Content>
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.followText}>
+                  Following: {following} | Followers: {followers}
                 </Text>
-              </View>
-            </Card.Content>
-            <Card.Content
-              style={{
-                marginBottom: 30,
-                alignItems: "center",
-              }}
-            >
-              <Text>
-                Following: {following} | Followers: {followers}
-              </Text>
-            </Card.Content>
-
+              </Card.Content>
+            </View>
+            <View style={styles.buttonContainer}>
             <Pressable style={styles.button} onPress={submit}>
               <Text style={styles.buttonText}>Save Changes</Text>
             </Pressable>
+             </View>
           </Card>
         </View>
       ))}
@@ -279,25 +267,48 @@ const EditProfile = ({navigation}) => {
   );
 };
 
-export default EditProfile;
-
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 35,
-    textAlign: "center",
-    padding: 15,
-    fontWeight: "500",
+  container: {
+    flex: 1,
+
+  },
+  mainContainer: {
+    width: "100%", // Adjust the width as needed
   },
   customBackAction: {
-    marginLeft: -10, // Adjust the back action position if needed
+    marginLeft: -10,
   },
   appContent: {
     alignItems: "center",
     justifyContent: "center",
   },
   profile: {
-    height: "100%",
-    width: "100%",
+    alignItems: "center",
+  },
+  coverImage: {
+    height: 130,
+    minWidth: "100%",
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginTop: -5,
+    marginBottom: -15,
+    paddingBottom: -5,
+  },
+  profileimage: {
+    alignItems: "center",
+    marginTop: 15,
+    marginBottom: -5,
+    paddingBottom: -5,
+  },
+  textContainer: {
+    margin: 5,
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 80,
+  },
+  cardContent: {
+    marginVertical: 10,
     alignItems: "center",
   },
   icon: {
@@ -305,37 +316,32 @@ const styles = StyleSheet.create({
     width: 20,
     marginRight: 20,
   },
-  container: {
+  containerCalander: {
     flexDirection: "row",
     padding: 10,
     alignItems: "center",
   },
+  buttonContainer: {
+      marginTop: -110, // Adjust the value as needed to move the button up
+      alignItems: "center",
+      paddingBottom: 35,
+    },
   button: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 5,
+    paddingVertical: 15,
     paddingHorizontal: 5,
-    borderRadius: 4,
+    borderRadius: 10,
     elevation: 3,
-    backgroundColor: "white",
-    borderWidth: 5,
-    borderColor: "#72E6FF",
-    translateX: -50,
-    borderRadius: 20,
+    backgroundColor: "#72E6FF",
+    marginTop: 20,
   },
   buttonText: {
     fontSize: 16,
     lineHeight: 21,
     fontWeight: "bold",
     letterSpacing: 0.25,
-    color: "#72E6FF",
-  },
-  profileimage: {
-    alignItems: "center",
-    marginTop: 50,
-    marginBottom: 10,
-    paddingBottom: 10,
-    transform: [{ translateX: 113 }],
+    color: "white",
   },
   username: {
     fontSize: 16,
@@ -355,4 +361,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
+  handle: {
+    marginBottom: 10,
+  },
+  followText: {
+    marginBottom: 30,
+    alignItems: "center",
+  },
 });
+
+export default EditProfile;

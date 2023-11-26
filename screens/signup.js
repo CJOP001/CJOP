@@ -6,20 +6,23 @@ import { Formik } from "formik";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput  } from "react-native";
 import { Alert } from "react-native";
+import { retrieveUserByPhone, getUserData, retrieveUserData } from '../components/UserInfo';
 
 
 const {darkLight} = Colors;
 
 const SignUp = ({navigation}) => {
-
+    
 
     var tempPhone = "";
     var tempUser = "";
     var tempId = "";
     var tempError = false;
 
-        const CheckExistingProfile = async () => {
+    const currentDate = new Date();
 
+        const CheckExistingProfile = async () => {
+        
         tempId = trimString(tempId);
         tempId = ToLowerCase(tempId);
         try
@@ -30,12 +33,12 @@ const SignUp = ({navigation}) => {
                     .eq('nameid', tempId);
 
                     if(data == "" || data == null)
-                    {
+                    {   
                         console.log("adding new user.....")
                         tempError = false;
                         SignUpUser();
-
-
+                        
+                        
                     }
                     else if(data != "")
                     {
@@ -55,7 +58,7 @@ const SignUp = ({navigation}) => {
                     }
                     else
                     {
-
+                        
                     }
           }
     catch (error)
@@ -64,7 +67,7 @@ const SignUp = ({navigation}) => {
     }
 }
 
-const trimString = (tempId) =>
+const trimString = (tempId) => 
 {
     let string = tempId.split(" ").join("");
     return string;
@@ -76,31 +79,66 @@ const ToLowerCase = (tempId) =>
     return lowerCaseText;
 }
 
-const AddNewUser= async() =>
-{
+const AddNewUser = async () => {
     console.log(tempError);
-                        const {reply, error} = await supabase
-                            .from('app_users')
-                            .insert({'fullname':  tempUser,
-                                    'phone_no': tempPhone,
-                                    'nameid': tempId,
-                                    'status': 'Active'})
-                        if(error)
-                        {
-                            console.log(error, "unsuccessful insert");
-                            Alert.alert(
-                                'Sign Up Error',
-                                'Adding new user failed. Please try again.',
-                                [{text: 'Back', style: 'cancel'},],{cancelable: true,}
+    try {
+        // Add user to app_users table
+        const { data: user, error: userError } = await supabase
+            .from('app_users')
+            .insert({
+                'fullname': tempUser,
+                'phone_no': tempPhone,
+                'nameid': tempId,
+                'status': 'Active',
+            });
 
-                            );
-                        }
-                         else{
-                            console.log("successful insert");
-                            SendOTP();
+        if (userError) {
+            console.log(userError, "unsuccessful insert");
+            Alert.alert(
+                'Sign Up Error',
+                'Adding new user failed. Please try again.',
+                [{ text: 'Back', style: 'cancel' }],
+                { cancelable: true }
+            );
+        } else {
+            console.log("successful user insert");
+            const userData = await retrieveUserByPhone(tempPhone);
+                
+                console.log('User Data:', userData);
+                const userId = userData.id;
+                console.log('User ID:', userId);
+                AddNewUserWallet(userId);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
 
-                    }
-}
+
+
+const AddNewUserWallet = async (user) => {
+    try {
+        // Add credit wallet for the new user
+        const { data: wallet, error: walletError } = await supabase
+            .from('credits')
+            .insert({
+                'user_id': user, // Use the user_id parameter
+                'credit_amount': 0,
+                'date': currentDate,
+                'status': 'active',
+            });
+
+        if (walletError) {
+            console.log(walletError, "unsuccessful wallet insert");
+            // Handle the error appropriately
+        } else {
+            console.log("successful wallet insert");
+            SendOTP();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 const SignUpUser = async() =>
 {
@@ -117,7 +155,6 @@ const SignUpUser = async() =>
     {
         console.log("successful signup, sending OTP......")
         AddNewUser();
-
     }
 }
     catch(error)
@@ -129,11 +166,10 @@ const SignUpUser = async() =>
         [{text: 'Back', style: 'cancel'},],{cancelable: true,}
 
     );
-
 }
 }
 
-const SendOTP = async() =>
+const SendOTP = async() => 
 {
     const {data, error} = await supabase.auth.signInWithOtp({
         phone: tempPhone,
@@ -154,16 +190,16 @@ const SendOTP = async() =>
             }
 }
     return (
-        <KeyboardAvoidingWrapper>
+        <KeyboardAvoidingWrapper>   
             <StatusBar style="dark"/>
         <View style={styles.UpperSignUpContainer}>
-        <Image style={styles.SignUpLogo} resizeMode="cover" source={require('../assets/signup_splashart.png')}/>
+        <Image style={styles.SignUpLogo} resizeMode="cover" source={require('../assets/signup_splashart.png')}/>  
         </View>
         <View style={styles.LowerSignUpContainer}>
         <Text style={styles.SignUpTitle}>Welcome to CJOP</Text>
         <Text style={styles.SignUpInfo}>Become a journalist in your own right. Sign up below to begin your journalist's journey.</Text>
-
-                <Formik
+        
+                <Formik 
                 initialValues={{phone_number: '', username: '', name_id: ''}}
                     onSubmit={(values) => {console.log(values);
                         tempPhone = values.phone_number;
@@ -173,10 +209,10 @@ const SendOTP = async() =>
                         CheckExistingProfile();
                     }}
                     >
-                        {({handleChange, handleBlur, handleSubmit, values}) =>
+                        {({handleChange, handleBlur, handleSubmit, values}) => 
                             (<View style={styles.StyledFormArea}>
                                 <View style={styles.SignUpInput}>
-                                <PhoneInput
+                                <PhoneInput 
                                     label="Phone Number (Malaysia)"
                                     placeholder="eg. +6 XXX-XXX-XXXX"
                                     placeholderTextColor={darkLight}
@@ -185,8 +221,8 @@ const SendOTP = async() =>
                                     value={values.phone_number}
                                     keyboardType="phone-pad"
                                 />
-
-                                <UsernameInput
+                                
+                                <UsernameInput 
                                 label="tempUser"
                                 placeholder="eg. Titanfall#456"
                                 placeholderTextColor={darkLight}
@@ -197,7 +233,7 @@ const SendOTP = async() =>
                                 maxLength={50}
                             />
                             </View>
-                            <ProfileInput
+                            <ProfileInput 
                                 label="Profile Name"
                                 placeholder="eg. Reynold34"
                                 placeholderTextColor={darkLight}
@@ -207,14 +243,14 @@ const SendOTP = async() =>
                                 minLength={10}
                                 maxLength={50}
                             />
-                            <Text style={{
+                            <Text style={{ 
                                         opacity: tempError? 1: 0,
                                         fontSize: 15,
                                         fontFamily: 'Roboto',
                                         marginLeft: 15,
                                         color: tempError? "#FF0F0F": "#000000",
                                          }}>A profile name has already exist</Text>
-
+                            
                             <TouchableOpacity style={styles.SignUpButton} onPress={handleSubmit}>
                 <Text style={styles.SignUpText}>
                     Sign Up
@@ -295,7 +331,7 @@ StyledFormArea: {
     width: "90%",
     alignItems: "left",
     paddingLeft: 10,
-    justifyContent: "center"
+    justifyContent: "center"    
 },
 SignUpInput: {
     flexDirection: "row",
@@ -318,7 +354,7 @@ SignUpButton: {
 SignUpText: {
     height: 30,
     justifyContent: "center",
-    paddingBottom: 5,
+    paddingBottom: 5, 
     paddingRight: 1,
     textAlign: "center",
     fontFamily: 'Roboto',
