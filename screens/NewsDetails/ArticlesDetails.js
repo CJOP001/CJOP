@@ -4,6 +4,7 @@ import { Image, View, StyleSheet, TouchableOpacity, Modal, ScrollView } from 're
 import { useNavigation } from '@react-navigation/native';
 import { retrieveUserData } from '../../components/UserInfo';
 import supabase from '../../supabase/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import ReportModal from './ReportModal';
@@ -21,12 +22,15 @@ const ArticlesDetails = ({ route }) => {
   const [isImageModalVisible, setImageModalVisible] = useState(false);
   const [isCommentModalVisible, setCommentModalVisible] = useState(false); 
   const [userInfo, setUserInfo] = useState(null);
+  const [commentText, setCommentText] = useState('');
+  const [userID, setUserID] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Get the entire article object from the route params
   const { article } = route.params;
 
   // Destructure the article object
-  const { id, user_id, status, created_at, image_path, description, likes, comments } = article;
+  const { id, user_id, status, created_at, image_path, description, likes, comments, fullname, user_image, } = article;
 
 
   useEffect(() => {
