@@ -49,10 +49,10 @@ function CustomDrawerContent(props) {
 
   const handleLogout = async () => {
     try {
-      // Clear user session (assuming you're using AsyncStorage)
+      // Clear user session 
       await AsyncStorage.clear();
   
-      // Navigate to the login screen (assuming 'LoginStack' is the correct stack name)
+      // Navigate to the login screen 
       props.navigation.navigate('LoginStack');
   
       // Hide the logout dialog
@@ -71,21 +71,21 @@ function CustomDrawerContent(props) {
           <Image
             style={styles.avatar}
             source={{
-              uri: 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/HD-wallpaper-will-never-forget-iphone-apple-ipad-steve-jobs.jpg'
+              uri: 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage/Avatars/default'
             }}
           />
           <View style={styles.infoContainer}>
-            <Text style={styles.username}>{userFullName}</Text>
-            <Text style={styles.alias}>@{userFullName}</Text>
+            <Text style={styles.username}>{userFullName}alwin</Text>
+            <Text style={styles.alias}>@{userFullName}alwin123</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.countContainer}>
         <View style={styles.countRow}>
-          <Text style={styles.countText}>{followersCount}</Text>
+          <Text style={styles.countText}>{followersCount}0</Text>
           <Text style={styles.countLabel}>Followers</Text>
-          <Text style={styles.countText}>{followingCount}</Text>
+          <Text style={styles.countText}>{followingCount}0</Text>
           <Text style={styles.countLabel}>Following</Text>
         </View>
       </View>
