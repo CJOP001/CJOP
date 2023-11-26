@@ -6,6 +6,7 @@ import { Divider, Portal, Dialog, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import supabase from '../supabase/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserData } from '../components/UserInfo';
 
 import TabNavigator from './TabNavigator';
 import Payment from '../screens/Payment/Payment';
@@ -17,36 +18,9 @@ import StackNavigator from './StackNavigator';
 
 const Drawer = createDrawerNavigator();
 
-
-
 function CustomDrawerContent(props) {
 
-  const [followersCount, SetFollowers] = useState([]);
-  const [followingCount, SetFollowing] = useState([]);
-
-  const getFollowing = async () => {
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`user_id`, `friend_id`, { count: "exact", head: true })
-      .eq("user_id", props.userID);
-    SetFollowing(data.length);
-  };
-
-  const getFollowers = async () => {
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`user_id`, `friend_id`, { count: "exact", head: true })
-      .eq("friend_id", props.userID);
-    SetFollowers(data.length);
-  };
-
-  useEffect(() => {
-    getFollowing();
-    getFollowers();
-  }, []);
-
-  const { color, userFullName } = props;
-
+  const { color, userFullName, userNameID, userImage, followersCount, followingCount } = props;
   const handleLogout = async () => {
     try {
       // Clear user session 
@@ -68,24 +42,24 @@ function CustomDrawerContent(props) {
       {/* Avatar and Username Section */}
       <View style={styles.avatarContainer}>
         <View style={styles.avatarAndInfo}>
-          <Image
-            style={styles.avatar}
-            source={{
-              uri: 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage/Avatars/default'
-            }}
-          />
+        {userImage ? (
+                    <Image
+                        style={styles.avatar}
+                        source={{ uri: userImage }}
+                    />
+                ) : null}
           <View style={styles.infoContainer}>
-            <Text style={styles.username}>{userFullName}alwin</Text>
-            <Text style={styles.alias}>@{userFullName}alwin123</Text>
+            <Text style={styles.username}>{userFullName}</Text>
+            <Text style={styles.alias}>@{userNameID}</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.countContainer}>
         <View style={styles.countRow}>
-          <Text style={styles.countText}>{followersCount}0</Text>
+          <Text style={styles.countText}>{followersCount}</Text>
           <Text style={styles.countLabel}>Followers</Text>
-          <Text style={styles.countText}>{followingCount}0</Text>
+          <Text style={styles.countText}>{followingCount}</Text>
           <Text style={styles.countLabel}>Following</Text>
         </View>
       </View>
@@ -115,7 +89,7 @@ function CustomDrawerContent(props) {
                 color: 'gray'
               }}
             >
-              Terms & Conditions
+              About Us
             </Text>
           </View>
         </TouchableOpacity>
@@ -178,27 +152,61 @@ function DrawerNavigator() {
   const hideLogoutDialog = () => setLogoutDialogVisible(false);
   const [userFullName, setUserFullName] = useState('');
   const [userID, setUserID] = useState(null);
+  const [userNameID, setUserNameID] = useState('');
+  const [userImage, setUserImage] = useState(null);
+  const [followersCount, setFollowersCount] = useState([]);
+  const [followingCount, setFollowingCount] = useState([]);
+
+
 
   useEffect(() => {
-    getData();
-  }, []);
+        async function fetchUserData() {
+            try {
+                // Retrieve user data from AsyncStorage
+                const userData = await getUserData();
+        
+                // Assuming the user data includes the user ID
+                const userId = userData.id;
+        
+                // Use userId as needed
+                console.log('User ID:', userId);
+        
+                setUserID(userId);
+                setUserFullName(userData.fullname || '');
+                setUserNameID(userData.nameid || '');
+                setUserImage(userData.user_image);
+        
+                console.log(userData.fullname);
+                console.log(userData.nameid);
 
-  const getData = async () => {
-    const storedUserID = await AsyncStorage.getItem('userID');
-    setUserID(storedUserID); // Set the retrieved userID
-    const { data, error, count } = await supabase
-      .from('app_users')
-      .select('fullname')
-      .eq('id', storedUserID);
+                getFollowing(userId);
+                getFollowers(userId);
+        
+            } catch (error) {
+                console.error('Error retrieving user data:', error);
+            }
+        }
 
-    if (data.length > 0) {
-      // Check if data is available
-      setUserFullName(data[0].fullname); // Update userFullName with the fetched full name //data[0].fullname
-      console.log(data[0].fullname);
-    }
-  };
+        // Call the function
+        fetchUserData();
+    }, []); // The empty dependency array ensures that this effect runs only once, on mount
 
-
+    const getFollowing = async (userID) => {
+      const { data, error, count } = await supabase
+        .from("friends")
+        .select(`user_id`, `friend_id`, { count: "exact", head: true })
+        .eq("user_id", userID);
+      setFollowingCount(data.length);
+    };
+  
+    const getFollowers = async (userID) => {
+      const { data, error, count } = await supabase
+        .from("friends")
+        .select(`user_id`, `friend_id`, { count: "exact", head: true })
+        .eq("friend_id", userID);
+      setFollowersCount(data.length);
+    };
+    
       return (
         <View style={{ flex: 1 }}>
         <Drawer.Navigator
@@ -213,6 +221,9 @@ function DrawerNavigator() {
               showLogoutDialog={showLogoutDialog}
               hideLogoutDialog={hideLogoutDialog}
               userFullName={userFullName}
+              userID={userID}
+              userNameID={userNameID}
+              userImage={userImage}
             />
           )}
         >
