@@ -1,9 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { ImageBackground, StyleSheet, View, Text, TouchableOpacity, Image, StatusBar } from "react-native";
 import { Colors } from "../components/styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
 const Welcome = ({navigation}) => {
 
     const authNavigate = async() =>
