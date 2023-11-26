@@ -17,7 +17,7 @@ const Welcome = ({navigation}) => {
             {
                 console.log(e);
             }
-           navigation.navigate(userID ? 'TabNavigator' : 'Auth');
+           navigation.navigate(userID ? 'TabNavigator' : 'Login');
 
         }
     return (
