@@ -97,7 +97,7 @@ const fetchUserID = async () => {
   try {
     const storedUserID = await AsyncStorage.getItem('uid');
     if (storedUserID) {
-      console.log('UserID:',storedUserID);
+      console.log('(Payment)UserID:',storedUserID);
       setUserID(storedUserID);
       return storedUserID;
     } else {
@@ -115,7 +115,7 @@ useEffect(() => {
     try {
       // Fetch user ID from async storage
       const userID = await fetchUserID();
-      console.log('User ID:', userID);
+      console.log('(Payment initialize)User ID:', userID);
 
       if (userID) {
         // Use the retrieved user ID for subsequent operations
