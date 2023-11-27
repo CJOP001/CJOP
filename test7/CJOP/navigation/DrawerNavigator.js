@@ -10,6 +10,8 @@ import { getUserData } from '../components/UserInfo';
 import Home from '../screens/Home';
 import Payment from '../screens/Payment/Payment';
 import StackNavigator from './StackNavigator';
+import FriendList from '../screens/FriendList';
+import Profile from '../screens/Profile';
 
 const Drawer = createDrawerNavigator();
 
@@ -151,6 +153,7 @@ function DrawerNavigator() {
     const [userImage, setUserImage] = useState(null);
     const [followersCount, setFollowersCount] = useState([]);
     const [followingCount, setFollowingCount] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -253,6 +256,29 @@ function DrawerNavigator() {
                 })}
             />
             <Drawer.Screen
+                name="Profile"
+                component={Profile}
+                options={({ route }) => ({
+                    headerShown: false,
+                    tabBarVisible: false,
+                    drawerLabel: ({ focused, color }) => (
+                        <Text style={{ color: focused ? color : 'gray' }}>Profile</Text>
+                    ),
+                    drawerIcon: ({ color }) => (
+                        <CustomDrawerIcon
+                            source={require('../assets/profile-icon.png')}
+                            iconStyle={{ tintColor: color }}
+                        />
+                    ),
+                })}
+                listeners={({ navigation }) => ({
+                    // Close the drawer when an item is pressed
+                    itemPress: () => {
+                    navigation.closeDrawer();
+                    },
+                })}
+            />
+            <Drawer.Screen
                 name="PaymentStack"
                 component={Payment}
                 options={({ route }) => ({
@@ -263,7 +289,30 @@ function DrawerNavigator() {
                     ),
                     drawerIcon: ({ color }) => (
                         <CustomDrawerIcon
-                            source={require('../assets/wallet.png')}
+                            source={require('../assets/wallet-icon.png')}
+                            iconStyle={{ tintColor: color }}
+                        />
+                    ),
+                })}
+                listeners={({ navigation }) => ({
+                    // Close the drawer when an item is pressed
+                    itemPress: () => {
+                    navigation.closeDrawer();
+                    },
+                })}
+            />
+            <Drawer.Screen
+                name="Friends"
+                component={FriendList}
+                options={({ route }) => ({
+                    headerShown: false,
+                    tabBarVisible: false,
+                    drawerLabel: ({ focused, color }) => (
+                        <Text style={{ color: focused ? color : 'gray' }}>FriendList</Text>
+                    ),
+                    drawerIcon: ({ color }) => (
+                        <CustomDrawerIcon
+                            source={require('../assets/friends-icon.png')}
                             iconStyle={{ tintColor: color }}
                         />
                     ),
