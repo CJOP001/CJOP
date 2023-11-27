@@ -1,29 +1,77 @@
-// Import necessary modules and components
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 'react-native';
-import { Appbar, Card } from 'react-native-paper';
-
-// Import custom components and data
-import dummyArticles from '../../components/articles';
-import ArticleCard from '../../components/ArticleCard';
+import React, { useState, useEffect } from "react";
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  ScrollView,
+  Pressable,
+  RefreshControl,
+  Dimensions,StatusBar
+} from "react-native";
+import { Appbar, Avatar, Card } from "react-native-paper";
+import SubscribedArticleCard from "../../components/SubscribedArticleCard";
+import supabase from "../../supabase/supabase";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 
 const Subscribe = ({ navigation }) => {
-  // State management
-  const [articles] = useState(dummyArticles);
-  const [isRefreshing, setRefreshing] = useState(false);
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Handler for pull-to-refresh
-  const handleRefresh = () => {
-    setRefreshing(true);
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // Fetch user ID from async storage
+        const storedUserID = await AsyncStorage.getItem('uid');
+        console.log('UserID:', storedUserID);
 
-    // Simulate data fetching or perform data updates here
-    // For example, you can fetch new articles or update the existing ones
+        if (storedUserID) {
+          // Set the retrieved user ID to the state variable
 
-    // After fetching/updating data, set refreshing to false
-    setRefreshing(false);
+          await fetchArticles(storedUserID);
+        } else {
+          console.error('User ID not available.');
+        }
+      } catch (error) {
+        console.error('Error initializing data:', error);
+      }
+    };
+
+    // Initialize data when the component mounts
+    initializeData();
+  }, []);
+
+    const fetchArticles = async (userID) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscribe')
+        .select(`news_id(*) 
+                  `)
+        .eq('user_id', userID)
+        .order('create_at', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        setArticles(data);
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+    const renderItem = ({ item }) => {
+    return <SubscribedArticleCard {...item.news_id} />;
+  };
+
 
   // Calculate screen dimensions
   const screenHeight = Dimensions.get('window').height;
@@ -31,7 +79,8 @@ const Subscribe = ({ navigation }) => {
   const contentHeight = (screenHeight - tabBarHeight) * 0.9;
 
   return (
-    <View style={styles.container}>
+<ScrollView showsVerticalScrollIndicator={false} >    
+<View style={styles.container}>
       {/* Appbar/Header */}
       <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
         {/* Back action */}
@@ -50,23 +99,18 @@ const Subscribe = ({ navigation }) => {
       </Appbar.Header>
 
       {/* Main content */}
-      <View style={{ alignItems: 'left', padding: 10, flex:1 }}>
-        {/* FlatList for articles */}
-        <FlatList
-          data={articles}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <ArticleCard {...item} />}
-          onEndReachedThreshold={0.5}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-              colors={['#72E6FF']} // Customize the color of the refresh spinner
-            />}
-        />
-      </View>
+      <View style={styles.articleContainer}>
+              {loading && <Text>Loading...</Text>}
+              {error && <Text>Error: {error}</Text>}
+              <FlatList
+                data={articles}
+                keyExtractor={(item) => item.news_id.id.toString()}
+                renderItem={renderItem}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
     </View>
+    </ScrollView>
   );
 };
 
@@ -81,7 +125,7 @@ const styles = StyleSheet.create({
   customBackAction: {
     marginLeft: -10, 
   },
-  articleCard: {
+  SubscribedArticleCard: {
     width: '100%',
     marginBottom: 10,
   },
@@ -94,6 +138,7 @@ const styles = StyleSheet.create({
   appbarTitle: {
     textAlign: 'center', 
     fontSize: 24,
-    fontWeight: '500', 
-  },
+    fontWeight: 'bold',
+    color: 'black',
+},
   })
