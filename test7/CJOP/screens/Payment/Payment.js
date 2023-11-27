@@ -429,7 +429,7 @@ const LearnAboutCredits = () => {
       <LearnAboutCredits />
 
 
-        <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center', }}>
           <Tab
             value={index}
             onChange={setIndex}
@@ -457,7 +457,7 @@ const LearnAboutCredits = () => {
 
         <View style={{ flex: 1 }}>
           <ScrollView
-            style={{ flex: 1 }}
+            style={{ flex: 1, marginBottom: 60 }}
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
