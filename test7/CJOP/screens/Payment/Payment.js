@@ -281,22 +281,33 @@ const LearnAboutCredits = () => {
   };
 
   // Function to handle transfer
-  const handleTransfer = async (recipientID, transferAmount) => {
+  const handleTransfer = async (recipientPhoneNumber, transferAmount) => {
     try {
       // Check if the recipient ID is valid (you may want to add more validation)
-      const recipientExists = await supabase
-        .from('credits')
-        .select('user_id')
-        .eq('user_id', recipientID)
-        .single();
+      const { data: recipientUserData, error: recipientUserError } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('phone_no', recipientPhoneNumber)
+      .single();
 
-      if (!recipientExists) {
-        console.error('Recipient not found');
-        return;
-      }
+    if (recipientUserError) {
+      console.error('Error checking recipient existence:', recipientUserError);
+      return;
+    }
+
+    if (!recipientUserData) {
+      console.error('Recipient not found');
+      return;
+    }
 
       // Deduct the transfer amount from the current user's balance
       const updatedSenderBalance = balance - transferAmount;
+
+      if (updatedSenderBalance < 0) {
+        console.error('Insufficient balance for transfer');
+        // Handle insufficient balance (show error message, rollback changes, etc.)
+        return;
+      }
       setBalance(updatedSenderBalance);
 
       // Add the transfer amount to the recipient's balance
@@ -412,8 +423,8 @@ const LearnAboutCredits = () => {
           visible={isTransferModalVisible}
           onClose={() => setTransferModalVisible(false)}
           onTransfer={(recipientID, transferAmount) =>
-            handleTransfer(recipientID, transferAmount)
-          }
+            handleTransfer(recipientID, transferAmount)}
+          currentUserID={currentUserID}
         />
 
         {/* Withdraw Modal */}
@@ -498,9 +509,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appbarTitle: {
-    textAlign: 'center',
+    textAlign: 'center', 
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: 'bold',
+    color: 'black',
   },
   cardContainer:{
     flexDirection: 'row', 
