@@ -1,33 +1,31 @@
 // WithdrawModal.js
 import React, { useState } from 'react';
 import { Modal, View, Text, StyleSheet, Alert} from 'react-native';
-import { Button, Snackbar } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import supabase from '../../supabase/supabase';
 
-const reloadOptions = [10, 15, 20, 50, 100, 500];
-const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39';
 
-const WithdrawModal = ({ visible, onClose, balance }) => {
-  
+const reloadOptions = [10, 15, 20, 50, 100, 500];
+
+const WithdrawModal = ({ visible, onClose, balance, currentUserID }) => {
+
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
 
 const handleWithdrawal = async () => {
   setLoading(true);
   setError(null);
-  
+
   try {
     console.log('Current balance:', balance);
     console.log('Selected amount:', selectedAmount);
-    
+
     if (balance >= selectedAmount) {
       console.log(`Withdrawal confirmed with amount: $${selectedAmount}`);
       const newBalance = balance - selectedAmount;
-      
+
       // Update the user's balance in the database
       const { error: updateError } = await supabase
         .from('credits')
@@ -53,9 +51,6 @@ const handleWithdrawal = async () => {
       if (insertError) {
         throw insertError;
       }
-      
-      setSnackbarMessage('Withdrawal successful');
-      setSnackbarVisible(true);
       onClose(); // Close the modal after withdrawal
     } else {
       console.log('Insufficient balance for withdrawal');
@@ -82,7 +77,7 @@ const handleWithdrawal = async () => {
               {reloadOptions.map((amount) => (
                 <Button
                   key={amount}
-                  mode='contained' 
+                  mode='contained'
                   onPress={() => setSelectedAmount(amount)}
                   style={[
                     styles.modalButton,
@@ -91,7 +86,7 @@ const handleWithdrawal = async () => {
                       height:'40%',
                       backgroundColor: selectedAmount === amount ? '#72E6FF' : '#E9EFF7',
 
-                    }, 
+                    },
                   ]}
                   uppercase={false}
                   disabled={selectedAmount === amount}
@@ -112,12 +107,12 @@ const handleWithdrawal = async () => {
             >
                 Withdraw
             </Button>
-            
+
             <Button
               mode="contained"
               onPress={() => {
                 setSelectedAmount(null);
-                onClose(); 
+                onClose();
               }}
               style={styles.modalButton}
               contentStyle={styles.buttonContent}
@@ -125,15 +120,6 @@ const handleWithdrawal = async () => {
               Cancel
             </Button>
           </View>
-
-          {/* Snackbar for showing success or error messages */}
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={3000} // Adjust the duration as needed
-          >
-            {snackbarMessage}
-          </Snackbar>
 
         </View>
       </View>
@@ -163,11 +149,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '85%',
     alignItems: 'left',
     maxWidth: 500,
-    height: '50%',
-    maxHeight: 400 ,
+    minHeight: 400,
+    height: '40%',
+    //maxHeight: 400 ,
   },
   buttonGrid: {
     flexDirection: 'row',
@@ -184,15 +171,15 @@ const styles = StyleSheet.create({
   modalButton: {
     marginTop: 10,
     backgroundColor: '#72E6FF',
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonContent: {
-    height: 'auto', 
-    paddingHorizontal: 12, 
+    height: 'auto',
+    paddingHorizontal: 12,
   },
   cancelButton: {
-    flex: 1, 
-    marginLeft: 5, 
-  },   
+    flex: 1,
+    marginLeft: 5,
+  },
 });

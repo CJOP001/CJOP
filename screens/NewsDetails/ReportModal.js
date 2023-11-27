@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 
-const ReportModal = ({ isVisible, onDismiss, onReport }) => {
+const ReportModal = ({ isVisible, onDismiss, onReport,  }) => {
   const [selectedReport, setSelectedReport] = useState(null);
 
   const reportOptions = [
     'Inappropriate content',
     'Spam',
     'Harassment',
+    'Violent Content',
+    'Fake News',
+    'Child Safety Concerns',
     'Other',
   ];
 

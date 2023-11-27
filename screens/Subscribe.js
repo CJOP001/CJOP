@@ -4,15 +4,36 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 're
 import { Appbar, Card } from 'react-native-paper';
 
 // Import custom components and data
-import dummyArticles from '../components/articles';
 import ArticleCard from '../components/ArticleCard';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 
 const Subscribe = ({ navigation }) => {
   // State management
-  const [articles] = useState(dummyArticles);
   const [refreshing, setRefreshing] = useState(false);
+
+   useEffect(() => {
+      const initializeData = async () => {
+        try {
+          // Fetch user ID from async storage
+          const storedUserID = await AsyncStorage.getItem('uid');
+          console.log('UserID:', storedUserID);
+
+          if (storedUserID) {
+            // Set the retrieved user ID to the state variable
+            setUserID(storedUserID);
+          } else {
+            console.error('User ID not available.');
+          }
+        } catch (error) {
+          console.error('Error initializing data:', error);
+        }
+      };
+
+      // Initialize data when the component mounts
+      initializeData();
+    }, []);
+
 
   // Handler for pull-to-refresh
   const handleRefresh = () => {

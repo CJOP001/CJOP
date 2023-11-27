@@ -3,242 +3,250 @@ import {
   View,
   StyleSheet,
   Text,
-  Image,
   FlatList,
-  TouchableOpacity,
-  ScrollView,
-  Button,
-  BackHandler,
-  Pressable,
 } from "react-native";
 import { Appbar, Avatar, Searchbar, Card } from "react-native-paper";
 import { ListItem } from "react-native-elements";
-import "react-native-url-polyfill/auto";
-import { createClient } from "@supabase/supabase-js";
+import { Tab } from '@rneui/themed';
 import supabase from "../supabase/supabase";
+import { getUserData, retrieveUserData } from "../components/UserInfo";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
-
-const FriendsList = ({navigation}) => {
+const FriendsList = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [index, setIndex] = useState(0);
+  const [userID, setUserID] = useState(null);
+  const [error, setError] = useState(null);
+  const [people, setPeople] = useState(null);
+
 
   const onChangeSearch = (query) => {
-    // Update the search query state
     setSearchQuery(query);
   };
 
-  //initial fake data because react will load this data regardless of if the data has been obtained yet
-  const [people, SetPeople] = useState([{ fullname: "" }]);
+  useEffect(() => {
+      const initializeData = async () => {
+        try {
+          // Fetch user ID from async storage
+          const storedUserID = await AsyncStorage.getItem('uid');
+          console.log('UserID:', storedUserID);
 
-  const sortPeople = async () => {
-    console.log("Start sorting all people");
-    //query for everyone that does not have the current user id
-    const { data, error } = await supabase
-      .from("app_users")
-      .select(
-        `
-        id, 
-        nameid,
-        fullname,
-        user_image
-        `
-      )
-      .neq("id", userID);
-    SetPeople(data);
-  };
+          if (storedUserID) {
+            // Set the retrieved user ID to the state variable
+            setUserID(storedUserID);
+
+            await sortPeople(storedUserID);
+
+          } else {
+            console.error('User ID not available.');
+          }
+        } catch (error) {
+          console.error('Error initializing data:', error);
+        }
+      };
+
+      // Initialize data when the component mounts
+      initializeData();
+    }, []);
+
+ const sortPeople = async () => {
+   console.log("Start sorting all people");
+   try {
+     // Check if userID is available before making the query
+     if (userID) {
+       const { data, error } = await supabase
+         .from("app_users")
+         .select("id, nameid, fullname, user_image")
+         .neq("id", userID);
+
+       if (error) {
+         console.error("Error fetching all people:", error);
+       } else {
+         console.log("Data:", data);
+         setPeople(data);
+       }
+     } else {
+       console.error("UserID is null. Cannot fetch data.");
+     }
+   } catch (error) {
+     console.error("Error sorting people:", error);
+   }
+ };
+
 
   const sortFollowing = async () => {
-    console.log("Started sorting following.");
-    //query for every friend_id and their associated app_users data when the user_id is equal to the current session's user_id
-    //this one is objectively correct but fails due to not recognizing the correct foreign key
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`friend_id, app_users( user_image, fullname, nameid)`)
-      .eq("user_id", userID);
+    try {
+      const { data, error, count } = await supabase
+        .from("friends")
+        .select("friend_id, user_id(app_users(id, user_image, fullname, nameid))")
+        .eq("user_id", userID);
 
-    //a reversed query of the above. Somehow the id field is left empty and the sort doesnt work.
-    // const { data, error } = await supabase
-    //   .from("app_users")
-    //   .select(`friends(user_id), user_image, fullname, nameid`)
-    //   .eq("friends.user_id", userID);
-
-    console.log(data);
-    SetPeople(data);
+      if (data) {
+        setPeople(data);
+      } else {
+        console.error("Error fetching friends:", error);
+      }
+    } catch (error) {
+      console.error("Error sorting following:", error);
+    }
   };
 
   const sortFollowers = async () => {
-    console.log("Started sorted followers.");
-    //query for the user_id and their associated app_users data when the friend_id is equal to the current session's user_id
-    const { data, error, count } = await supabase
-      .from("friends")
-      .select(`user_id, app_users( user_image, fullname, nameid)`)
-      .eq("friend_id", userID);
-    console.log(data);
-    SetPeople(data);
+    try {
+      const { data, error, count } = await supabase
+        .from("friends")
+        .select("user_id, app_users(id, user_image, fullname, nameid)")
+        .eq("friend_id", userID);
+
+      if (data) {
+        setPeople(data);
+      } else {
+        console.error("Error fetching followers:", error);
+      }
+    } catch (error) {
+      console.error("Error sorting followers:", error);
+    }
   };
 
-  function renderList() {
-    //render the elements based on the data obtained as the data obtained comes in slightly different formats
-    if (typeof people[0].fullname !== "undefined") {
-      console.log("sorting by 2d array");
-      //this returns the elements suitable for a two dimensional json array
-      return (
-        <FlatList
-          data={people}
-          keyExtractor={(item) => item.user_id}
-          renderItem={({ item }) => (
-            <ListItem>
-              <Avatar.Image
-                rounded
-                source={{
-                  uri: item.user_image,
-                }}
-              />
-              <ListItem.Title>{item.fullname}</ListItem.Title>
-              <ListItem.Subtitle>@{item.nameid}</ListItem.Subtitle>
-            </ListItem>
-          )}
-        />
-      );
-    } else {
-      console.log("sorting by 3d array");
-      // this returns the elements suitable for a three dimensional json array
-      return (
-        <FlatList
-          data={people}
-          keyExtractor={(item) => item.user_id}
-          renderItem={({ item }) => (
-            <ListItem>
-              <Avatar.Image
-                rounded
-                source={{
-                  uri: item.app_users.user_image,
-                }}
-              />
-              <ListItem.Title>{item.app_users.fullname}</ListItem.Title>
-              <ListItem.Subtitle>@{item.app_users.nameid}</ListItem.Subtitle>
-            </ListItem>
-          )}
-        />
-      );
-    }
+const renderList = () => {
+  if (!people) {
+    return null; // Return null or a loading indicator while data is being fetched
   }
 
-  //on page load, initialize sortPeople.
+  return (
+    <FlatList
+      data={people}
+      keyExtractor={(item) => item.user_id}
+      renderItem={({ item }) => {
+        const user = item.app_users || item; // Use app_users if available, otherwise use the item itself
+
+        return (
+          <ListItem>
+            <Avatar.Image
+              rounded
+              source={{
+                uri: user.user_image,
+              }}
+            />
+            <ListItem.Title>{user.fullname}</ListItem.Title>
+            <ListItem.Subtitle>@{user.nameid}</ListItem.Subtitle>
+          </ListItem>
+        );
+      }}
+    />
+  );
+};
+  // On page load, initialize sortPeople.
   useEffect(() => {
     sortPeople();
   }, []);
 
   return (
-    <View>
-      <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
-        <View style={styles.customBackAction}>
-          <Appbar.BackAction
-            onPress={() => {
-              console.log("Going back");
-              navigation.goBack();
-            }}
-          />
-        </View>
-        {/*Header*/}
+    <View style={styles.mainContainer}>
+      <Appbar.Header style={styles.appbar}>
+        <Appbar.BackAction
+          onPress={() => {
+            console.log("Going back");
+            navigation.goBack();
+          }}
+        />
         <Appbar.Content title="Manage Friends" style={styles.appContent} />
       </Appbar.Header>
-      <View>
-        {/*Search Bar */}
+      <View style={styles.contentContainer}>
+        {/* Enhanced Search Bar */}
+        <View style={styles.searchContainer}>
+          <Searchbar
+            placeholder="Search"
+            onChangeText={onChangeSearch}
+            value={searchQuery}
+            style={styles.searchBar}
+            inputStyle={styles.searchInput}
+            iconColor="#555"
+          />
+        </View>
 
-        <Searchbar
-          placeholder="Search"
-          onChangeText={onChangeSearch}
-          value={searchQuery}
-          style={styles.searchBar}
-        />
-
-        {/*Tabs*/}
-        <Card style={styles.buttonTab}>
-          <View
-            style={{
-              flexDirection: "row",
-            }}
+        {/* Tabs and List */}
+        <Card style={styles.card}>
+          <Tab
+            value={index}
+            onChange={setIndex}
+            indicatorStyle={{ backgroundColor: '#72E6FF', height: 3 }}
           >
-            <Pressable style={styles.buttons} onPress={sortPeople}>
-              <Text style={styles.buttonText}>People</Text>
-            </Pressable>
-            <Pressable style={styles.buttons} onPress={sortFollowers}>
-              <Text style={styles.buttonText}>Followers</Text>
-            </Pressable>
-            <Pressable style={styles.buttons} onPress={sortFollowing}>
-              <Text style={styles.buttonText}>Following</Text>
-            </Pressable>
-          </View>
+            <Tab.Item
+              title="People"
+              titleStyle={styles.tabItem}
+              style={styles.tabItemContainer}
+              onPress={sortPeople}
+            />
+            <Tab.Item
+              title="Followers"
+              titleStyle={styles.tabItem}
+              style={styles.tabItemContainer}
+              onPress={sortFollowers}
+            />
+            <Tab.Item
+              title="Following"
+              titleStyle={styles.tabItem}
+              style={styles.tabItemContainer}
+              onPress={sortFollowing}
+            />
+          </Tab>
 
-          {/*List*/}
-          <View
-            style={{ alignItems: "left", padding: 15, width: "100%" }}
-            onload={sortPeople}
-            on
-          >
-            {renderList()}
-          </View>
+          {/* List */}
+          <View style={styles.listContainer}>{renderList()}</View>
         </Card>
       </View>
     </View>
   );
 };
 
-export default FriendsList;
-
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 35,
-    textAlign: "center",
-    padding: 15,
-    fontWeight: "500",
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
   },
-  customBackAction: {
-    marginLeft: -10, // Adjust the back action position if needed
+  appbar: {
+    backgroundColor: "#72E6FF",
   },
   appContent: {
     alignItems: "center",
     justifyContent: "center",
   },
-  buttonTab: {},
-  FriendsList: {
-    height: "25%",
-    width: "100%",
-    alignItems: "center",
+  contentContainer: {
+    flex: 1,
+    padding: 15,
   },
-  icon: {
-    height: 20,
-    width: 20,
-    marginRight: 20,
+  searchContainer: {
+    marginVertical: 10,
   },
-  container: {
-    flexDirection: "row",
-    transform: [{ translateX: 10 }],
-    padding: 10,
+  searchBar: {
+    borderRadius: 20,
+    backgroundColor: "#E0E0E0", // Gray background for the search bar
   },
-  categoryScrollView: {
-    padding: 10,
+  searchInput: {
+    fontSize: 16,
   },
-  buttons: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 4,
+  card: {
+    flex: 1,
+    marginVertical: 10,
+    padding: 15,
+    borderRadius: 10,
     elevation: 3,
     backgroundColor: "white",
-    borderWidth: 5,
-    borderColor: "#72E6FF",
-    translateX: -50,
-    borderRadius: 20,
-    minWidth: 120,
   },
-  buttonText: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: "bold",
-    letterSpacing: 0.25,
-    color: "#72E6FF",
+  listContainer: {
+    flex: 1,
+  },
+  tabItemContainer: {
+    flex: 1,
+    width: 0,
+    overflow: 'hidden',
+  },
+  tabItem: {
+    fontSize: 14,
+    color: '#7C82A1',
+    textAlign: 'left',
   },
 });
+
+export default FriendsList;

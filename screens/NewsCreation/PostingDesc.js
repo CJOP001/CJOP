@@ -17,7 +17,7 @@ import OverlaySheetModal from './PostingModal';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
-import CameraModal from '../CameraModal';
+import CameraModal from '../../screens/CameraModal';
 import * as Permissions from 'expo-permissions';
 import categories from '../../components/categories';
 

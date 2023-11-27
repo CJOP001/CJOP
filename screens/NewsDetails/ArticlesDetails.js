@@ -25,12 +25,14 @@ const ArticlesDetails = ({ route }) => {
   const [commentText, setCommentText] = useState('');
   const [userID, setUserID] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [articleDetails, setArticleDetails] = useState(null);
+  const [commentsData, setCommentsData] = useState([]);
 
   // Get the entire article object from the route params
   const { article } = route.params;
 
   // Destructure the article object
-  const { id, user_id, status, created_at, image_path, description, likes, comments, fullname, user_image, } = article;
+  const { id, user_id, status, created_at, image_path, description, likes, comments, fullname, user_image } = article;
 
   useEffect(() => {
     const initializeData = async () => {
@@ -44,9 +46,34 @@ const ArticlesDetails = ({ route }) => {
           setUserID(storedUserID);
 
           await handleCommentSubmit(storedUserID);
-           const hasLiked = await checkIfLiked(storedUserID);
-           setIsLiked(hasLiked);
+          const hasLiked = await checkIfLiked(storedUserID);
+          setIsLiked(hasLiked);
 
+          // Fetch comments and user details (fullname and user_image) for the article
+          const { data: articleData, error: articleError } = await supabase
+            .from('news_management')
+            .select('*')
+            .eq('id', id);
+
+          if (articleError) {
+            console.error('Error fetching article data:', articleError);
+          } else {
+            // Set the article data to the state variable
+            const articleDetails = articleData[0];
+            setArticleDetails(articleDetails);
+          }
+
+          const { data: commentsData, error: commentsError } = await supabase
+            .from('comments')
+            .select('*, app_users:user_id(fullname, user_image)')
+            .eq('news_id', id);
+
+          if (commentsError) {
+            console.error('Error fetching comments:', commentsError);
+          } else {
+            // Set the comments data to the state variable
+            setCommentsData(commentsData);
+          }
         } else {
           console.error('User ID not available.');
         }
@@ -59,7 +86,7 @@ const ArticlesDetails = ({ route }) => {
     initializeData();
   }, []);
 
- const checkIfLiked = async (userID) => {
+  const checkIfLiked = async (userID) => {
     // Check if the user has already liked the article
     const { data, error } = await supabase
       .from('likes')
@@ -70,48 +97,48 @@ const ArticlesDetails = ({ route }) => {
     return data && data.length > 0;
   };
 
-const handleLikePress = async () => {
-  try {
-    // If already liked, unlike the article
-    if (isLiked) {
-      const { data, error } = await supabase
-        .from('likes')
-        .delete()
-        .eq('user_id', userID)
-        .eq('news_id', id);
+  const handleLikePress = async () => {
+    try {
+      // If already liked, unlike the article
+      if (isLiked) {
+        const { data, error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('user_id', userID)
+          .eq('news_id', id);
 
-      if (error) {
-        console.error('Error unliking:', error);
+        if (error) {
+          console.error('Error unliking:', error);
+        } else {
+          console.log('Unlike successful:', data);
+          // Refresh the likes count after unliking
+          // You may want to fetch the updated likes count from the database
+          setIsLiked(false);
+        }
       } else {
-        console.log('Unlike successful:', data);
-        // Refresh the likes count after unliking
-        // You may want to fetch the updated likes count from the database
-        setIsLiked(false);
-      }
-    } else {
-      // If not liked, like the article
-      const { data, error } = await supabase
-        .from('likes')
-        .upsert([ // Use upsert instead of insert
-          {
-            user_id: userID,
-            news_id: article.id,
-          },
-        ]);
+        // If not liked, like the article
+        const { data, error } = await supabase
+          .from('likes')
+          .upsert([
+            {
+              user_id: userID,
+              news_id: article.id,
+            },
+          ]);
 
-      if (error) {
-        console.error('Error liking:', error);
-      } else {
-        console.log('Like successful:', data);
-        // Refresh the likes count after liking
-        // You may want to fetch the updated likes count from the database
-        setIsLiked(true);
+        if (error) {
+          console.error('Error liking:', error);
+        } else {
+          console.log('Like successful:', data);
+          // Refresh the likes count after liking
+          // You may want to fetch the updated likes count from the database
+          setIsLiked(true);
+        }
       }
+    } catch (error) {
+      console.error('Error liking/unliking:', error);
     }
-  } catch (error) {
-    console.error('Error liking/unliking:', error);
-  }
-};
+  };
 
   const handleCommentPress = () => {
     // Show the CommentModal
@@ -122,7 +149,7 @@ const handleLikePress = async () => {
     // Handle share button press
   };
 
-  const handleReportPress = () => {
+  const handleReportPress = async () => {
     // Show the report modal
     setReportModalVisible(true);
   };
@@ -130,13 +157,55 @@ const handleLikePress = async () => {
   const handleReportModalDismiss = () => {
     // Hide the report modal
     setReportModalVisible(false);
+
   };
 
-  const handleReport = (reportReason) => {
-    // Handle the report action with the selected report reason
-    console.log('Report Reason:', reportReason);
-    // You can add your logic for reporting here
-  };
+ const handleReport = async (reportReason) => {
+     try {
+       // Check if the report reason is not empty
+       if (reportReason.trim() !== '') {
+         // Check if the user ID is available
+         if (userID) {
+           // Insert the report into the Supabase database
+           const { data: reportData, error: reportError } = await supabase
+             .from('report')
+             .insert([
+               {
+                 title: reportReason,
+                 user_id: userID, // Ensure user_id is not null
+                 nm_id: id,
+                 status: 'open',
+               },
+             ]);
+
+           if (reportError) {
+             console.error('Error submitting report:', reportError);
+           } else {
+             console.log('Report submitted successfully:', reportData);
+
+             // Update the status of the news in news_management table
+             const { data: updateData, error: updateError } = await supabase
+               .from('news_management')
+               .update({ status: 'reported' })
+               .eq('id', id);
+
+             if (updateError) {
+               console.error('Error updating news status:', updateError);
+             } else {
+               console.log('News status updated successfully:', updateData);
+             }
+
+             // Hide the report modal
+             setReportModalVisible(false);
+           }
+         } else {
+           console.error('User ID not available.');
+         }
+       }
+     } catch (error) {
+       console.error('Error submitting report:', error);
+     }
+   };
 
   const handleImagePress = () => {
     // Show the image modal
@@ -153,39 +222,39 @@ const handleLikePress = async () => {
     setCommentModalVisible(false);
   };
 
-const handleCommentSubmit = async () => {
-console.log(commentText);
-console.log(userID);
-  try {
-    // Check if the comment text is not empty
-    if (commentText.trim() !== '') {
-      // Insert the comment into the Supabase database
-      const { data, error } = await supabase
-        .from('comments')
-        .insert([
-          {
-            user_id: userID, // Use the login user ID
-            news_id: id,
-            comment_text: commentText,
-          },
-        ]);
+  const handleCommentSubmit = async () => {
+    console.log(commentText);
+    console.log(userID);
+    try {
+      // Check if the comment text is not empty
+      if (commentText.trim() !== '') {
+        // Insert the comment into the Supabase database
+        const { data, error } = await supabase
+          .from('comments')
+          .insert([
+            {
+              user_id: userID, // Use the login user ID
+              news_id: id,
+              comment_text: commentText,
+            },
+          ]);
 
-      if (error) {
-        console.error('Error submitting comment:', error);
-      } else {
-        console.log('Comment submitted successfully:', data);
-        // Refresh the comments after submitting
-        // You may want to fetch the updated comments from the database
+        if (error) {
+          console.error('Error submitting comment:', error);
+        } else {
+          console.log('Comment submitted successfully:', data);
+          // Refresh the comments after submitting
+          // You may want to fetch the updated comments from the database
+        }
       }
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      // Reset the comment text and hide the CommentModal
+      setCommentText('');
+      setCommentModalVisible(false);
     }
-  } catch (error) {
-    console.error('Error submitting comment:', error);
-  } finally {
-    // Reset the comment text and hide the CommentModal
-    setCommentText('');
-    setCommentModalVisible(false);
-  }
-};
+  };
 
   const formatDate = (timestamp) => {
     const options = {
@@ -205,7 +274,7 @@ console.log(userID);
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
       </Appbar.Header>
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Card style={styles.articleCard}>
           <TouchableOpacity style={styles.reportButton} onPress={handleReportPress}>
             <View style={styles.reportRectangle}>
@@ -237,11 +306,11 @@ console.log(userID);
           </TouchableOpacity>
 
           {/* Like, Comment, Share icons */}
-              <View style={styles.iconContainer}>
-                      <TouchableOpacity onPress={handleLikePress}>
-                        <View style={styles.iconWrapper}>
-                          <Image source={isLiked ? blueLikeIcon : likeIcon} style={styles.icon} />
-                        </View>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity onPress={handleLikePress}>
+              <View style={styles.iconWrapper}>
+                <Image source={isLiked ? blueLikeIcon : likeIcon} style={styles.icon} />
+              </View>
             </TouchableOpacity>
             <Text>{likes}</Text>
             <TouchableOpacity onPress={handleCommentPress}>
@@ -266,23 +335,30 @@ console.log(userID);
           <Divider style={styles.divider} />
           <Text style={styles.commentTitle}>Comments</Text>
           {/* Map through comments and display them */}
-          {comments && Array.isArray(comments)
-            ? comments.map((articleComment, index) => (
-              <View key={index} style={styles.commentContainer}>
-                {/* Add a profile picture next to each comment */}
-                <Avatar.Image
-                  source={require('../../assets/avatar.png')}
-                  size={30}
-                  style={styles.commentAvatar}
-                />
-                <View style={styles.commentContent}>
-                  <Text style={styles.commentText}>{articleComment}</Text>
-                </View>
-              </View>
+          {commentsData && Array.isArray(commentsData) ? (
+            commentsData.map((comment, index) => (
+              <Card key={index} style={styles.commentCard}>
+                <Card.Content style={styles.commentContent}>
+                  <View style={styles.commentContainer}>
+                    {/* Add a profile picture next to each comment */}
+                    <Avatar.Image
+                      source={{ uri: comment.app_users.user_image }}
+                      size={40}
+                      style={styles.commentAvatar}
+                    />
+                    <View style={styles.commentTextContainer}>
+                      <Text style={styles.commentAuthor}>{comment.app_users.fullname}</Text>
+                      <Text style={styles.commentText}>{comment.comment_text}</Text>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
             ))
-            : null}
+          ) : (
+            <Text>No comments available.</Text>
+          )}
         </Card>
-      </View>
+      </ScrollView>
 
       {/* Report Modal */}
       <ReportModal
@@ -306,11 +382,11 @@ console.log(userID);
 
       {/* Comment Modal */}
       <CommentModal
-          isVisible={isCommentModalVisible}
-          onDismiss={handleCommentModalDismiss}
-          onSubmit={handleCommentSubmit}
-          commentText={commentText}  // <-- Update this line
-          setCommentText={setCommentText}  // <-- Update this line
+        isVisible={isCommentModalVisible}
+        onDismiss={handleCommentModalDismiss}
+        onSubmit={handleCommentSubmit}
+        commentText={commentText}
+        setCommentText={setCommentText}
       />
     </>
   );
@@ -361,16 +437,35 @@ const styles = StyleSheet.create({
     left: 10,
     fontWeight: 'bold',
   },
-  commentContainer: {
-    marginTop: 10,
-  },
-  commentText: {
-    fontSize: 16,
-  },
+  commentCard: {
+     marginVertical: 8, // Adjust the vertical margin for each comment card
+   },
+   commentContent: {
+     flexDirection: 'row',
+     alignItems: 'flex-start',
+     paddingHorizontal: 10,
+     paddingVertical: 8,
+   },
+   commentContainer: {
+     flexDirection: 'row',
+     alignItems: 'flex-start',
+   },
+   commentAvatar: {
+     marginRight: 10,
+   },
+   commentTextContainer: {
+     flex: 1,
+   },
+   commentAuthor: {
+     fontWeight: 'bold',
+     marginRight: 5,
+   },
+   commentText: {
+     marginTop: 5, // Adjust the spacing between author and text
+   },
   reportButton: {
-    position: 'absolute',
-    top: 18,
-    right: 13,
+    top: 30,
+    left: 250,
     flexDirection: 'row',
     alignItems: 'center',
   },

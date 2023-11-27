@@ -22,9 +22,10 @@ const Payment = ({ navigation }) => {
   const [isTransferModalVisible, setTransferModalVisible] = useState(false);
   const [isWithdrawModalVisible, setWithdrawModalVisible] = useState(false);
   const [isLearnAboutCreditsExpanded, setLearnAboutCreditsExpanded] = useState(false);
+  const [userID, setUserID] = useState(null);
 
   // Constants
-  const currentUserID = '1d93bd48-5c9e-43f0-9866-c0cd6a284a39'; //lwk
+  const currentUserID = userID //lwk
 
   // Constants for transaction types
   const TRANSACTION_RELOAD = 'Reload';
@@ -76,8 +77,14 @@ const handleRefresh = async () => {
   setRefreshing(true); // Start the refresh animation
 
   try {
-    await fetchBalance();
-    await fetchCreditTransactions();
+    const userID = await fetchUserID();
+
+    if (userID) {
+      await fetchBalance(userID);
+      await fetchCreditTransactions(userID);
+    } else {
+      console.error('User ID not available.');
+    }
   } catch (error) {
     console.error('Error refreshing data:', error);
   } finally {
@@ -90,7 +97,8 @@ const fetchUserID = async () => {
   try {
     const storedUserID = await AsyncStorage.getItem('uid');
     if (storedUserID) {
-      console.log('UserWalletID:',storedUserID);
+      console.log('(Payment)UserID:',storedUserID);
+      setUserID(storedUserID);
       return storedUserID;
     } else {
       console.error('User ID not found in async storage.');
@@ -104,15 +112,20 @@ const fetchUserID = async () => {
 
 useEffect(() => {
   const initializeData = async () => {
-    // Fetch user ID from async storage
-    const userID = await fetchUserID();
+    try {
+      // Fetch user ID from async storage
+      const userID = await fetchUserID();
+      console.log('(Payment initialize)User ID:', userID);
 
-    if (userID) {
-      // Use the retrieved user ID for subsequent operations
-      fetchBalance(userID);
-      fetchCreditTransactions(userID);
-    } else {
-      console.error('User ID not available.');
+      if (userID) {
+        // Use the retrieved user ID for subsequent operations
+        await fetchBalance(userID);
+        await fetchCreditTransactions(userID);
+      } else {
+        console.error('User ID not available.');
+      }
+    } catch (error) {
+      console.error('Error initializing data:', error);
     }
   };
 
@@ -401,45 +414,47 @@ const LearnAboutCredits = () => {
           onTransfer={(recipientID, transferAmount) =>
             handleTransfer(recipientID, transferAmount)
           }
+          currentUserID={currentUserID}
         />
 
         {/* Withdraw Modal */}
       <WithdrawModal
         visible={isWithdrawModalVisible}
         onClose={() => setWithdrawModalVisible(false)}
-        balance={balance}  // Pass the balance as a prop to WithdrawModal
-        onUpdateBalance={(newBalance) => setBalance(newBalance)}  // Pass a function to update the balance
+        balance={balance}  
+        onUpdateBalance={(newBalance) => setBalance(newBalance)}  
+        currentUserID={currentUserID}
       />
 
       {/* Learn About Credits Section */}
       <LearnAboutCredits />
 
 
-        <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
-          <Tab
-            value={index}
-            onChange={setIndex}
-            indicatorStyle={{ backgroundColor: '#72E6FF', height: 3 }}
-            style={{ flex: 1 }}
-            
-          >
-            <Tab.Item
-              title="Spent"
-              titleStyle={{ fontSize: 16, color: '#7C82A1' }}
-              style={{ flex: 1, alignItems: 'center' }}
-            />
-            <Tab.Item
-              title="Received"
-              titleStyle={{ fontSize: 16, color: '#7C82A1' }}
-              style={{ flex: 1, alignItems: 'center' }}
-            />
-            <Tab.Item
-              title="Withdraw"
-              titleStyle={{ fontSize: 16, color: '#7C82A1' }}
-              style={{ flex: 1, alignItems: 'center' }}
-            />
-          </Tab>
-        </View>
+         <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+           <Tab
+             value={index}
+             onChange={setIndex}
+             indicatorStyle={{ backgroundColor: '#72E6FF', height: 3 }}
+             style={{ flex: 1 }}
+
+           >
+             <Tab.Item
+               title="Spent"
+               titleStyle={{ fontSize: 16, color: '#7C82A1' }}
+               style={{ flex: 1, alignItems: 'center'}}
+             />
+             <Tab.Item
+               title="Received"
+               titleStyle={{ fontSize: 16, color: '#7C82A1' }}
+               style={{ flex: 1, alignItems: 'center' }}
+             />
+             <Tab.Item
+               title="Withdraw"
+               titleStyle={{ fontSize: 16, color: '#7C82A1' }}
+               style={{ flex: 1, alignItems: 'center' }}
+             />
+           </Tab>
+         </View>
 
         <View style={{ flex: 1 }}>
           <ScrollView

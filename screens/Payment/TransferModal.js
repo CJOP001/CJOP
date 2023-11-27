@@ -4,7 +4,7 @@ import { Modal, View, Text, StyleSheet, KeyboardAvoidingView} from 'react-native
 import { Button, TextInput, HelperText } from 'react-native-paper';
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
 
-const TransferModal = ({ visible, onClose, onTransfer }) => {
+const TransferModal = ({ visible, onClose, onTransfer, currentUserID  }) => {
   // State for input values and error messages
   const [recipientID, setRecipientID] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
@@ -138,8 +138,9 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'left',
     maxWidth: 500,
+    minHeight: 300,
     height: '40%',
-    maxHeight: 400 ,
+    //maxHeight: 400 ,
   },
   modalButton: {
     marginTop: 10,
