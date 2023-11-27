@@ -23,6 +23,9 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [userImage, setUserImage] = useState(null);
+  const [userID, setUserID] = useState(null);
+
+  const defaultUserImage = 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/UserImage/Avatars/default';
 
 
  // Fetch articles from Supabase
@@ -70,15 +73,11 @@ useEffect(() => {
           const userId = userData.id;
   
           // Use userId as needed
-          console.log('User ID:', userId);
+          console.log('(Home)User ID:', userId);
   
           setUserID(userId);
-          setUserFullName(userData.fullname || '');
-          setUserNameID(userData.nameid || '');
           setUserImage(userData.user_image);
   
-          console.log(userData.fullname);
-          console.log(userData.nameid);
   
       } catch (error) {
           console.error('Error retrieving user data:', error);
@@ -157,14 +156,15 @@ useEffect(() => {
             colors={['#72E6FF']} 
           />
         }
+        style={{ marginBottom: 60 }}
       >
       <Appbar.Header>
         <TouchableOpacity onPress={openDrawer}>
-          <Avatar.Image
-            source={{ uri: imageUrl }}
-            size={40}
-            style={{ margin: 10, marginTop: 20 }}
-          />
+        <Avatar.Image
+          source={{ uri: userImage || defaultUserImage }}
+          size={40}
+          style={{ margin: 10, marginTop: 20 }}
+        />
         </TouchableOpacity>
         {renderSearchBar()}
       </Appbar.Header>
