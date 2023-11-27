@@ -14,6 +14,7 @@ import Login from '../screens/Auth/login';
 import Verification from '../screens/Auth/verification';
 import SignUp from '../screens/Auth/signup';
 import AudiencePage from '../screens/LiveStream/AudiencePage';
+import ArticlesDetails from '../screens/NewsDetails/ArticlesDetails';
 
 
 const Stack = createNativeStackNavigator();
@@ -28,6 +29,7 @@ function StackNavigator() {
             <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
             <Stack.Screen name='LoginStack' component={LoginStack} />
             <Stack.Screen name='Login' component={Login} />
+            <Stack.Screen name='ArticlesDetails' component={ArticlesDetails} />
         </Stack.Navigator>
     );
 }
