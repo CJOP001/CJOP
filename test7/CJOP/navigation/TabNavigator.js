@@ -62,15 +62,15 @@ function TabNavigator({ navigation }) {
               let iconName;
   
               if (route.name === 'HomeTab') {
-                iconName = focused ? require('../assets/estate.png') : require('../assets/home-icon.png');
+                iconName = focused ? require('../assets/estate2.png') : require('../assets/estate1.png');
               } else if (route.name === 'AddPostModal') {
-                iconName = focused ? require('../assets/addboxblue.png') : require('../assets/addbox.png');
+                iconName = focused ? require('../assets/add-box2.png') : require('../assets/add-box1.png');
               } else if (route.name === 'Payment') {
                 iconName = focused ? require('../assets/wallet2.png') : require('../assets/wallet-icon.png');
               } else if (route.name === 'Subscribe') {
-                iconName = focused ? require('../assets/group4.png') : require('../assets/group3.png');
+                iconName = focused ? require('../assets/group2.png') : require('../assets/group1.png');
               } else if (route.name === 'Profile') {
-                iconName = focused ? require('../assets/userblue.png') : require('../assets/user1.png');
+                iconName = focused ? require('../assets/user2.png') : require('../assets/user1.png');
               }
   
               return <Image source={iconName} style={{ width: 30, height: 30, tintColor: color }} resizeMode="contain" />;
