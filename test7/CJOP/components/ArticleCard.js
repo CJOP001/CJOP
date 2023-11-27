@@ -60,7 +60,7 @@ const ArticleCard = React.memo(
 
   const handleReadMorePress = () => {
 
-    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments } });
+    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
     hideModal();
   };
 
