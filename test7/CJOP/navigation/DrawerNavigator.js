@@ -165,12 +165,12 @@ function DrawerNavigator() {
               const userId = parsedUserData.id;
       
               // Use userId as needed
-              console.log('User ID:', userId);
+              console.log('(Drawer)User ID:', userId);
       
-              setUserID(userId);
-              setUserFullName(parsedUserData.fullname || '');
-              setUserNameID(parsedUserData.nameid || '');
-              setUserImage(parsedUserData.user_image);
+                setUserID(userId);
+                setUserFullName(parsedUserData.fullname || '');
+                setUserNameID(parsedUserData.nameid || '');
+                setUserImage(parsedUserData.user_image);
       
               // Move these calls inside the fetchUserData function
               await getFollowing(userId);
