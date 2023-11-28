@@ -476,6 +476,7 @@ const LearnAboutCredits = () => {
                 colors={['#72E6FF']} 
               />
             }
+            showsVerticalScrollIndicator={false}
           >
             {renderContent()}
           </ScrollView>
