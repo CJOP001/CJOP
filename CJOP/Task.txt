@@ -1,0 +1,340 @@
+// DrawerNavigator.js
+import React from 'react';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { View, Text, Image, StyleSheet } from 'react-native';
+
+import TabNavigator from './TabNavigator';
+import Payment from '../screens/Payment';
+import Profile from '../screens/Profile';
+import FriendsList from '../screens/FriendList';
+
+const Drawer = createDrawerNavigator();
+
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      {/* Avatar and Username Section */}
+      <View style={styles.avatarContainer}>
+        <View style={styles.avatarAndInfo}>
+          <Image
+            style={styles.avatar}
+            source={{
+              uri: 'https://imbrgdnynoeyqyotpxaq.supabase.co/storage/v1/object/public/testing/avatar.png',
+            }}
+          />
+          <View style={styles.infoContainer}>
+            <Text style={styles.username}>Username</Text>
+            <Text style={styles.alias}>Alias</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Standard Drawer Items */}
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+}
+
+const CustomDrawerIcon = ({ source, iconStyle }) => (
+  <Image source={source} style={[styles.icon, iconStyle]} />
+);
+
+function DrawerNavigator() {
+      return (
+        <Drawer.Navigator
+          initialRouteName="HomeScreen"
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+        <Drawer.Screen
+          name="HomeScreen"
+          component={TabNavigator}
+          options={{
+            headerShown: false,
+            drawerLabel: ({ focused, color }) => (
+              <Text style={{ color: focused ? color : 'gray' }}>Home</Text>
+            ),
+            drawerIcon: ({ color }) => (
+              <CustomDrawerIcon
+                source={require('../assets/home-icon.png')}
+                iconStyle={{ tintColor: color }} // Set the icon's tint color to match the label color
+              />
+            ),
+          }}
+          listeners={({ navigation }) => ({
+            // Close the drawer when an item is pressed
+            itemPress: () => {
+              navigation.closeDrawer();
+            },
+          })}
+        />
+        <Drawer.Screen
+          name="DrawerProfile"
+          component={TabNavigator}
+          options={{
+            headerShown: false,
+            drawerLabel: ({ focused, color }) => (
+              <Text style={{ color: focused ? color : 'gray' }}>Profile</Text>
+            ),
+            drawerIcon: ({ color }) => (
+              <CustomDrawerIcon
+                source={require('../assets/profile-icon.png')}
+                iconStyle={{ tintColor: color }} // Set the icon's tint color to match the label color
+              />
+            ),
+          }}
+          listeners={({ navigation }) => ({
+            // Close the drawer when an item is pressed
+            itemPress: () => {
+              navigation.closeDrawer();
+            },
+          })}
+        />
+        <Drawer.Screen
+          name="Friends"
+          component={TabNavigator} 
+          options={{
+            headerShown: false,
+            drawerLabel: 'Friends',
+            drawerIcon: ({ color }) => (
+              <CustomDrawerIcon icon="account-multiple" color={color} /> 
+              ),
+          }}
+          listeners={({ navigation }) => ({
+            itemPress: () => {
+              navigation.closeDrawer();
+            },
+          })}
+        />
+        <Drawer.Screen
+          name="Payment"
+          component={TabNavigator}
+          options={{
+            headerShown: false,
+            drawerLabel: ({ focused, color }) => (
+              <Text style={{ color: focused ? color : 'gray' }}>Wallet</Text>
+            ),
+            drawerIcon: ({ color }) => (
+              <CustomDrawerIcon source={require('../assets/wallet-icon.png')} color={color} /> 
+              ),
+          }}
+          listeners={({ navigation }) => ({
+            // Close the drawer when an item is pressed
+            itemPress: () => {
+              navigation.closeDrawer();
+            },
+          })}
+        />
+        </Drawer.Navigator>
+      );
+  }
+
+  const styles = StyleSheet.create({
+    avatarContainer: {
+      padding: 16,
+    },
+    avatarAndInfo: {
+      flexDirection: 'row', // Lay out avatar and info side by side
+      alignItems: 'center', // Center items vertically
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+    },
+    infoContainer: {
+      marginLeft: 16, // Add spacing between avatar and info
+      flexDirection: 'column', // Stack username and alias vertically
+    },
+    username: {
+      fontSize: 18,
+    },
+    alias: {
+      fontSize: 16,
+      color: 'gray',
+    },
+    icon: {
+      width: 24,
+      height: 24,
+      tintColor: 'gray', 
+    },
+  });
+
+export default DrawerNavigator;
+
+
+
+
+// TabNavigator.js
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Home from '../screens/Home';
+import Payment from '../screens/Payment';
+import NewsCreation from '../screens/NewsCreationModal';
+import Subscribe from '../screens/Subscribe';
+import Profile from '../screens/Profile';
+import { Image } from 'react-native';
+
+const Tab = createBottomTabNavigator();
+
+function TabNavigator() {
+    return (
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            position: 'absolute',
+            backgroundColor: '#ffffff',
+            display: 'flex',
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+          },
+          tabBarIcon: ({ color, size }) => {
+            let iconName;
+  
+            if (route.name === 'TabHome') {
+              iconName = require('../assets/home-icon.png');
+            } else if (route.name === 'Payment') {
+              iconName = require('../assets/wallet-icon.png');
+            } else if (route.name === 'NewsCreation') {
+              iconName = require('../assets/addnews-icon.png');
+            } else if (route.name === 'Subscribe') {
+              iconName = require('../assets/mynews-icon.png');
+            } else if (route.name === 'TabProfile') {
+              iconName = require('../assets/profile-icon.png');
+            }
+  
+            return (
+              <Image
+                source={iconName}
+                style={{ width: size, height: size, tintColor: color }}
+              />
+            );
+          },
+        })}
+      >
+        <Tab.Screen name="TabHome" component={Home} />
+        <Tab.Screen name="Payment" component={Payment} />
+        <Tab.Screen name="NewsCreation" component={NewsCreation} />
+        <Tab.Screen name="Subscribe" component={Subscribe} />
+        <Tab.Screen name="TabProfile" component={Profile} />
+      </Tab.Navigator>
+    );
+  }
+
+export default TabNavigator;
+
+
+1 credit = RM0.01 (When i subscribe to news post, my wallet will deduct 1 credit, 
+10 credit = RM 0.10 (When post news, it will take a deposit of 10 credits and after a verification process it will return back to the user) 
+100 credit = RM1
+1000 credits = RM10
+Reporter will receive 25% of each credit paid by subscribing readers when they view the full news reported.
+
+
+
+
+
+
+
+// Import necessary modules and components
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, RefreshControl, Dimensions } from 'react-native';
+import { Appbar, Card } from 'react-native-paper';
+
+// Import custom components and data
+import dummyArticles from '../../components/articles';
+import ArticleCard from '../../components/ArticleCard';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+
+
+const Subscribe = ({ navigation }) => {
+  // State management
+  const [articles] = useState(dummyArticles);
+  const [isRefreshing, setRefreshing] = useState(false);
+
+  // Handler for pull-to-refresh
+  const handleRefresh = () => {
+    setRefreshing(true);
+
+    // Simulate data fetching or perform data updates here
+    // For example, you can fetch new articles or update the existing ones
+
+    // After fetching/updating data, set refreshing to false
+    setRefreshing(false);
+  };
+
+  // Calculate screen dimensions
+  const screenHeight = Dimensions.get('window').height;
+  const tabBarHeight = useBottomTabBarHeight();
+  const contentHeight = (screenHeight - tabBarHeight) * 0.9;
+
+  return (
+    <View style={styles.container}>
+      {/* Appbar/Header */}
+      <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
+        {/* Back action */}
+        <View style={styles.customBackAction}>
+          <Appbar.BackAction
+            onPress={() => {
+              console.log('Going back');
+              navigation.goBack();
+            }}
+          />
+        </View>
+        {/* Title */}
+        <View style={styles.appbarTitleContainer}>
+          <Text style={styles.appbarTitle}>Subscribe</Text>
+        </View>
+      </Appbar.Header>
+
+      {/* Main content */}
+      <View style={{ alignItems: 'left', padding: 10, flex:1 }}>
+        {/* FlatList for articles */}
+        <FlatList
+          data={articles}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <ArticleCard {...item} />}
+          onEndReachedThreshold={0.5}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={['#72E6FF']} // Customize the color of the refresh spinner
+            />}
+        />
+      </View>
+    </View>
+  );
+};
+
+export default Subscribe
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#E9EFF7',
+    height: '100%'
+  },
+  customBackAction: {
+    marginLeft: -10, 
+  },
+  articleCard: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  appbarTitleContainer: {
+    flex: 1,
+    marginRight: 30,
+    justifyContent: 'center', 
+    alignItems: 'center', 
+  },
+  appbarTitle: {
+    textAlign: 'center', 
+    fontSize: 24,
+    fontWeight: '500', 
+  },
+  })
+
