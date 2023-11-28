@@ -16,33 +16,33 @@ import { ListItem } from "react-native-elements";
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
 import { isString } from "formik";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const supabase = createClient(
   "https://imbrgdnynoeyqyotpxaq.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYnJnZG55bm9leXF5b3RweGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTIyNDI2NzEsImV4cCI6MjAwNzgxODY3MX0.fQ62JtlzvH-HM3tEXrp-rqcAXjb4jwUo1xzlhXw_cjE"
 );
 
-//hardcoded user id. TODO: Update to automatically retrieve id from previous parts.
-var userID = "1d93bd48-5c9e-43f0-9866-c0cd6a284a39";
-
 const FriendsList = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState();
+  const [userID, setUserID] = useState("");
+  //initial fake data because react will load this data regardless of if the data has been obtained yet
+  const [people, SetPeople] = useState([{ fullname: "" }]);
+
   var query = "";
+
   const onChangeSearch = (query) => {
     // Update the search query state
     setSearchQuery(query);
-    query = "*" + query + "*";
-    //console.log("Now searching: " + query);
+    console.log("Now searching: " + query);
     sortPeople(query);
   };
-
-  //initial fake data because react will load this data regardless of if the data has been obtained yet
-  const [people, SetPeople] = useState([{ fullname: "" }]);
 
   const sortPeople = async (query) => {
     //query for everyone that does not have the current user id
     if (!isString(query)) {
       //console.log("Sorting no query");
+      //console.log("Stored User ID: " + userID);
       const { data, error } = await supabase
         .from("app_users")
         .select(
@@ -54,9 +54,15 @@ const FriendsList = ({ navigation }) => {
         `
         )
         .neq("id", userID);
-      SetPeople(data);
+      if (error) {
+        console.error("Error fetching all people:", error);
+      } else {
+        console.log("Data:", data);
+        SetPeople(data);
+      }
     } else {
       //console.log("Sorting with query");
+      //console.log("Stored User ID: " + userID);
       //console.log(query);
       const { data, error } = await supabase
         .from("app_users")
@@ -82,14 +88,20 @@ const FriendsList = ({ navigation }) => {
 
   const sortFollowing = async () => {
     console.log("Started sorting following.");
+    console.log("Stored User ID: " + userID);
     //query for every friend_id and their associated app_users data when the user_id is equal to the current session's user_id
     //query for everyone that does not have the current user id
     const { data, error, count } = await supabase
       .from("friends")
       .select(`friend_id, user:friend_id(id, user_image, fullname, nameid)`)
       .eq("user_id", userID);
-    if (data.length > 0) {
-      SetPeople(data);
+    if (error) {
+      console.error("Error fetching all people:", error);
+    } else {
+      console.log("Data:", data);
+      if (data.length > 0) {
+        SetPeople(data);
+      }
     }
 
     //this one is objectively correct but fails due to not recognizing the correct foreign key
@@ -110,19 +122,27 @@ const FriendsList = ({ navigation }) => {
 
   const sortFollowers = async () => {
     console.log("Started sorted followers.");
+    console.log("Stored User ID: " + userID);
     //query for the user_id and their associated app_users data when the friend_id is equal to the current session's user_id
     //query for everyone that does not have the current user id
     const { data, error, count } = await supabase
       .from("friends")
       .select(`user_id, user:user_id(id, user_image, fullname, nameid)`)
       .eq("friend_id", userID);
-    if (data.length > 0) {
+    if (error) {
+      console.error("Error fetching all people:", error);
+    } else {
+      console.log("Data:", data);
       SetPeople(data);
     }
   };
+
   function renderList() {
     //render the elements based on the data obtained as the data obtained comes in slightly different formats
-    if (typeof people[0].fullname !== "undefined") {
+    if (people.length == 0) {
+      return <Text>Nothing Found!</Text>;
+    } else if (typeof people[0].fullname !== "undefined") {
+      console.log("Two dimensional array!");
       //this returns the elements suitable for a two dimensional json array
       return (
         <FlatList
@@ -150,6 +170,7 @@ const FriendsList = ({ navigation }) => {
         />
       );
     } else {
+      console.log("Three dimensional array!");
       // this returns the elements suitable for a three dimensional json array
       return (
         <FlatList
@@ -182,9 +203,28 @@ const FriendsList = ({ navigation }) => {
 
   //on page load, initialize sortPeople.
   useEffect(() => {
-    sortPeople();
-  }, []);
+    const initializeData = async () => {
+      try {
+        // Fetch user ID from async storage
+        const storedUserID = await AsyncStorage.getItem("uid");
+        console.log("UserID:", storedUserID);
 
+        if (storedUserID) {
+          // Set the retrieved user ID to the state variable
+          var result = storedUserID.replaceAll('"', "");
+          await setUserID(result);
+          await sortPeople(result);
+        } else {
+          console.error("User ID not available.");
+        }
+      } catch (error) {
+        console.error("Error initializing data:", error);
+      }
+    };
+
+    // Initialize data when the component mounts
+    initializeData();
+  }, []);
   return (
     <View>
       <Appbar.Header style={{ backgroundColor: "#72E6FF" }}>
@@ -229,9 +269,13 @@ const FriendsList = ({ navigation }) => {
 
           {/*List*/}
           <View
-            style={{ alignItems: "left", padding: 15, width: "100%" }}
+            style={{
+              alignItems: "left",
+              padding: 15,
+              width: "100%",
+              height: "85%",
+            }}
             onload={sortPeople}
-            on
           >
             {renderList()}
           </View>
