@@ -60,11 +60,9 @@ const SubscribedArticleCard = React.memo(
 
   const handleReadMorePress = () => {
     navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
-    hideModal();
   };
 
-  const showModal = () => setModalVisible(true);
-  const hideModal = () => setModalVisible(false);
+  
 
   // Function to limit the content to 5 words
   const limitDescription = (text) => {
@@ -141,7 +139,7 @@ const SubscribedArticleCard = React.memo(
         <View style={styles.readButtonContainer}>
           <Button
             mode="contained"
-            onPress={showModal}
+            onPress={handleReadMorePress}
             style={styles.readButton}
             labelStyle={styles.readButtonText}
           >
@@ -149,22 +147,7 @@ const SubscribedArticleCard = React.memo(
           </Button>
         </View>
 
-        <Portal>
-          <Modal visible={isModalVisible} onDismiss={hideModal}>
-            <View style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 , justifyContent: 'center', alignItems: 'center'}}>
-              <Button
-                mode="contained"
-                onPress={handleReadMorePress}
-                style={styles.readButton}
-                labelStyle={styles.readButtonText}
-              >
-                Read
-              </Button>
-              {/* Add any other content you want in the modal */}
-              <Button onPress={hideModal}>Close</Button>
-            </View>
-          </Modal>
-        </Portal>
+        
     </Card>
   );
 });

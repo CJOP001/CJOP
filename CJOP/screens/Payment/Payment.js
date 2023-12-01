@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Payment = ({ navigation }) => {
   // State variables
   const { width } = Dimensions.get('window');
-  const buttonWidth = width * 0.4;
+  const buttonWidth = width * 0.5;
   const [balance, setBalance] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -25,14 +25,15 @@ const Payment = ({ navigation }) => {
   const [userID, setUserID] = useState(null);
 
   // Constants
-  const currentUserID = userID;
+  const currentUserID = userID //lwk
 
   // Constants for transaction types
   const TRANSACTION_RELOAD = 'Reload';
   const TRANSACTION_RECEIVED = 'Received';
   const TRANSACTION_POST = 'Post';
+  const TRANSACTION_SUBSCRIBE = 'Subscribe';
+  const TRANSACTION_SUBSCRIBER = 'Post Income';
   const TRANSACTION_WITHDRAW = 'Withdraw';
-  const TRANSACTION_TRANSFER = 'Transfer';
 
 // Function to fetch balance
 const fetchBalance = async (currentUserID) => {
@@ -98,7 +99,7 @@ const fetchUserID = async () => {
   try {
     const storedUserID = await AsyncStorage.getItem('uid');
     if (storedUserID) {
-      console.log('(Payment)UserID:',storedUserID);
+      console.log('UserID:',storedUserID);
       setUserID(storedUserID);
       return storedUserID;
     } else {
@@ -116,7 +117,7 @@ useEffect(() => {
     try {
       // Fetch user ID from async storage
       const userID = await fetchUserID();
-      console.log('(Payment initialize)User ID:', userID);
+      console.log('User ID:', userID);
 
       if (userID) {
         // Use the retrieved user ID for subsequent operations
@@ -194,7 +195,7 @@ const LearnAboutCredits = () => {
 
   const renderContent = () => {
     const spentTransactions = creditTransactions.filter(
-      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER
+      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER || item.transaction_type === TRANSACTION_SUBSCRIBE || item.transaction_type === TRANSACTION_SUBSCRIBER
     );
   
     const receivedTransactions = creditTransactions.filter(
@@ -204,7 +205,6 @@ const LearnAboutCredits = () => {
     const withdrawTransactions = creditTransactions.filter(
       (item) => item.transaction_type === TRANSACTION_WITHDRAW
     );
-
     return (
       <View>
         {index === 0 && (
@@ -220,7 +220,7 @@ const LearnAboutCredits = () => {
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
                     <Text style={styles.dateText}> {new Date(item.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                   </View>
-                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
+                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : (item.transaction_type === TRANSACTION_POST|| item.transaction_type === TRANSACTION_SUBSCRIBE) ? '#FF0000' : 'black' }]}> 
                     {item.amount} credits
                   </Text>
                 </Card.Content>
@@ -242,7 +242,7 @@ const LearnAboutCredits = () => {
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
                     <Text style={styles.dateText}> {new Date(item.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                   </View>
-                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
+                  <Text style={[styles.amountText, { color: (item.transaction_type === TRANSACTION_RELOAD||item.transaction_type ===TRANSACTION_SUBSCRIBER) ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
                     {item.amount} credits
                   </Text>
                 </Card.Content>
@@ -283,59 +283,31 @@ const LearnAboutCredits = () => {
   };
 
   // Function to handle transfer
-  const handleTransfer = async (recipientPhoneNumber, transferAmount) => {
+  const handleTransfer = async (recipientID, transferAmount) => {
     try {
       // Check if the recipient ID is valid (you may want to add more validation)
-      const { data: recipientUserData, error: recipientUserError } = await supabase
-      .from('app_users')
-      .select('id')
-      .eq('phone_no', recipientPhoneNumber)
-      .single();
+      const recipientExists = await supabase
+        .from('credits')
+        .select('user_id')
+        .eq('user_id', recipientID)
+        .single();
 
-      console.log('Got It',recipientUserData);
-
-    if (recipientUserError) {
-      console.error('Error checking recipient existence:', recipientUserError);
-      return;
-    }
-
-    if (!recipientUserData) {
-      console.error('Recipient not found');
-      return;
-    }
+      if (!recipientExists) {
+        console.error('Recipient not found');
+        return;
+      }
 
       // Deduct the transfer amount from the current user's balance
       const updatedSenderBalance = balance - transferAmount;
-      console.log('Updated Balance',updatedSenderBalance)
-
-      if (updatedSenderBalance < 0) {
-        console.error('Insufficient balance for transfer');
-        // Handle insufficient balance (show error message, rollback changes, etc.)
-        return;
-      }
-
-      const { data: senderData, error: senderError } = await supabase
-      .from('credits')
-      .update({ credit_amount: updatedSenderBalance })
-      .eq('user_id', currentUserID);
-
-      if (senderError) {
-        console.error('Error updating sender balance:', senderError.message);
-        // Handle error (show error message, rollback changes, etc.)
-        return;
-      }
-
       setBalance(updatedSenderBalance);
-      console.log('Deducted');
 
       // Add the transfer amount to the recipient's balance
       const { data: recipientData, error: recipientError } = await supabase
         .from('credits')
         .upsert([
           {
-            user_id: recipientUserData.id,
-            credit_amount: transferAmount,
-            date: new Date()
+            user_id: recipientID,
+            credit_amount: supabase.sql`credit_amount + ${transferAmount}`,
           },
         ]);
 
@@ -344,8 +316,6 @@ const LearnAboutCredits = () => {
         // Handle error (rollback sender's balance update, show error message, etc.)
         return;
       }
-
-      console.log('Added to recipient balance');
 
       // Create a credit transaction for the sender
       const senderTransaction = {
@@ -357,7 +327,7 @@ const LearnAboutCredits = () => {
 
       // Create a credit transaction for the recipient
       const recipientTransaction = {
-        user_id: recipientUserData.id,
+        user_id: recipientID,
         transaction_type: TRANSACTION_RECEIVED,
         amount: transferAmount,
         date: new Date(),
@@ -444,7 +414,8 @@ const LearnAboutCredits = () => {
           visible={isTransferModalVisible}
           onClose={() => setTransferModalVisible(false)}
           onTransfer={(recipientID, transferAmount) =>
-            handleTransfer(recipientID, transferAmount)}
+            handleTransfer(recipientID, transferAmount)
+          }
           currentUserID={currentUserID}
         />
 
@@ -452,8 +423,8 @@ const LearnAboutCredits = () => {
       <WithdrawModal
         visible={isWithdrawModalVisible}
         onClose={() => setWithdrawModalVisible(false)}
-        balance={balance}  // Pass the balance as a prop to WithdrawModal
-        onUpdateBalance={(newBalance) => setBalance(newBalance)}
+        balance={balance}  
+        onUpdateBalance={(newBalance) => setBalance(newBalance)}  
         currentUserID={currentUserID}
       />
 
@@ -461,7 +432,7 @@ const LearnAboutCredits = () => {
       <LearnAboutCredits />
 
 
-        <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center', }}>
+        <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
           <Tab
             value={index}
             onChange={setIndex}
@@ -472,7 +443,7 @@ const LearnAboutCredits = () => {
             <Tab.Item
               title="Spent"
               titleStyle={{ fontSize: 16, color: '#7C82A1' }}
-              style={{ flex: 1, alignItems: 'center'}}
+              style={{ flex: 1, alignItems: 'center' }}
             />
             <Tab.Item
               title="Received"
@@ -497,7 +468,6 @@ const LearnAboutCredits = () => {
                 colors={['#72E6FF']} 
               />
             }
-            showsVerticalScrollIndicator={false}
           >
             {renderContent()}
           </ScrollView>
@@ -519,8 +489,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     textAlign: 'center',
     padding: 15,
-    fontWeight: 'bold',
-    color: '#000'
+    fontWeight: '600',
   },
   customBackAction: {
     marginLeft: -10,
@@ -531,10 +500,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appbarTitle: {
-    textAlign: 'center', 
+    textAlign: 'center',
     fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
+    fontWeight: '500',
   },
   cardContainer:{
     flexDirection: 'row', 
@@ -568,7 +536,7 @@ const styles = StyleSheet.create({
   learnText: {
     fontSize: 16,
     textAlign: 'left',
-    color: '#333', 
+    color: '#333', // Adjust the color as needed
     lineHeight: 24,
   },
 });

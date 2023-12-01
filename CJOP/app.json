@@ -28,9 +28,6 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "eas": {
-        "projectId": "0ce97eb8-d1ad-4090-a3a8-7c05e8e7b0de"
-      },
       "android": {
         "permissions": [
           "CAMERA",
