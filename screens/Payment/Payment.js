@@ -31,6 +31,8 @@ const Payment = ({ navigation }) => {
   const TRANSACTION_RELOAD = 'Reload';
   const TRANSACTION_RECEIVED = 'Received';
   const TRANSACTION_POST = 'Post';
+  const TRANSACTION_SUBSCRIBE = 'Subscribe';
+  const TRANSACTION_SUBSCRIBER = 'Post Income';
   const TRANSACTION_WITHDRAW = 'Withdraw';
 
 // Function to fetch balance
@@ -193,7 +195,11 @@ const LearnAboutCredits = () => {
 
   const renderContent = () => {
     const spentTransactions = creditTransactions.filter(
+<<<<<<< Updated upstream:screens/Payment/Payment.js
       (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST
+=======
+      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER || item.transaction_type === TRANSACTION_SUBSCRIBE || item.transaction_type === TRANSACTION_SUBSCRIBER
+>>>>>>> Stashed changes:CJOP/screens/Payment/Payment.js
     );
   
     const receivedTransactions = creditTransactions.filter(
@@ -218,7 +224,7 @@ const LearnAboutCredits = () => {
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
                     <Text style={styles.dateText}> {new Date(item.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                   </View>
-                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
+                  <Text style={[styles.amountText, { color: (item.transaction_type === TRANSACTION_RELOAD||item.transaction_type ===TRANSACTION_SUBSCRIBER) ? 'green' : (item.transaction_type === TRANSACTION_POST|| item.transaction_type === TRANSACTION_SUBSCRIBE) ? '#FF0000' : 'black' }]}> 
                     {item.amount} credits
                   </Text>
                 </Card.Content>

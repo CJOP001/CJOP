@@ -28,7 +28,11 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+<<<<<<< Updated upstream:app.json
       
+=======
+
+>>>>>>> Stashed changes:CJOP/app.json
       "android": {
         "permissions": [
           "CAMERA",
