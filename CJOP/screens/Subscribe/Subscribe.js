@@ -17,6 +17,7 @@ import SubscribedArticleCard from "../../components/SubscribedArticleCard";
 import supabase from "../../supabase/supabase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const Subscribe = ({ navigation }) => {
@@ -73,6 +74,14 @@ const Subscribe = ({ navigation }) => {
     return <SubscribedArticleCard {...item.news_id} />;
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const storedUserID = await AsyncStorage.getItem('uid');
+    console.log('(Refresh)UserID:', storedUserID);
+    await fetchArticles(storedUserID);
+    setRefreshing(false);
+  };
+
 
   // Calculate screen dimensions
   const screenHeight = Dimensions.get('window').height;
@@ -80,38 +89,40 @@ const Subscribe = ({ navigation }) => {
   const contentHeight = (screenHeight - tabBarHeight) * 0.9;
 
   return (
-<ScrollView showsVerticalScrollIndicator={false} >    
-<View style={styles.container}>
-      {/* Appbar/Header */}
-      <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
-        {/* Back action */}
-        <View style={styles.customBackAction}>
-          <Appbar.BackAction
-            onPress={() => {
-              console.log('Going back');
-              navigation.goBack();
-            }}
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={articles}
+        keyExtractor={(item) => item.news_id.id.toString()}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        ListHeaderComponent={() => (
+          <>
+            <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
+              <View style={styles.customBackAction}>
+                <Appbar.BackAction
+                  onPress={() => {
+                    console.log('Going back');
+                    navigation.goBack();
+                  }}
+                />
+              </View>
+              <View style={styles.appbarTitleContainer}>
+                <Text style={styles.appbarTitle}>Subscribe</Text>
+              </View>
+            </Appbar.Header>
+          </>
+        )}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#72E6FF']} // Add your custom color here
           />
-        </View>
-        {/* Title */}
-        <View style={styles.appbarTitleContainer}>
-          <Text style={styles.appbarTitle}>Subscribe</Text>
-        </View>
-      </Appbar.Header>
-
-      {/* Main content */}
-      <View style={styles.articleContainer}>
-              {loading && <Text>Loading...</Text>}
-              {error && <Text>Error: {error}</Text>}
-              <FlatList
-                data={articles}
-                keyExtractor={(item) => item.news_id.id.toString()}
-                renderItem={renderItem}
-                showsVerticalScrollIndicator={false}
-              />
-            </View>
-    </View>
-    </ScrollView>
+        }
+      />
+    </SafeAreaView>
   );
 };
 
@@ -141,5 +152,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'black',
+},
+articleContainer: {
+  paddingHorizontal: 10,
 },
   })
