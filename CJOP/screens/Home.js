@@ -120,7 +120,6 @@ useEffect(() => {
 }, []);
 
 
-
   const onChangeSearch = (query) => {
     // Update the search query state
     setSearchQuery(query);
@@ -165,82 +164,83 @@ useEffect(() => {
     setRefreshing(false); // Stop the refresh animation when data is fetched
   }
 
-
-  
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        animated={true}
-        backgroundColor="#72E6FF"
-        barStyle={statusBarStyle}
-        showHideTransition={statusBarTransition}
-        hidden={hidden}
-      />
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
+      <FlatList
+        ListHeaderComponent={() => (
+          <>
+            <StatusBar
+              animated={true}
+              backgroundColor="#72E6FF"
+              barStyle={statusBarStyle}
+              showHideTransition={statusBarTransition}
+              hidden={hidden}
+            />
+            <Appbar.Header>
+              <TouchableOpacity onPress={openDrawer}>
+                <Avatar.Image
+                  source={{ uri: userImage || defaultUserImage }}
+                  size={40}
+                  style={{ margin: 10, marginTop: 20 }}
+                />
+              </TouchableOpacity>
+              {renderSearchBar()}
+            </Appbar.Header>
+            <Appbar.Header>
+              {/* Scrollable list of categories */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScrollView}
+              >
+                {categoryData.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[
+                      styles.categoryButton,
+                      category.id === selectedCategory
+                        ? styles.selectedCategoryButton
+                        : null,
+                    ]}
+                    onPress={() => setSelectedCategory(category.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryButtonText,
+                        category.id === selectedCategory
+                          ? styles.selectedCategoryButtonText
+                          : null,
+                      ]}
+                    >
+                      {category.type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </Appbar.Header>
+          </>
+        )}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            colors={['#72E6FF']} 
+            colors={['#72E6FF']}
           />
         }
-        style={{ marginBottom: 60 }}
-      >
-      <Appbar.Header>
-        <TouchableOpacity onPress={openDrawer}>
-        <Avatar.Image
-          source={{ uri: userImage || defaultUserImage }}
-          size={40}
-          style={{ margin: 10, marginTop: 20 }}
-        />
-        </TouchableOpacity>
-        {renderSearchBar()}
-      </Appbar.Header>
-      <Appbar.Header>
-      {/* Scrollable list of categories */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
-        {categoryData.map(category => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryButton,
-              category.id === selectedCategory ? styles.selectedCategoryButton : null,
-            ]}
-            onPress={() => setSelectedCategory(category.id)}
-          >
-            <Text style={[styles.categoryButtonText, category.id === selectedCategory ? styles.selectedCategoryButtonText : null]}>{category.type}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      </Appbar.Header>
-      {/* List of articles */}
-      <View style={styles.articleListContainer}>
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      ) : error ? (
-        <Text style={{ color: 'red' }}>{error}</Text>
-      ) : filteredArticles.length === 0 ? (
-        <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 18 }}>
-          There are no news articles in this category.
-        </Text>
-      ) : (
-          <View style={{ alignItems: 'left', padding: 15, width: '100%' }}>
+        ListFooterComponent={() => (
+          <View style={{ marginBottom: 50, padding: 15 }}>
+            {/* Filter articles based on the selected category for the footer */}
             <FlatList
               data={filteredArticles}
               keyExtractor={(item) => item.id.toString()}
               renderItem={renderItem}
               showsVerticalScrollIndicator={false}
               initialNumToRender={5}
-              
             />
           </View>
         )}
-      </View>
-    </ScrollView>
+        style={{ marginBottom: 10 }}
+      />
     </SafeAreaView>
   );
 };
