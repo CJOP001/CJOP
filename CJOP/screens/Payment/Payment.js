@@ -33,6 +33,8 @@ const Payment = ({ navigation }) => {
   const TRANSACTION_POST = 'Post';
   const TRANSACTION_WITHDRAW = 'Withdraw';
   const TRANSACTION_TRANSFER = 'Transfer';
+  const TRANSACTION_SUBSCRIBE = 'Subscribe';
+  const TRANSACTION_SUBSCRIBER = 'Post Income';
 
 // Function to fetch balance
 const fetchBalance = async (currentUserID) => {
@@ -194,11 +196,11 @@ const LearnAboutCredits = () => {
 
   const renderContent = () => {
     const spentTransactions = creditTransactions.filter(
-      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER
+      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER || item.transaction_type === TRANSACTION_SUBSCRIBE 
     );
   
     const receivedTransactions = creditTransactions.filter(
-      (item) => item.transaction_type === TRANSACTION_RECEIVED
+      (item) => item.transaction_type === TRANSACTION_RECEIVED || item.transaction_type === TRANSACTION_SUBSCRIBER
     );
   
     const withdrawTransactions = creditTransactions.filter(
@@ -241,7 +243,7 @@ const LearnAboutCredits = () => {
                     <Text style={styles.transactionType}> {item.transaction_type}</Text>
                     <Text style={styles.dateText}> {new Date(item.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                   </View>
-                  <Text style={[styles.amountText, { color: item.transaction_type === TRANSACTION_RELOAD ? 'green' : item.transaction_type === TRANSACTION_POST ? '#FF0000' : 'black' }]}> 
+                  <Text style={[styles.amountText, { color: (item.transaction_type === TRANSACTION_RELOAD||item.transaction_type ===TRANSACTION_SUBSCRIBER||item.transaction_type ===TRANSACTION_RECEIVED) ? 'green' :  'black' }]}> 
                     {item.amount} credits
                   </Text>
                 </Card.Content>
