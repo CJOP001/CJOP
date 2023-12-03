@@ -131,8 +131,10 @@ class PostingDesc extends Component {
     }
 
     // Open the overlay sheet modal
-    this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
-    this.setState({ modalUserId: userId });
+    this.setState({
+      isModalVisible: !this.state.isModalVisible,
+      modalUserId: userId,
+    });
   };
 
   // Function to handle retaking the image
