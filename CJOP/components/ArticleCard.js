@@ -312,7 +312,7 @@ const addToSubscribe = async() =>
         <Card.Cover
           source={{ uri: image_path }}
           style={styles.articleImage}
-          resizeMode="contain" // Set resizeMode to 'contain'
+          resizeMode="cover" // Set resizeMode to 'contain'
         />
       ) : null}
       
