@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { retrieveUserData } from '../../components/UserInfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import supabase from '../../supabase/supabase';
+import ImageView from "react-native-image-viewing";
 
 import ReportModal from './ReportModal';
 import CommentModal from './CommentModal'; // Import the new CommentModal
@@ -268,6 +269,12 @@ const ArticlesDetails = ({ route }) => {
     return new Date(timestamp).toLocaleString('en-US', options);
   };
 
+  const images = [
+    {
+      uri: image_path,
+    },
+  ];
+
   return (
     <>
       <Appbar.Header>
@@ -367,17 +374,12 @@ const ArticlesDetails = ({ route }) => {
       />
 
       {/* Image Modal */}
-      <Modal visible={isImageModalVisible} transparent={true} onRequestClose={handleImageModalDismiss}>
-        <View style={styles.imageModalContainer}>
-          <TouchableOpacity onPress={handleImageModalDismiss}>
-            <Image
-              source={{ uri: image_path }}
-              style={styles.fullImage}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      <ImageView
+        images={images}
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={handleImageModalDismiss}
+      />
 
       {/* Comment Modal */}
       <CommentModal
