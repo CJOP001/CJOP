@@ -30,12 +30,12 @@ const PostingModal = ({
    const [loading, setLoading] = useState(false);
    const [userBalances, setUserBalances] = useState(null);
 
+
   const callBalance = async () => {
     try {
-
       if (userId) {
+        console.log(userId);
 
-      console.log(userId);
 
         const { data: userCreditDetail, error: creditsError } = await supabase
           .from('credits')
@@ -49,17 +49,14 @@ const PostingModal = ({
         }
 
         setUserBalances(userCreditDetail[0].credit_amount);
-
-      } else {
-        console.error('User data is not available.');
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
- useEffect(() => {
-     callBalance();
-   }, []);
+  useEffect(() => {
+    callBalance();
+  }, [userId]);
 
 const handleConfirm = async () => {
   console.log('Text Input:', textInputValue);
@@ -69,7 +66,7 @@ const handleConfirm = async () => {
 
   if (!userData) {
     setLoading(false); // Hide loader after the process is complete
-    console.error('User data is not available.');
+    console.error('(PostModal)User data is not available.');
     return;
   }
 
@@ -82,7 +79,7 @@ const handleConfirm = async () => {
   try {
     // Check if user data is available
     if (userData) {
-      userId = userData.id;
+      console.log('from handleConfirm',userId);
 
       // Check if user balance is lower than 10 credits
     const { data: userCredits, error: creditsError } = await supabase
@@ -338,7 +335,7 @@ const deductCredits = async (userId) => {
             </TouchableOpacity>
             <Text style={styles.headerText}>Posting</Text>
             <Text style={styles.subText1}> 10 Credits will be pending</Text>
-              <Text style={styles.modalText}>
+            <Text style={styles.modalText}>
                 {userBalances !== null ? `Current Balance: ${userBalances} credits` : 'Loading...'}
               </Text>
             <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
