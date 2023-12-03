@@ -34,7 +34,7 @@ const getUserData = async () => {
     if (userData) {
       return userData;
     } else {
-      console.error('User data is not available.');
+      console.error('User data is not availabl.');
       return null;
     }
   } catch (error) {

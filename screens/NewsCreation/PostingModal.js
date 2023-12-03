@@ -28,36 +28,36 @@ const PostingModal = ({
   const navigation = useNavigation();
 
    const [loading, setLoading] = useState(false);
-    const [userBalances, setUserBalances] = useState('Loading...');
+   const [userBalances, setUserBalances] = useState(null);
 
-     const callBalance = async () => {
-       try {
-         if (userId) {
-           const { data: userCreditDetail, error: creditsError } = await supabase
-             .from('credits')
-             .select('credit_amount')
-             .eq('user_id', userId);
+  const callBalance = async () => {
+    try {
 
-           if (creditsError) {
-             console.error('Error fetching user credits:', creditsError);
-             setLoading(false);
-             return;
-           }
+      if (userId) {
 
-           setUserBalances(userCreditDetail[0].credit_amount);
-         } else {
-           console.error('User data is not available.');
-         }
-       } catch (error) {
-         console.error('Error fetching user data:', error);
-       } finally {
-         setLoading(false);
-       }
-     };
+      console.log(userId);
 
-     useEffect(() => {
-       callBalance();
-     }, []);
+        const { data: userCreditDetail, error: creditsError } = await supabase
+          .from('credits')
+          .select('credit_amount')
+          .eq('user_id', userId);
+
+        if (creditsError) {
+          console.error('Error fetching user credits:', creditsError);
+          setLoading(false);
+          return;
+        }
+
+        setUserBalances(userCreditDetail[0].credit_amount);
+
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+ useEffect(() => {
+     callBalance();
+   }, [userId]);
 
 const handleConfirm = async () => {
   console.log('Text Input:', textInputValue);
@@ -80,7 +80,6 @@ const handleConfirm = async () => {
   try {
     // Check if user data is available
     if (userData) {
-      userId = userData.id;
 
       // Check if user balance is lower than 10 credits
     const { data: userCredits, error: creditsError } = await supabase
@@ -337,8 +336,8 @@ const deductCredits = async (userId) => {
             <Text style={styles.headerText}>Posting</Text>
             <Text style={styles.subText1}> 10 Credits will be pending</Text>
               <Text style={styles.modalText}>
-                Current Balance: {userBalances} credits
-                </Text>
+                {userBalances !== null ? `Current Balance: ${userBalances} credits` : 'Loading...'}
+              </Text>
             <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
               <Text style={styles.confirmButtonText}>Confirm</Text>
             </TouchableOpacity>

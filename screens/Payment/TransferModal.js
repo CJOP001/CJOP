@@ -18,7 +18,7 @@ const TransferModal = ({ visible, onClose, onTransfer, currentUserID }) => {
   
     // Validate input (add more validation as needed)
     if (!recipientID) {
-      setRecipientError('Recipient ID is required');
+      setRecipientError('Phone number is required');
       return;
     }
   

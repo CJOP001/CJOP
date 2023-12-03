@@ -32,6 +32,7 @@ const Payment = ({ navigation }) => {
   const TRANSACTION_RECEIVED = 'Received';
   const TRANSACTION_POST = 'Post';
   const TRANSACTION_WITHDRAW = 'Withdraw';
+  const TRANSACTION_TRANSFER = 'Transfer';
 
 // Function to fetch balance
 const fetchBalance = async (currentUserID) => {
@@ -193,7 +194,7 @@ const LearnAboutCredits = () => {
 
   const renderContent = () => {
     const spentTransactions = creditTransactions.filter(
-      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST
+      (item) => item.transaction_type === TRANSACTION_RELOAD || item.transaction_type === TRANSACTION_POST || item.transaction_type === TRANSACTION_TRANSFER
     );
   
     const receivedTransactions = creditTransactions.filter(
@@ -280,78 +281,108 @@ const LearnAboutCredits = () => {
     );
   };
 
-  // Function to handle transfer
-  const handleTransfer = async (recipientID, transferAmount) => {
-    try {
-      // Check if the recipient ID is valid (you may want to add more validation)
-      const recipientExists = await supabase
-        .from('credits')
-        .select('user_id')
-        .eq('user_id', recipientID)
-        .single();
+// Function to handle transfer
+const handleTransfer = async (recipientPhoneNumber, transferAmount) => {
+  try {
+    // Check if the recipient ID is valid (you may want to add more validation)
+    const { data: recipientUserData, error: recipientUserError } = await supabase
+    .from('app_users')
+    .select('id')
+    .eq('phone_no', recipientPhoneNumber)
+    .single();
 
-      if (!recipientExists) {
-        console.error('Recipient not found');
-        return;
-      }
+    console.log('Got It',recipientUserData);
 
-      // Deduct the transfer amount from the current user's balance
-      const updatedSenderBalance = balance - transferAmount;
-      setBalance(updatedSenderBalance);
+  if (recipientUserError) {
+    console.error('Error checking recipient existence:', recipientUserError);
+    return;
+  }
 
-      // Add the transfer amount to the recipient's balance
-      const { data: recipientData, error: recipientError } = await supabase
-        .from('credits')
-        .upsert([
-          {
-            user_id: recipientID,
-            credit_amount: supabase.sql`credit_amount + ${transferAmount}`,
-          },
-        ]);
+  if (!recipientUserData) {
+    console.error('Recipient not found');
+    return;
+  }
 
-      if (recipientError) {
-        console.error('Error updating recipient balance:', recipientError);
-        // Handle error (rollback sender's balance update, show error message, etc.)
-        return;
-      }
+    // Deduct the transfer amount from the current user's balance
+    const updatedSenderBalance = balance - transferAmount;
+    console.log('Updated Balance',updatedSenderBalance)
 
-      // Create a credit transaction for the sender
-      const senderTransaction = {
-        user_id: currentUserID,
-        transaction_type: TRANSACTION_TRANSFER,
-        amount: -transferAmount,
-        date: new Date(),
-      };
-
-      // Create a credit transaction for the recipient
-      const recipientTransaction = {
-        user_id: recipientID,
-        transaction_type: TRANSACTION_RECEIVED,
-        amount: transferAmount,
-        date: new Date(),
-      };
-
-      // Insert both transactions into the credit_transactions table
-      const { error: transactionError } = await supabase
-        .from('credit_transactions')
-        .upsert([senderTransaction, recipientTransaction]);
-
-      if (transactionError) {
-        console.error('Error creating credit transactions:', transactionError);
-        // Handle error (rollback transactions, show error message, etc.)
-        return;
-      }
-
-      // Notify the user that the transfer was successful
-      console.log('Transfer successful');
-
-      // Close the transfer modal or perform any other necessary actions
-      setTransferModalVisible(false);
-    } catch (error) {
-      console.error('Error during transfer:', error);
-      // Handle generic error (show error message, rollback changes, etc.)
+    if (updatedSenderBalance < 0) {
+      console.error('Insufficient balance for transfer');
+      // Handle insufficient balance (show error message, rollback changes, etc.)
+      return;
     }
-  };
+
+    const { data: senderData, error: senderError } = await supabase
+    .from('credits')
+    .update({ credit_amount: updatedSenderBalance })
+    .eq('user_id', currentUserID);
+
+    if (senderError) {
+      console.error('Error updating sender balance:', senderError.message);
+      // Handle error (show error message, rollback changes, etc.)
+      return;
+    }
+
+    setBalance(updatedSenderBalance);
+    console.log('Deducted');
+
+    // Add the transfer amount to the recipient's balance
+    const { data: recipientData, error: recipientError } = await supabase
+      .from('credits')
+      .upsert([
+        {
+          user_id: recipientUserData.id,
+          credit_amount: transferAmount,
+          date: new Date()
+        },
+      ]);
+
+    if (recipientError) {
+      console.error('Error updating recipient balance:', recipientError);
+      // Handle error (rollback sender's balance update, show error message, etc.)
+      return;
+    }
+
+    console.log('Added to recipient balance');
+
+    // Create a credit transaction for the sender
+    const senderTransaction = {
+      user_id: currentUserID,
+      transaction_type: TRANSACTION_TRANSFER,
+      amount: -transferAmount,
+      date: new Date(),
+    };
+
+    // Create a credit transaction for the recipient
+    const recipientTransaction = {
+      user_id: recipientUserData.id,
+      transaction_type: TRANSACTION_RECEIVED,
+      amount: transferAmount,
+      date: new Date(),
+    };
+
+    // Insert both transactions into the credit_transactions table
+    const { error: transactionError } = await supabase
+      .from('credit_transactions')
+      .upsert([senderTransaction, recipientTransaction]);
+
+    if (transactionError) {
+      console.error('Error creating credit transactions:', transactionError);
+      // Handle error (rollback transactions, show error message, etc.)
+      return;
+    }
+
+    // Notify the user that the transfer was successful
+    console.log('Transfer successful');
+
+    // Close the transfer modal or perform any other necessary actions
+    setTransferModalVisible(false);
+  } catch (error) {
+    console.error('Error during transfer:', error);
+    // Handle generic error (show error message, rollback changes, etc.)
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -412,8 +443,8 @@ const LearnAboutCredits = () => {
           visible={isTransferModalVisible}
           onClose={() => setTransferModalVisible(false)}
           onTransfer={(recipientID, transferAmount) =>
-            handleTransfer(recipientID, transferAmount)
-          }
+            handleTransfer(recipientID, transferAmount)}
+          currentUserID={currentUserID}
         />
 
         {/* Withdraw Modal */}
@@ -465,6 +496,7 @@ const LearnAboutCredits = () => {
                 colors={['#72E6FF']} 
               />
             }
+            showsVerticalScrollIndicator={false}
           >
             {renderContent()}
           </ScrollView>
@@ -498,9 +530,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appbarTitle: {
-    textAlign: 'center',
+    textAlign: 'center', 
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: 'bold',
+    color: 'black',
   },
   cardContainer:{
     flexDirection: 'row', 

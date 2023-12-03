@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, Image } from 'react-native';
 
-const CommentModal = ({ isVisible, onDismiss, onSubmit }) => {
+const CommentModal = ({ isVisible, onDismiss, onSubmit, commentText, setCommentText }) => {
   const [comment, setComment] = useState('');
 
   const handleSendPress = () => {
-    onSubmit(comment);
+    onSubmit(commentText);
     setComment('');
     onDismiss();
   };
@@ -31,11 +31,11 @@ const CommentModal = ({ isVisible, onDismiss, onSubmit }) => {
             style={styles.commentInput}
             multiline={true}
             placeholder="Type your comment here..."
-            value={comment}
-            onChangeText={(text) => setComment(text)}
+            value={commentText}
+            onChangeText={(text) => setCommentText(text)}
             maxLength={1000}
           />
-          <Text style={styles.wordCount}>{`Max: ${1000 - comment.length} words remaining`}</Text>
+          <Text style={styles.wordCount}>{`Max: ${1000 - commentText.length} words remaining`}</Text>
           <TouchableOpacity style={styles.sendButton} onPress={handleSendPress}>
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>

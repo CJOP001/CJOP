@@ -3,6 +3,9 @@ import { Card, Avatar, Button, Text, Modal, Portal } from 'react-native-paper';
 import { Image, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { retrieveUserData } from '../components/UserInfo';
+import supabase from '../supabase/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from "react-native";
 
 // Import your custom icons
 import likeIcon from '../assets/like.png';
@@ -59,10 +62,208 @@ const ArticleCard = React.memo(
   };
 
   const handleReadMorePress = () => {
-
-    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments } });
-    hideModal();
+    handleUpdateCreditAmount();
+    handleAddCreditAmount();
   };
+
+  const handleUpdateCreditAmount = async () => {
+    let tempID = await AsyncStorage.getItem('uid');
+    try {
+      // Retrieve the user's current credit balance from data source
+      const { data, error } = await supabase
+        .from('credits')
+        .select('credit_amount')
+        .eq('user_id', tempID);
+  
+      if (error) {
+        throw error;
+      }
+  
+      if (data && data.length > 0 && data[0].credit_amount > 0) {
+        // Calculate the new credit balance
+        const currentCreditAmount = data[0].credit_amount;
+        const newCreditAmount = currentCreditAmount - 1;
+  
+        // Update the user's credit balance in the data source
+        const { error: updateError } = await supabase
+          .from('credits')
+          .update({ credit_amount: newCreditAmount })
+          .eq('user_id', tempID );
+  
+        if (updateError) {
+          throw updateError;
+        }
+        else{
+          handleInsertCreditTransaction();
+        }
+  
+      } else {
+        console.error('No balance data found.');
+        hideModal();
+        Alert.alert(
+          'Credit error',
+          'No credit balance found. Please make sure there is always credit in your wallet.',
+          [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+        )
+      }
+    } catch (error) {
+      console.error('Error updating credit amount:', error);
+    }
+  };
+
+  //add credit amount to post owner
+  const handleAddCreditAmount = async () => {
+    try {
+      // Retrieve the user's current credit balance from data source
+      const { data, error } = await supabase
+        .from('credits')
+        .select('credit_amount')
+        .eq('user_id', user_id);
+  
+      if (error) {
+        throw error;
+      }
+  
+      if (data && data.length > 0 ) {
+        // Calculate the new credit balance
+        const currentCreditAmount = data[0].credit_amount;
+        const newCreditAmount = currentCreditAmount + 1;
+        console.log(user_id, "this is poster");
+        // Update the user's credit balance in the data source
+        const { data: updateData, error: updateError } = await supabase
+          .from('credits')
+          .update({ credit_amount: newCreditAmount })
+          .eq('user_id', user_id );
+  
+        if (updateError) {
+          throw updateError;
+        }
+        else{
+          handleInsertCreditTransactionForPoster();
+        }
+  
+      } else {
+        console.error('Send credit to poster fail.');
+        }
+    } catch (error) {
+      console.error('Error updating credit amount:', error);
+    }
+  };
+
+  //insert subscribe credit amount
+  const handleInsertCreditTransaction = async () => {
+    let tempID = await AsyncStorage.getItem('uid');
+
+    try {
+      const transactionTime = new Date();
+  
+      // Insert a record in the credit_transaction table
+      const {data, error} = await supabase
+        .from('credit_transactions')
+        .insert([
+          {
+            user_id: tempID,
+            transaction_type: 'Subscribe',
+            amount: 1,
+            date: transactionTime.toISOString(),
+          },
+        ]);
+      if (error) {
+        console.log(error);
+
+        throw error;
+      }
+      else
+      {
+        // Log the inserted transaction
+        addToSubscribe();
+      } 
+      
+    } catch (error) {
+      console.error('Error inserting credit transaction:', error);
+    }
+  };
+
+  //insert transfer record for poster
+  const handleInsertCreditTransactionForPoster = async () => {
+    try {
+      const transactionTime = new Date();
+  
+      // Insert a record in the credit_transaction table
+      const {data, error} = await supabase
+        .from('credit_transactions')
+        .insert([
+          {
+            user_id: user_id,
+            transaction_type: 'Post Income',
+            amount: 1,
+            date: transactionTime.toISOString(),
+          },
+        ]);
+      if (error) {
+        console.log(error);
+
+        throw error;
+      }
+      
+    } catch (error) {
+      console.error('Error inserting credit transaction:', error);
+    }
+  };
+
+  //checks if post is alr subscribed or is owned
+  const checkSubscribed = async() => {
+    let tempID = await AsyncStorage.getItem('uid');
+    try {const {data, error} = await supabase
+                          .from('subscribe')
+                          .select()
+                          .match({user_id: tempID, news_id: id});
+    
+    if(data.length > 0 || tempID == user_id)
+    {
+      navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
+    }
+    else{
+      showModal();
+    }
+  } catch(e)
+  {
+    console.log(e);
+  }
+}
+
+//add post to subscribed list
+const addToSubscribe = async() =>
+{
+  let tempID = await AsyncStorage.getItem('uid');
+  try{
+    const {data, error} = await supabase 
+                    .from('subscribe')
+                    .insert([
+                      {
+                        user_id: tempID,
+                        news_id: id,
+                      },
+                    ]);
+                  if(error)
+                  {
+                    hideModal();
+                    Alert.alert(
+                      'Subscription error',
+                      'Cannot subscribe to news. Please contact the relevant help center.',
+                      [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+                  );
+                  }
+                  else 
+                  {
+                    navigation.navigate('ArticlesDetails', { article: { id, user_id, status, created_at, image_path, description, likes, comments,  fullname: userInfo ? userInfo.fullname : 'Loading...', user_image: userInfo ? userInfo.user_image : 'https://example.com/default-avatar.jpg', } });
+                  hideModal();
+                }
+  }catch(e)
+  {
+    console.log("Subscription failed, ",e)
+  }
+}
 
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);
@@ -142,7 +343,7 @@ const ArticleCard = React.memo(
         <View style={styles.readButtonContainer}>
           <Button
             mode="contained"
-            onPress={showModal}
+            onPress={checkSubscribed}
             style={styles.readButton}
             labelStyle={styles.readButtonText}
           >

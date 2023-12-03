@@ -46,7 +46,7 @@ class PostingDesc extends Component {
       try {
         // Fetch user ID from async storage
         const userId = await AsyncStorage.getItem('uid');
-        console.log('(Payment initialize)User ID:', userId);
+        console.log('(Post initialize)User ID:', userId);
 
         if (userId) {
           // Set the retrieved user ID to the state variable
@@ -76,7 +76,7 @@ class PostingDesc extends Component {
           throw error;
         }
 
-        console.log('User Details:', data);
+        console.log('(Post)User Details:', data);
         this.setState({ userDetails: data[0] });
 
       } catch (error) {
@@ -131,8 +131,10 @@ class PostingDesc extends Component {
     }
 
     // Open the overlay sheet modal
-    this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
-    this.setState({ modalUserId: userId });
+    this.setState({
+       isModalVisible: !this.state.isModalVisible,
+       modalUserId: userId,
+     });
   };
 
   // Function to handle retaking the image
@@ -306,7 +308,7 @@ pickImage = async () => {
         {/* Overlay modal for the modal text */}
         <OverlaySheetModal
           isVisible={this.state.isModalVisible}
-          onCancel={this.toggleModal}
+          onCancel={() => this.toggleModal()}
           textInputValue={textInputValue}
           image={this.state.image}
           selectedCategoryId={this.state.selectedCategoryId}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, View, StyleSheet, Text, TextInput } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { Appbar } from "react-native-paper";
 
 export default function LiveStream (props) {
     const navigation = useNavigation();
@@ -23,6 +23,21 @@ export default function LiveStream (props) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
+                {/* Back action */}
+                <View style={styles.customBackAction}>
+                <Appbar.BackAction
+                    onPress={() => {
+                    console.log('Going back');
+                    navigation.goBack();
+                    }}
+                />
+                </View>
+                {/* Title */}
+                <View style={styles.appbarTitleContainer}>
+                <Text style={styles.appbarTitle}>Live Stream</Text>
+                </View>
+            </Appbar.Header>
       <Text style={styles.userID}>Your User ID: {userID}</Text>
       <Text style={[styles.liveID, styles.leftPadding]}>Live ID:</Text>
             <TextInput
@@ -36,7 +51,7 @@ export default function LiveStream (props) {
             <View style={[styles.buttonLine, styles.leftPadding]}>
                 <Button disabled={liveID.length == 0} style={styles.button} title="Start a live" onPress={() => { onJoinPress(true) }} />
                 <View style={styles.buttonSpacing} />
-                <Button  disabled={liveID.length == 0} style={styles.button} title="Watch a live" onPress={() => { onJoinPress(false) }} />
+                {/*<Button  disabled={liveID.length == 0} style={styles.button} title="Watch a live" onPress={() => { onJoinPress(false) }} />*/}
             </View>
             {/* <View style={styles.buttonLine}>
                 <Button title="Disconnect SDK" onPress={() => { ZegoUIKit.disconnectSDK() }} />
@@ -49,8 +64,20 @@ export default function LiveStream (props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start'
+        backgroundColor: '#E9EFF7',
+        height: '100%'
+    },
+    appbarTitleContainer: {
+        flex: 1,
+        marginRight: 30,
+        justifyContent: 'center', 
+        alignItems: 'center', 
+    },
+    appbarTitle: {
+        textAlign: 'center', 
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: 'black',
     },
     buttonLine: {
         // flex: 1,

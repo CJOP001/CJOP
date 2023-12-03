@@ -12,7 +12,6 @@ import {
   Alert,
 } from 'react-native';
 import { Camera, requestPermissions, useCameraDevices } from 'react-native-vision-camera';
-import { launchImageLibrary } from 'react-native-image-picker';
 
 function CameraModal(props) {
   const [processingImage, setProcessingImage] = useState(false);
@@ -60,22 +59,21 @@ function CameraModal(props) {
     }
   };
 
- const takePicture = async () => {
-   if (cameraRef.current) {
-     try {
-       setProcessingImage(true); // Start processing
-       const photo = await cameraRef.current.takePhoto({ quality: 'high' });
-       props.onPictureTaken(photo); // Pass the photo object directly
-       console.log(photo);
-       props.onClose();
-     } catch (e) {
-       console.log('Error taking picture:', e);
-     } finally {
-       setProcessingImage(false); // Finish processing
-     }
-   }
- };
-
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      try {
+        setProcessingImage(true);
+        const image = await cameraRef.current.takePhoto();
+        console.log('Picture taken:', image);
+        props.onPictureTaken(image);
+        props.onClose();
+      } catch (e) {
+        console.log('Error taking picture:', e);
+      } finally {
+        setProcessingImage(false);
+      }
+    }
+  };
 
   const flipCamera = () => {
     setIsFrontCamera((prev) => !prev); // Toggle between front and back cameras

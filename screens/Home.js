@@ -6,7 +6,7 @@ import ArticleCard from '../components/ArticleCard';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import supabase from '../supabase/supabase';
-import { getUserData } from '../components/UserInfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const STYLES = ['default', 'dark-content', 'light-content'];
@@ -63,31 +63,61 @@ useEffect(() => {
   fetchCategories();
 }, []);
 
-useEffect(() => {
-  async function fetchUserData() {
-      try {
-          // Retrieve user data from AsyncStorage
-          const userData = await getUserData();
-  
-          // Assuming the user data includes the user ID
-          const userId = userData.id;
-  
-          // Use userId as needed
-          console.log('(Home)User ID:', userId);
-  
-          setUserID(userId);
-          setUserImage(userData.user_image);
-  
-  
-      } catch (error) {
-          console.error('Error retrieving user data:', error);
-      }
+
+
+
+// Function to fetch user ID from async storage
+const fetchUserID = async () => {
+  try {
+    const storedUserID = await AsyncStorage.getItem('uid');
+    if (storedUserID) {
+      //console.log('(Home)UserID:',storedUserID);
+      setUserID(storedUserID);
+      return storedUserID;
+    } else {
+      console.error('User ID not found in async storage.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching user ID from async storage:', error);
+    return null;
   }
+};
 
-  // Call the function
-  fetchUserData();
+useEffect(() => {
+  const initializeData = async () => {
+    try {
+      // Fetch user ID from async storage
+      const userID = await fetchUserID();
+      console.log('(Home)User ID:', userID);
+
+      if (userID) {
+        setUserID(userID);
+
+        const { data: userData, error: userError } = await supabase
+            .from('app_users')
+            .select('*')
+            .eq('id', userID);
+
+          if (userError) {
+            console.error('Error fetching user data:', userError);
+          } else {
+
+            setUserImage(userData[0].user_image);
+          }
+          console.log('Got image:', userData[0].user_image);
+        
+      } else {
+        console.error('User ID not available.');
+      }
+    } catch (error) {
+      console.error('Error initializing data:', error);
+    }
+  };
+
+  // Initialize data when the component mounts
+  initializeData();
 }, []);
-
 
 
 
