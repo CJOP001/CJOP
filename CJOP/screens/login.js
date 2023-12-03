@@ -41,7 +41,12 @@ const Login = ({navigation}) => {
                      }
                      catch(e)
                      {
-                         console.log(e);
+                         console.log('Phone number has not been verified yet.',e);
+                         Alert.alert(
+                            'Login error',
+                            'Invalid phone number. For new users, please wait while your phone number is being verified.',
+                            [{text: 'Return', style: 'cancel'},],{cancelable: true,} 
+                        );
                      }
                  }
                  else if (data[0].status == 'Suspended')
