@@ -12,7 +12,7 @@ import CommentModal from './CommentModal'; // Import the new CommentModal
 
 // Import your custom icons
 import likeIcon from '../../assets/like.png';
-import blueLikeIcon from '../../assets/blueLikeIcon.png';
+import blueLikeIcon from '../../assets/blue_like.png';
 import commentIcon from '../../assets/comments.png';
 import shareIcon from '../../assets/share.png'; // Import your share icon
 
