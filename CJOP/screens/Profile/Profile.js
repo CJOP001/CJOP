@@ -113,18 +113,20 @@ const SelfProfile = ({ navigation }) => {
     <ScrollView style={{ flex: 1 }}>
       <View>
         {/* Header Section */}
-        <Appbar.Header style={styles.profile}>
+        <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
           <View style={styles.customBackAction}>
             <Appbar.BackAction
               onPress={() => {
-                console.log("Going back");
+                console.log('Going back');
                 navigation.goBack();
               }}
             />
           </View>
-          {/* Title Bar */}
-          <Appbar.Content title="Your Profile" style={styles.appContent} />
+          <View style={styles.appbarTitleContainer}>
+            <Text style={styles.appbarTitle}>Profile</Text>
+          </View>
         </Appbar.Header>
+
         {userdata.map((userdata) => (
           <View key={userdata.id}>
             {/* Profile Background */}
@@ -201,6 +203,18 @@ const SelfProfile = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  appbarTitleContainer: {
+    flex: 1,
+    marginRight: 30,
+    justifyContent: 'center', 
+    alignItems: 'center', 
+  },
+  appbarTitle: {
+    textAlign: 'center', 
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+  },
   customBackAction: {
     marginLeft: -10, // Adjust the back action position if needed
   },
@@ -208,6 +222,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  
   profile: {
     margin: 10,
     borderRadius: 10,

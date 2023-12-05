@@ -33,6 +33,7 @@ class PostingDesc extends Component {
       cameraVisible: false,
       hasCameraPermission: null,
       userId: null,
+      previewImage: null,
     };
   }
 
@@ -194,18 +195,24 @@ pickImage = async () => {
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
 
+    setPreviewImage = (imageUri) => {
+      this.setState({ previewImage: imageUri });
+    };
 
     return (
       <ScrollView style={styles.container}>
         <Appbar.Header style={{ backgroundColor: '#72E6FF' }}>
-          <Appbar.BackAction
-            onPress={() => {
-              console.log('Going back');
-              this.props.navigation.goBack();
-            }}
-            style={styles.customBackAction}
-          />
-          <Appbar.Content title="Create" style={styles.appContent} />
+              <View style={styles.customBackAction}>
+                <Appbar.BackAction
+                  onPress={() => {
+                    console.log('Going back');
+                    this.props.navigation.goBack();
+                  }}
+                />
+              </View>
+              <View style={styles.appbarTitleContainer}>
+                <Text style={styles.appbarTitle}>Create Post</Text>
+              </View>
         </Appbar.Header>
 
         <View style={styles.dropdownContainer}>
@@ -357,9 +364,17 @@ const styles = StyleSheet.create({
   customBackAction: {
     marginLeft: -10,
   },
-  appContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  appbarTitleContainer: {
+    flex: 1,
+    marginRight: 30,
+    justifyContent: 'center', 
+    alignItems: 'center', 
+  },
+  appbarTitle: {
+    textAlign: 'center', 
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
   },
   dropdownContainer: {
     marginTop: '5%',
