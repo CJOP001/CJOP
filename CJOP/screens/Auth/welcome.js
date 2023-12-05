@@ -74,19 +74,15 @@ const styles = StyleSheet.create({
     },
     StyledButton: {
         width: "70%",
-        height: "5%",
-        paddingTop: 5,
-        paddingLeft: 3,
-        paddingRight: 3,
-        paddingBottom: 50,
-        textAlign: "center",
+        height: 'auto',  
+        paddingHorizontal: 10,  
         backgroundColor: '#72E6FF',
         borderRadius: 20,
         marginTop: 20,
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "center", 
     },
     ButtonText: {
-        height: 40,
         paddingBottom: 3, 
         textAlign: 'center',
         fontFamily: 'Roboto',
