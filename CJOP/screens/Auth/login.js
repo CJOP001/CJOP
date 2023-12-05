@@ -162,19 +162,14 @@ StyledFormArea: {
 },
 SignInButton: {
     width: "50%",
-    height: 15,
-    padding: 10,
-    paddingTop: 10,
-    paddingLeft: 50,
-    paddingRight: 50,
-    paddingBottom: 35,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     backgroundColor: "#72E6FF",
     borderRadius: 12,
     marginTop: 10,
     marginLeft: 32
 },
 SignInText: {
-    height: 30,
     justifyContent: "center",
     paddingTop: 2,
     paddingBottom: 5, 
@@ -229,8 +224,6 @@ StyledDetailsInput: {
     marginBottom: 10,
     marginLeft: 32
 }
-
-
 
 
 });

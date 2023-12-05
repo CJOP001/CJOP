@@ -352,21 +352,30 @@ const addToSubscribe = async() =>
         </View>
 
         <Portal>
-          <Modal visible={isModalVisible} onDismiss={hideModal}>
-            <View style={styles.modalContent}>
-              <Button
-                mode="contained"
-                onPress={handleReadMorePress}
-                style={styles.readButton}
-                labelStyle={styles.readButtonText}
-              >
-                Read
-              </Button>
-              {/* Add any other content you want in the modal */}
-              <Button onPress={hideModal}>Close</Button>
-            </View>
-          </Modal>
-        </Portal>
+  <Modal
+    style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+    visible={isModalVisible}
+    onDismiss={hideModal}
+  >
+    <View style={styles.modalContent}>
+      <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+        Pay 1 credit to read?
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: 20 }}>
+        <Button
+          mode="contained"
+          onPress={handleReadMorePress}
+          style={styles.readButton}
+          labelStyle={styles.readButtonText}
+        >
+          Read
+        </Button>
+        {/* Add any other content you want in the modal */}
+        <Button onPress={hideModal}>Close</Button>
+      </View>
+    </View>
+  </Modal>
+</Portal>
     </Card>
   );
 });
@@ -425,7 +434,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin: 10,
     justifyContent: 'center', 
-    alignItems: 'center'
+    alignItems: 'center',
+    width: '80%',
   },
 });
 
