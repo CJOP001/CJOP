@@ -19,7 +19,7 @@ function CameraModal(props) {
   const cameraDevices = useCameraDevices();
   const [cameraDevice, setCameraDevice] = useState(null);
   const [isFrontCamera, setIsFrontCamera] = useState(true);
-   const [selectedImage, setSelectedImage] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
 
   useEffect(() => {
     checkCameraPermission();
@@ -69,6 +69,7 @@ function CameraModal(props) {
         props.onClose();
       } catch (e) {
         console.log('Error taking picture:', e);
+        Alert.alert('Error', 'An error occurred while taking the picture. Please try again.');
       } finally {
         setProcessingImage(false);
       }
@@ -131,6 +132,7 @@ function CameraModal(props) {
           <Text style={styles.processingText}>Processing Image...</Text>
         </View>
       )}
+      
     </Modal>
   );
 }
