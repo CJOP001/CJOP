@@ -116,6 +116,9 @@ const Verification = ({navigation, route}) => {
                 {
                     throw(error)
                 }
+                else{
+                    retrieveUID();
+                }
             } catch (error)
             {
                 console.log(error);
@@ -134,7 +137,6 @@ const Verification = ({navigation, route}) => {
     const handleVerify = () =>
     {
         VerifyOtp();
-        retrieveUID();
     }
 
     return (
